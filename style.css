@@ -1,0 +1,27 @@
+/* style.css - 위드케어(WithCare) 추가 커스텀 스타일 */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* 부드러운 스크롤 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 인쇄 시 안심 리포트 출력 최적화 */
+@media print {
+  header, footer, nav, button {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .print-report-container {
+    box-shadow: none !important;
+    border: 1px solid #cccccc !important;
+  }
+}
