@@ -1,10 +1,10 @@
-// store.js - 위드케어(WithCare) 인메모리 & 로컬스토리지 연동 상태 관리자 v2.0
+// store.js - 위드케어(WithCare) 인메모리 & 로컬스토리지 연동 상태 관리자 v3.0
 
-const STORAGE_KEY = 'withcare_reservations_v3';
-const ROLE_KEY = 'withcare_current_role_v3';
-const USER_KEY = 'withcare_current_user_v3';
-const CHATS_KEY = 'withcare_chats_v3';
-const MANAGERS_KEY = 'withcare_managers_v3';
+const STORAGE_KEY = 'withcare_reservations_v4';
+const USER_KEY = 'withcare_current_user_v4';
+const PROFILE_KEY = 'withcare_patient_profile_v4';
+const CHATS_KEY = 'withcare_chats_v4';
+const MANAGERS_KEY = 'withcare_managers_v4';
 
 class WithCareStoreManager {
   constructor() {
@@ -17,7 +17,7 @@ class WithCareStoreManager {
     this.testimonials = GUARDIAN_TESTIMONIALS;
     this.transportOptions = TRANSPORT_OPTIONS;
 
-    this.role = this.loadInitialRole();
+    this.patientProfile = this.loadInitialPatientProfile();
     this.currentUser = this.loadInitialUser();
     this.reservations = this.loadInitialReservations();
     this.chats = this.loadInitialChats();
@@ -28,12 +28,12 @@ class WithCareStoreManager {
         this.reservations = this.loadInitialReservations();
         this.notify();
       }
-      if (e.key === ROLE_KEY) {
-        this.role = this.loadInitialRole();
-        this.notify();
-      }
       if (e.key === USER_KEY) {
         this.currentUser = this.loadInitialUser();
+        this.notify();
+      }
+      if (e.key === PROFILE_KEY) {
+        this.patientProfile = this.loadInitialPatientProfile();
         this.notify();
       }
       if (e.key === CHATS_KEY) {
@@ -48,7 +48,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 초기 로더 및 영속화 유틸
+  // 초기 데이터 로드 및 영속화
   // ========================================================
   loadInitialManagers() {
     try {
@@ -63,13 +63,14 @@ class WithCareStoreManager {
     return initial;
   }
 
-  loadInitialRole() {
+  loadInitialPatientProfile() {
     try {
-      const saved = localStorage.getItem(ROLE_KEY);
-      return saved ? saved : 'GUARDIAN'; // 'GUARDIAN' 또는 'MANAGER'
-    } catch (e) {
-      return 'GUARDIAN';
-    }
+      const saved = localStorage.getItem(PROFILE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    const initial = JSON.parse(JSON.stringify(DEFAULT_PATIENT_PROFILE));
+    this.persist(PROFILE_KEY, initial);
+    return initial;
   }
 
   loadInitialUser() {
@@ -80,7 +81,7 @@ class WithCareStoreManager {
     // 기본 로그인 상태: 김민수 보호자
     const defaultUser = {
       isLoggedIn: true,
-      role: 'GUARDIAN',
+      role: 'GUARDIAN', // 'GUARDIAN' | 'MANAGER'
       type: 'MEMBER', // 'MEMBER' | 'NON_MEMBER'
       name: '김민수',
       birth: '1982-08-25',
@@ -133,8 +134,8 @@ class WithCareStoreManager {
     this.listeners.forEach((listener) => {
       try {
         listener({
-          role: this.role,
           currentUser: this.currentUser,
+          patientProfile: this.patientProfile,
           reservations: this.reservations,
           managers: this.managers,
           chats: this.chats
@@ -146,7 +147,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 1. 회원 / 비회원 로그인 및 권한 마이페이지 분기
+  // 1. 환자 및 매니저 로그인 / 로그아웃 시스템 (화면 토글 제거)
   // ========================================================
   login({ role, type, name, birth, phone, password, managerId }) {
     let userObj;
@@ -162,9 +163,8 @@ class WithCareStoreManager {
         avatar: mgr.avatar,
         phone: mgr.phone
       };
-      this.role = 'MANAGER';
     } else {
-      // 환자/보호자 로그인 (회원 or 비회원)
+      // 환자/보호자 로그인 (회원 또는 비회원)
       userObj = {
         isLoggedIn: true,
         role: 'GUARDIAN',
@@ -173,12 +173,10 @@ class WithCareStoreManager {
         birth: birth || '1982-08-25',
         phone: phone || '010-9876-5432'
       };
-      this.role = 'GUARDIAN';
     }
 
     this.currentUser = userObj;
     this.persist(USER_KEY, this.currentUser);
-    this.persist(ROLE_KEY, this.role);
     this.notify();
     return userObj;
   }
@@ -186,38 +184,39 @@ class WithCareStoreManager {
   logout() {
     this.currentUser = {
       isLoggedIn: false,
-      role: 'GUARDIAN',
+      role: 'GUEST',
       type: 'GUEST',
-      name: '게스트',
+      name: '',
       birth: '',
       phone: ''
     };
-    this.role = 'GUARDIAN';
     this.persist(USER_KEY, this.currentUser);
-    this.persist(ROLE_KEY, this.role);
     this.notify();
-  }
-
-  setRole(newRole) {
-    this.role = newRole;
-    if (newRole === 'MANAGER' && this.currentUser.role !== 'MANAGER') {
-      // 매니저 모드로 전환 시 기본 매니저 계정으로 자동 세팅
-      this.login({ role: 'MANAGER', managerId: 'mgr-1' });
-      return;
-    } else if (newRole === 'GUARDIAN' && this.currentUser.role !== 'GUARDIAN') {
-      this.login({ role: 'GUARDIAN', type: 'MEMBER', name: '김민수' });
-      return;
-    }
-    this.persist(ROLE_KEY, newRole);
-    this.notify();
-  }
-
-  getRole() {
-    return this.role;
   }
 
   getCurrentUser() {
     return this.currentUser;
+  }
+
+  getRole() {
+    return this.currentUser ? this.currentUser.role : 'GUEST';
+  }
+
+  // ========================================================
+  // 2. 환자 기본 정보 조회 및 수정 입력 (환자 마이페이지용)
+  // ========================================================
+  getPatientProfile() {
+    return { ...this.patientProfile };
+  }
+
+  updatePatientProfile(newProfile) {
+    this.patientProfile = {
+      ...this.patientProfile,
+      ...newProfile
+    };
+    this.persist(PROFILE_KEY, this.patientProfile);
+    this.notify();
+    return this.patientProfile;
   }
 
   getManagers() {
@@ -237,7 +236,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 2. 예약 신청 (상세 환자 정보 & 개별 의견란 & 이동수단)
+  // 3. 예약 생성
   // ========================================================
   createReservation(bookingData) {
     const newId = `RES-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
@@ -245,21 +244,19 @@ class WithCareStoreManager {
 
     const newReservation = {
       id: newId,
-      patientName: bookingData.patientName || '김순자',
-      patientBirth: bookingData.patientBirth || '1950-01-01',
-      patientAge: Number(bookingData.patientAge) || 75,
-      patientGender: bookingData.patientGender || '여성',
-      patientPhone: bookingData.patientPhone || '010-0000-0000',
-      patientRegion: bookingData.patientRegion || '서울 마포구',
+      patientName: bookingData.patientName || this.patientProfile.name || '김순자',
+      patientBirth: bookingData.patientBirth || this.patientProfile.birth || '1950-01-01',
+      patientAge: Number(bookingData.patientAge) || 76,
+      patientGender: bookingData.patientGender || this.patientProfile.gender || '여성',
+      patientPhone: bookingData.patientPhone || this.patientProfile.phone || '010-0000-0000',
+      patientRegion: bookingData.patientRegion || this.patientProfile.region || '서울 마포구',
       guardianName: bookingData.guardianName || this.currentUser.name || '신청 보호자',
-      guardianBirth: bookingData.guardianBirth || this.currentUser.birth || '1982-01-01',
       guardianPhone: bookingData.guardianPhone || this.currentUser.phone || '010-1234-5678',
-      guardianPassword: bookingData.guardianPassword || 'demo',
       mobility: bookingData.mobility || 'INDEPENDENT',
       mobilityLabel: this.getMobilityLabel(bookingData.mobility),
       useWheelchair: Boolean(bookingData.useWheelchair),
-      currentMedications: bookingData.currentMedications || '특이 복용약 없음',
-      symptomsDescription: bookingData.symptomsDescription || '특이 증상 없음',
+      currentMedications: bookingData.currentMedications || this.patientProfile.medications || '특이 복용약 없음',
+      symptomsDescription: bookingData.symptomsDescription || this.patientProfile.symptoms || '특이 증상 없음',
       messageToDoctor: bookingData.messageToDoctor || '진료 소견 메모 부탁드립니다.',
       messageToManager: bookingData.messageToManager || '안전하고 편안한 이동 부탁드립니다.',
       transportOption: bookingData.transportOption || 'TAXI_TRANSIT',
@@ -270,19 +267,18 @@ class WithCareStoreManager {
       doctor: bookingData.doctor || '전문의 상담',
       date: bookingData.date || new Date().toISOString().split('T')[0],
       time: bookingData.time || '10:00',
-      pickupAddress: bookingData.pickupAddress || '서울시 마포구 공덕동 100',
+      pickupAddress: bookingData.pickupAddress || this.patientProfile.address || '서울시 마포구 공덕동 100',
       options: bookingData.options || { pharmacy: true, paymentAssist: true, wheelchairRental: false },
       serviceDuration: bookingData.serviceDuration || '2시간 기본',
       cost: bookingData.cost || 55000,
-      status: 'REQUESTED', // 초기 상태: 예약 대기중
-      step: 1, // 1단계: 예약완료
+      status: 'REQUESTED',
+      step: 1,
       managerId: bookingData.managerId || null,
       report: null,
       review: null,
       createdAt: nowStr
     };
 
-    // 만약 특정 매니저를 지정해 예약한 경우 바로 매칭
     if (bookingData.managerId) {
       newReservation.status = 'MATCHED';
       newReservation.step = 2;
@@ -291,7 +287,7 @@ class WithCareStoreManager {
     this.reservations.unshift(newReservation);
     this.persist(STORAGE_KEY, this.reservations);
 
-    // 채팅방 초기 환영 메시지 생성
+    // 채팅방 개설
     if (!this.chats[newId]) {
       this.chats[newId] = [
         {
@@ -321,7 +317,7 @@ class WithCareStoreManager {
 
   getTransportLabel(key) {
     switch (key) {
-      case 'TAXI_TRANSIT': return '택시 / 대중교통 (환자 부담)';
+      case 'TAXI_TRANSIT': return '택시 / 대중교통 동행';
       case 'PERSONAL_CAR': return '매니저 자차 동행 (+15,000원)';
       case 'WALK': return '도보 동행 (인근 병원)';
       default: return '택시 / 대중교통 동행';
@@ -329,7 +325,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 3. 매니저 예약 수락
+  // 4. 매니저 예약 수락
   // ========================================================
   acceptReservation(id, managerId = 'mgr-1') {
     const mgr = this.getManagerById(managerId);
@@ -339,14 +335,13 @@ class WithCareStoreManager {
           ...r,
           managerId: mgr.id,
           status: 'MATCHED',
-          step: 2 // 2단계: 매니저 배정 완료
+          step: 2
         };
       }
       return r;
     });
     this.persist(STORAGE_KEY, this.reservations);
 
-    // 채팅방에 매니저 수락 인사 메시지 추가
     this.sendChatMessage(
       id,
       `안녕하세요, 보호자님! 오늘 동행을 담당하게 된 ${mgr.name} 매니저(${mgr.badge})입니다. 어르신 안전하게 모시겠습니다. 요청사항 있으시면 언제든 말씀해 주세요!`,
@@ -358,7 +353,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 4. 배민 스타일 위치 트래킹 단계 업데이트 (시뮬레이션)
+  // 5. 실시간 동행 위치 상태 단계 업데이트
   // ========================================================
   updateStep(id, newStep) {
     this.reservations = this.reservations.map(r => {
@@ -412,7 +407,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 5. 카카오톡 스타일 1:1 채팅 메시지 전송
+  // 6. 1:1 실시간 대화방 메시지 전송
   // ========================================================
   sendChatMessage(reservationId, text, senderRole, senderName) {
     if (!text || !text.trim()) return;
@@ -428,7 +423,7 @@ class WithCareStoreManager {
 
     const newMessage = {
       id: `chat-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      sender: senderRole, // 'GUARDIAN' | 'MANAGER' | 'SYSTEM'
+      sender: senderRole,
       senderName: senderName || (senderRole === 'GUARDIAN' ? '보호자' : '동행 매니저'),
       avatar: avatar,
       time: timeStr,
@@ -449,7 +444,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 6. 안심 리포트 작성/수정 (보호자 안내용 진료 결과 & AI 음성요약)
+  // 7. 안심 리포트 저장 & 프리미엄 잠금 해제 토글
   // ========================================================
   saveReport(id, reportData) {
     const completedAt = new Date().toISOString().replace('T', ' ').substring(0, 16);
@@ -489,7 +484,6 @@ class WithCareStoreManager {
     this.notify();
   }
 
-  // 프리미엄 리포트 잠금 해제 토글 (BM 시뮬레이션)
   togglePremiumUnlock(id) {
     this.reservations = this.reservations.map(r => {
       if (r.id === id && r.report) {
@@ -508,7 +502,7 @@ class WithCareStoreManager {
   }
 
   // ========================================================
-  // 7. 만족도 평가 등록 및 매니저 평점 실시간 연동
+  // 8. 만족도 평가 등록 및 매니저 평점 실시간 연동
   // ========================================================
   addReview(reservationId, reviewData) {
     const createdAt = new Date().toISOString().replace('T', ' ').substring(0, 16);
@@ -530,7 +524,6 @@ class WithCareStoreManager {
       return r;
     });
 
-    // 매니저 평점/리뷰수 실시간 재계산 및 반영!
     if (targetManagerId) {
       this.managers = this.managers.map(m => {
         if (m.id === targetManagerId) {
@@ -558,11 +551,12 @@ class WithCareStoreManager {
     const freshReservations = JSON.parse(JSON.stringify(INITIAL_RESERVATIONS));
     const freshManagers = JSON.parse(JSON.stringify(DEFAULT_MANAGERS));
     const freshChats = JSON.parse(JSON.stringify(DEFAULT_CHAT_HISTORY));
+    const freshProfile = JSON.parse(JSON.stringify(DEFAULT_PATIENT_PROFILE));
 
     this.reservations = freshReservations;
     this.managers = freshManagers;
     this.chats = freshChats;
-    this.role = 'GUARDIAN';
+    this.patientProfile = freshProfile;
     this.currentUser = {
       isLoggedIn: true,
       role: 'GUARDIAN',
@@ -575,7 +569,7 @@ class WithCareStoreManager {
     this.persist(STORAGE_KEY, freshReservations);
     this.persist(MANAGERS_KEY, freshManagers);
     this.persist(CHATS_KEY, freshChats);
-    this.persist(ROLE_KEY, this.role);
+    this.persist(PROFILE_KEY, freshProfile);
     this.persist(USER_KEY, this.currentUser);
 
     this.notify();
