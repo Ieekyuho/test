@@ -1280,6 +1280,172 @@ function DashboardRouter(props) {
 }
 
 // ========================================================
+// 5-0. 실시간 5단계 동행 프로세스 트래커 컴포넌트
+// (원형 스텝퍼 + 각 단계 넘어갈 때마다 세부 설명 + 실시간 위치 표기)
+// ========================================================
+function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton = true }) {
+  const currentStep = reservation.step || 1;
+  // 유저가 원형 스텝을 클릭하여 해당 단계의 세부 설명을 자유롭게 열람할 수 있도록 상태 관리
+  const [selectedStep, setSelectedStep] = useState(currentStep);
+
+  // 예약의 실제 step이 변경되면(예: 매니저가 단계 전진 또는 시연 버튼 클릭) 선택 스텝도 최신으로 자동 동기화
+  useEffect(() => {
+    setSelectedStep(currentStep);
+  }, [currentStep]);
+
+  const activeMeta = TRACKING_STEPS_META.find(m => m.step === selectedStep) || TRACKING_STEPS_META[0];
+  const currentMeta = TRACKING_STEPS_META.find(m => m.step === currentStep) || TRACKING_STEPS_META[0];
+
+  return (
+    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4">
+      {/* 1. 상단 타이틀 및 현재 진행 단계 배지 */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+        <div className="flex items-center gap-2">
+          <div className="relative flex items-center justify-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-ping absolute"></span>
+            <span className="w-2 h-2 rounded-full bg-teal-600"></span>
+          </div>
+          <span className="font-extrabold text-slate-900 text-sm">⏱️ 실시간 5단계 동행 프로세스 트래커</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-bold text-slate-500">현재 상태:</span>
+          <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full border ${currentMeta.badgeColor}`}>
+            {currentMeta.statusTitle}
+          </span>
+        </div>
+      </div>
+
+      {/* 2. 5단계 원형 스텝퍼 바 (사용자 선호 프로세스 형식 복원) */}
+      <div className="relative pt-2 pb-1 px-4 sm:px-10">
+        {/* 가로 진행 게이지 선 */}
+        <div className="absolute top-7 left-10 right-10 sm:left-16 sm:right-16 h-1 bg-slate-200 z-0">
+          <div 
+            className="h-full bg-teal-600 transition-all duration-500 ease-out"
+            style={{ width: `${((Math.max(1, currentStep) - 1) / 4) * 100}%` }}
+          ></div>
+        </div>
+
+        {/* 5개 원형 단계 */}
+        <div className="relative z-10 flex justify-between items-start">
+          {TRACKING_STEPS_META.map((stepMeta) => {
+            const isDone = currentStep > stepMeta.step;
+            const isCurrent = currentStep === stepMeta.step;
+            const isSelected = selectedStep === stepMeta.step;
+
+            return (
+              <button
+                key={stepMeta.step}
+                type="button"
+                onClick={() => setSelectedStep(stepMeta.step)}
+                title={`클릭하여 ${stepMeta.step}단계 [${stepMeta.name}] 세부 설명 보기`}
+                className="group flex flex-col items-center focus:outline-hidden cursor-pointer"
+              >
+                {/* 원형 아이콘 */}
+                <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all duration-300 ${
+                  isDone
+                    ? 'bg-emerald-600 text-white shadow-xs group-hover:scale-105'
+                    : isCurrent
+                      ? 'bg-teal-600 text-white ring-4 ring-teal-200 shadow-md scale-110 font-extrabold animate-pulse'
+                      : 'bg-white text-slate-400 border-2 border-slate-300 group-hover:border-slate-400'
+                } ${isSelected && !isCurrent ? 'ring-2 ring-slate-400' : ''}`}>
+                  {isDone ? '✔' : stepMeta.step}
+                </div>
+
+                {/* 단계명 */}
+                <span className={`mt-2 text-[11px] sm:text-xs font-bold text-center whitespace-nowrap transition-colors ${
+                  isCurrent 
+                    ? 'text-teal-900 font-extrabold' 
+                    : isDone 
+                      ? 'text-emerald-700' 
+                      : 'text-slate-400'
+                }`}>
+                  {stepMeta.name}
+                </span>
+
+                {/* 현재 진행 마커 */}
+                {isCurrent && (
+                  <span className="text-[10px] text-teal-700 font-extrabold bg-teal-50 px-1.5 py-0.5 rounded mt-0.5 border border-teal-200">
+                    진행 중
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 3. 단계별 세부 설명 박스 & 실시간 위치 표기 */}
+      <div className="bg-white rounded-2xl border border-teal-200 p-4 sm:p-5 shadow-xs space-y-3">
+        {/* 상단 브리핑 헤더 */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div className="flex items-center gap-2">
+            <span className={`px-2.5 py-0.5 rounded-md font-extrabold text-xs ${
+              selectedStep === currentStep ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-700'
+            }`}>
+              {selectedStep}단계 {selectedStep === currentStep ? '실시간 브리핑' : '단계 안내'}
+            </span>
+            <h5 className="font-extrabold text-slate-900 text-sm">
+              {activeMeta.statusTitle}
+            </h5>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs text-teal-700 font-bold bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-100 w-fit">
+            <Icons.Clock className="w-3.5 h-3.5 text-teal-600" />
+            <span>상태 안내: {activeMeta.eta}</span>
+          </div>
+        </div>
+
+        {/* 단계 넘어갈 때마다 붙는 세부 설명 */}
+        <div className="bg-slate-50/90 rounded-xl p-3.5 border border-slate-200 text-xs leading-relaxed space-y-1">
+          <div className="flex items-center gap-1.5 font-bold text-slate-800">
+            <span className="text-teal-600">📋</span>
+            <span>단계별 동행 세부 프로세스 설명</span>
+            {selectedStep !== currentStep && (
+              <span className="text-[10px] text-slate-400 font-normal">
+                (원형 아이콘을 클릭하여 {selectedStep}단계 내용을 열람 중입니다)
+              </span>
+            )}
+          </div>
+          <p className="text-slate-700 pl-5 text-[12px] font-medium leading-normal">
+            {activeMeta.stepDetail}
+          </p>
+        </div>
+
+        {/* 실시간 위치 표기 (그대로 유지) */}
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-sky-50/80 p-3 rounded-xl border border-sky-100">
+          <Icons.MapPin className="w-4 h-4 text-sky-600 shrink-0" />
+          <span className="text-slate-500 shrink-0">실시간 위치 안내:</span>
+          <span className="text-slate-900 font-bold">{activeMeta.locationText}</span>
+        </div>
+
+        {/* 발표 시연 편의 버튼 */}
+        <div className="flex flex-wrap items-center justify-between pt-1 gap-2 border-t border-slate-100 text-xs">
+          <span className="text-[11px] text-slate-400">
+            💡 발표 시연 시 다음 단계 버튼을 클릭하면 세부 설명과 위치가 실시간으로 갱신됩니다.
+          </span>
+          <div className="flex gap-2">
+            {currentStep < 5 && showAdvanceButton && onAdvanceStep && (
+              <button
+                type="button"
+                onClick={() => onAdvanceStep(reservation.id, currentStep)}
+                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-extrabold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>다음 단계로 진행 시연 (➜ {currentStep + 1}단계)</span>
+              </button>
+            )}
+            {currentStep >= 5 && (
+              <span className="text-emerald-700 font-extrabold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                🎉 모든 동행 프로세스가 안전하게 완료되었습니다!
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ========================================================
 // 5-A. 환자 마이페이지 (환자 정보 입력/조회 + AI 매니저 추천 축소 내장)
 // ========================================================
 function PatientMyPageView({ currentUser, patientProfile, reservations, managers, onOpenReport, onOpenChat, onSelectManagerFromAI, onGoBooking, showToast }) {
@@ -1318,7 +1484,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
         </div>
         <button
           onClick={onGoBooking}
-          className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs transition"
+          className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
         >
           새 동행 예약하기
         </button>
@@ -1328,7 +1494,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
       <div className="flex border-b border-slate-200 gap-3 mb-6 text-xs font-bold">
         <button
           onClick={() => setSubTab('reservations')}
-          className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 ${
+          className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 cursor-pointer ${
             subTab === 'reservations' ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -1337,7 +1503,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
         </button>
         <button
           onClick={() => setSubTab('profile')}
-          className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 ${
+          className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 cursor-pointer ${
             subTab === 'profile' ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -1346,7 +1512,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
         </button>
         <button
           onClick={() => setSubTab('aiManagers')}
-          className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 ${
+          className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 cursor-pointer ${
             subTab === 'aiManagers' ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -1363,60 +1529,83 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
             const trackingMeta = TRACKING_STEPS_META.find(m => m.step === item.step) || TRACKING_STEPS_META[0];
 
             return (
-              <div key={item.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                  <div>
-                    <span className="font-extrabold text-sm text-slate-900 mr-2">{item.id}</span>
-                    <span className="text-xs text-slate-400">일시: {item.date} {item.time}</span>
+              <div key={item.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5">
+                {/* 1. 예약 카드 헤더 */}
+                <div className="flex flex-wrap justify-between items-center gap-2 border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-base text-slate-900">{item.id}</span>
+                    <span className="text-xs text-slate-400">신청일: {item.date} {item.time}</span>
                   </div>
-                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                     item.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
                     item.status === 'REQUESTED' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
                   }`}>
-                    {item.status === 'REQUESTED' ? '예약 대기중' : item.status === 'COMPLETED' ? '동행 완료' : '이동 및 진료 중'}
+                    {item.status === 'REQUESTED' ? '예약 대기중' : item.status === 'COMPLETED' ? '동행 완료' : `실시간 동행 진행 중 (${trackingMeta.name})`}
                   </span>
                 </div>
 
-                {/* 실시간 안심 위치 트래커 */}
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5 text-xs">
-                  <div className="flex justify-between items-center font-bold">
-                    <span className="text-slate-900 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
-                      <span>{trackingMeta.statusTitle}</span>
-                    </span>
-                    <span className="text-teal-700">{trackingMeta.eta}</span>
+                {/* 2. 4열 핵심 정보 그리드 (이전 카드 복원) */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl text-xs border border-slate-100">
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">환자 및 거동 상태</span>
+                    <strong className="text-slate-900">{item.patientName} / {item.mobility}</strong>
                   </div>
-                  <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-teal-500 h-full rounded-full transition-all" style={{ width: `${trackingMeta.percent}%` }}></div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">방문 병원 & 진료과</span>
+                    <strong className="text-slate-900">{item.hospital} / {item.department}</strong>
                   </div>
-                  <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                    <Icons.MapPin className="w-3.5 h-3.5 text-teal-600" />
-                    <span>{trackingMeta.locationText}</span>
-                  </p>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">방문 일시</span>
+                    <strong className="text-slate-900">{item.date} {item.time}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">자택 픽업지 & 견적</span>
+                    <strong className="text-sky-700">{item.cost.toLocaleString()}원 ({item.transportLabel})</strong>
+                  </div>
                 </div>
 
-                {/* 매니저 정보 & 1:1 대화방 열기 */}
+                {/* 3. 복원된 5단계 원형 프로세스 트래커 (단계별 세부 설명 + 실시간 위치 표기) */}
+                <RealtimeProcessTracker 
+                  reservation={item}
+                  onAdvanceStep={(resId, currentStep) => {
+                    const next = currentStep >= 5 ? 5 : currentStep + 1;
+                    window.withCareStore.updateStep(resId, next);
+                    const nextMeta = TRACKING_STEPS_META.find(m => m.step === next);
+                    showToast(`위치 상태를 [${nextMeta.statusTitle}] 단계로 갱신했습니다.`, 'success');
+                  }}
+                  showAdvanceButton={true}
+                />
+
+                {/* 4. 배정된 매니저 카드 & 1:1 대화방 / 안심 리포트 버튼 */}
                 {manager && (
-                  <div className="bg-white border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
                     <div className="flex items-center gap-3">
-                      <img src={manager.avatar} alt={manager.name} className="w-11 h-11 rounded-xl object-cover" />
+                      <img src={manager.avatar} alt={manager.name} className="w-12 h-12 rounded-xl object-cover border border-slate-100" />
                       <div>
-                        <div className="font-bold text-slate-900">{manager.name} 매니저 ({manager.badge})</div>
-                        <div className="text-slate-500 text-[11px]">평점 {manager.rating} ★ · 연락처: {manager.phone}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 text-sm">{manager.name} 매니저</span>
+                          <span className="text-[10px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded font-extrabold border border-teal-200">
+                            {manager.badge}
+                          </span>
+                        </div>
+                        <div className="text-slate-500 text-[11px] mt-0.5">평점 {manager.rating} ★ · 연락처: {manager.phone}</div>
+                        <p className="text-slate-600 text-[11px] mt-1 line-clamp-1">"{manager.intro}"</p>
                       </div>
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
                       <button
+                        type="button"
                         onClick={() => onOpenChat(item.id)}
-                        className="flex-1 sm:flex-initial px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold rounded-xl transition flex items-center justify-center gap-1.5"
+                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Icons.MessageSquare className="w-4 h-4" />
                         <span>1:1 안심 대화방</span>
                       </button>
-                      {item.status === 'COMPLETED' && (
+                      {(item.status === 'COMPLETED' || item.step >= 5) && (
                         <button
+                          type="button"
                           onClick={() => onOpenReport(item.id)}
-                          className="flex-1 sm:flex-initial px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition flex items-center justify-center gap-1.5"
+                          className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                         >
                           <Icons.ClipboardCheck className="w-4 h-4" />
                           <span>안심 리포트 보기</span>
@@ -1523,7 +1712,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
 
             <button
               type="submit"
-              className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl shadow-xs transition mt-2"
+              className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl shadow-xs transition mt-2 cursor-pointer"
             >
               환자 정보 저장하기
             </button>
@@ -1557,8 +1746,9 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
                   <p className="text-slate-600 text-[11px] mt-2 line-clamp-2">"{mgr.intro}"</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => onSelectManagerFromAI(mgr)}
-                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition"
+                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition cursor-pointer"
                 >
                   이 매니저로 동행 예약하기
                 </button>
@@ -1604,66 +1794,70 @@ function ManagerMyPageView({ currentUser, reservations, onOpenManagerReport, onO
         </span>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {reservations.map((item) => {
           const isRequested = item.status === 'REQUESTED';
 
           return (
-            <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3 text-xs">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                <span className="font-extrabold text-slate-900 text-sm">{item.id} · {item.patientName} 어르신 ({item.hospital})</span>
-                <span className={`px-2 py-0.5 rounded-full font-bold ${isRequested ? 'bg-amber-100 text-amber-800' : 'bg-teal-100 text-teal-800'}`}>
-                  {isRequested ? '신규 요청' : '진행 업무'}
+            <div key={item.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4 text-xs">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <span className="font-extrabold text-slate-900 text-base">{item.id} · {item.patientName} 어르신 ({item.hospital})</span>
+                <span className={`px-3 py-1 rounded-full font-bold ${isRequested ? 'bg-amber-100 text-amber-800' : 'bg-teal-100 text-teal-800'}`}>
+                  {isRequested ? '신규 동행 요청' : '진행 업무'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-600">
-                <div>일시: <strong className="text-slate-900">{item.date} {item.time}</strong></div>
-                <div>진료과: <strong className="text-slate-900">{item.department}</strong></div>
-                <div>이동수단: <strong className="text-slate-900">{item.transportLabel}</strong></div>
-                <div>금액: <strong className="text-sky-600">{item.cost.toLocaleString()}원</strong></div>
+              {/* 4열 업무 요약 정보 */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                <div>일시: <strong className="text-slate-900 block mt-0.5">{item.date} {item.time}</strong></div>
+                <div>진료과: <strong className="text-slate-900 block mt-0.5">{item.department}</strong></div>
+                <div>이동수단: <strong className="text-slate-900 block mt-0.5">{item.transportLabel}</strong></div>
+                <div>정산 예정액: <strong className="text-teal-700 block mt-0.5">{item.cost.toLocaleString()}원</strong></div>
               </div>
 
-              <div className="bg-slate-50 p-2.5 rounded-xl text-slate-700">
-                <strong>매니저 전달사항:</strong> {item.messageToManager}
+              <div className="bg-slate-50 p-3 rounded-xl text-slate-700 border border-slate-100">
+                <span className="font-bold text-slate-900">보호자 전달사항:</span> {item.messageToManager}
               </div>
+
+              {/* 진행 중 업무일 경우 5단계 프로세스 트래커 & 단계별 설명 박스 노출 */}
+              {!isRequested && (
+                <RealtimeProcessTracker 
+                  reservation={item}
+                  onAdvanceStep={handleAdvanceStep}
+                  showAdvanceButton={true}
+                />
+              )}
 
               {/* 매니저 액션 툴바 */}
               <div className="pt-2 border-t border-slate-100 flex flex-wrap justify-between items-center gap-2">
                 <div className="flex gap-2">
-                  {isRequested ? (
+                  {isRequested && (
                     <button
+                      type="button"
                       onClick={() => handleAccept(item.id)}
-                      className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-xs transition"
+                      className="px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
                     >
                       이 예약 즉시 수락하기
                     </button>
-                  ) : (
-                    item.step < 5 && (
-                      <button
-                        onClick={() => handleAdvanceStep(item.id, item.step)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition"
-                      >
-                        위치 상태 전진 (현재 {item.step}단계 ➜ {item.step + 1}단계)
-                      </button>
-                    )
                   )}
                 </div>
 
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={() => onOpenChat(item.id)}
-                    className="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold rounded-xl transition flex items-center gap-1"
+                    className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
-                    <Icons.MessageSquare className="w-3.5 h-3.5" />
+                    <Icons.MessageSquare className="w-4 h-4" />
                     <span>보호자 1:1 대화</span>
                   </button>
                   {item.step >= 4 && (
                     <button
+                      type="button"
                       onClick={() => onOpenManagerReport(item.id)}
-                      className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition"
+                      className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition shadow-xs cursor-pointer"
                     >
-                      진료 리포트 작성
+                      진료 리포트 작성/확인
                     </button>
                   )}
                 </div>
@@ -1675,6 +1869,7 @@ function ManagerMyPageView({ currentUser, reservations, onOpenManagerReport, onO
     </div>
   );
 }
+
 
 // ========================================================
 // 6. 1:1 실시간 대화방 모달 (ChatModal)
