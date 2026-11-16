@@ -1,471 +1,413 @@
-// app.js - 위드케어(WithCare) 병원 동행서비스 React 메인 애플리케이션 v3.0
+// app.js - 위드케어(WithCare) 병원 동행서비스 React 메인 애플리케이션 v3.4
+// 대전광역시 MVP & 의료 전공 대학생 동행 매니저 전용
 
 const { useState, useEffect, useMemo, useRef } = React;
 
 // ========================================================
-// 고품질 인라인 SVG 아이콘 팩
+// 0. 공통 SVG 아이콘 정의
 // ========================================================
 const Icons = {
   Heart: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>
-  ),
-  ShieldCheck: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
     </svg>
   ),
   Calendar: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  ),
-  Clock: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
     </svg>
   ),
   MapPin: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
     </svg>
   ),
-  User: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-    </svg>
-  ),
-  Users: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-  ),
-  Hospital: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-    </svg>
-  ),
-  ClipboardCheck: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-    </svg>
-  ),
-  Sparkles: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-    </svg>
-  ),
-  Star: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill={props.filled ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={props.filled ? 0 : 2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-    </svg>
-  ),
-  Check: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-    </svg>
-  ),
-  ArrowRight: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-    </svg>
-  ),
-  Car: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 17a2 2 0 100-4 2 2 0 000 4zm8 0a2 2 0 100-4 2 2 0 000 4z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13l2-7h14l2 7M5 13h14M5 13v4h14v-4" />
-    </svg>
-  ),
-  Phone: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-    </svg>
-  ),
-  Pill: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-    </svg>
-  ),
-  TrendingUp: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-    </svg>
-  ),
-  RotateCcw: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-  ),
-  ChevronRight: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+  ShieldCheck: (props) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
     </svg>
   ),
   MessageSquare: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
     </svg>
   ),
-  Lock: (props) => (
-    <svg className={props.className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+  ClipboardCheck: (props) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.09 1.976 1.053 1.976 2.188V18.75a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75V6.108c0-1.135.845-2.098 1.976-2.188.374-.03.748-.057 1.124-.08" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" />
+    </svg>
+  ),
+  User: (props) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+    </svg>
+  ),
+  Clock: (props) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  Sparkles: (props) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+    </svg>
+  ),
+  BuildingHospital: (props) => (
+    <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
     </svg>
   )
 };
 
-window.Icons = Icons;
-
 // ========================================================
-// 메인 App 컴포넌트
+// 1. 메인 App 루트 컴포넌트
 // ========================================================
 function App() {
-  const [currentUser, setCurrentUser] = useState(window.withCareStore.getCurrentUser());
-  const [patientProfile, setPatientProfile] = useState(window.withCareStore.getPatientProfile());
-  const [reservations, setReservations] = useState(window.withCareStore.getReservations());
-  const [managers, setManagers] = useState(window.withCareStore.getManagers());
+  const [currentTab, setCurrentTab] = useState('home');
 
-  // 'home' | 'ai' | 'booking' | 'dashboard'
-  const [activeTab, setActiveTab] = useState('home');
-
-  // 예약 폼 프리필
-  const [bookingPrefill, setBookingPrefill] = useState({
-    hospital: '',
-    department: '',
-    managerId: null
+  const [storeState, setStoreState] = useState({
+    currentUser: window.withCareStore.currentUser,
+    patientProfile: window.withCareStore.patientProfile,
+    reservations: window.withCareStore.reservations,
+    managers: window.withCareStore.managers,
+    urgentRequests: window.withCareStore.urgentRequests
   });
 
-  // 모달 상태
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [activeChatReservationId, setActiveChatReservationId] = useState(null);
-  const [activeReportReservationId, setActiveReportReservationId] = useState(null);
-  const [activeManagerReportReservationId, setActiveManagerReportReservationId] = useState(null);
-  const [isB2BModalOpen, setIsB2BModalOpen] = useState(false);
+  const [activeChatResId, setActiveChatResId] = useState(null);
+  const [activeReportResId, setActiveReportResId] = useState(null);
+  const [activeManagerReportResId, setActiveManagerReportResId] = useState(null);
+  const [isVolunteerCertModalOpen, setIsVolunteerCertModalOpen] = useState(false);
+
+  const [preselectedManager, setPreselectedManager] = useState(null);
+  const [preselectedHospital, setPreselectedHospital] = useState(null);
+
   const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   useEffect(() => {
     const unsubscribe = window.withCareStore.subscribe((state) => {
-      setCurrentUser(state.currentUser);
-      setPatientProfile(state.patientProfile);
-      setReservations([...state.reservations]);
-      setManagers([...state.managers]);
+      setStoreState({ ...state });
     });
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3200);
+  const handleSelectManagerForBooking = (manager, hospital = null) => {
+    setPreselectedManager(manager);
+    if (hospital) setPreselectedHospital(hospital);
+    setCurrentTab('booking');
+    showToast(`[${manager.name}] 동행자님이 선택되었습니다. 일정을 확인하고 예약을 진행하세요.`, 'success');
   };
 
-  const handleResetData = () => {
-    if (window.confirm('모든 예약, 매니저 평점, 환자 프로필 데이터를 시연용 초기 상태로 리셋하시겠습니까?')) {
-      window.withCareStore.resetToInitial();
-      showToast('데모 데이터가 초기 상태로 재설정되었습니다.', 'success');
+  // 서비스 소개 클릭 시: 메인페이지 하단 서비스 소개 및 비즈니스 모델 섹션으로 부드럽게 스크롤
+  const handleServiceIntroClick = () => {
+    if (currentTab !== 'home') {
+      setCurrentTab('home');
+      setTimeout(() => {
+        const el = document.getElementById('service-intro');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      const el = document.getElementById('service-intro');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 
-  const handleLogout = () => {
-    window.withCareStore.logout();
-    showToast('로그아웃되었습니다. 로그인 창에서 원하시는 모드로 접속하세요.', 'info');
-    setIsLoginModalOpen(true);
+  const handleLogoClick = () => {
+    setCurrentTab('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSelectHospitalForBooking = (hospitalName, deptName) => {
-    setBookingPrefill({
-      hospital: hospitalName,
-      department: deptName,
-      managerId: null
-    });
-    setActiveTab('booking');
-    showToast(`'${hospitalName}' 병원 정보가 예약 폼에 자동 입력되었습니다.`, 'info');
-  };
-
-  const handleSelectManagerFromAI = (mgr) => {
-    setBookingPrefill({
-      hospital: '',
-      department: '',
-      managerId: mgr.id
-    });
-    setActiveTab('booking');
-    showToast(`'${mgr.name} 매니저'가 배정 매니저로 지정되었습니다. 일정을 확인해주세요.`, 'info');
+  const handleMyPageClick = () => {
+    if (!storeState.currentUser.isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    setCurrentTab('myPage');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-      {/* 토스트 알림 */}
-      {toast && (
-        <div className="fixed top-18 right-4 z-50 flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 animate-fadeIn text-xs sm:text-sm font-medium">
-          <span className="text-emerald-400">
-            {toast.type === 'success' ? <Icons.Check className="w-5 h-5" /> : <Icons.Sparkles className="w-5 h-5" />}
-          </span>
-          <span>{toast.message}</span>
-        </div>
-      )}
-
-      {/* 상단 간결 안내 배너 */}
-      <div className="bg-slate-900 text-slate-300 text-xs py-2 px-4 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="bg-sky-500 text-white px-2 py-0.5 rounded text-[10px] font-bold">대학교 프로젝트 데모</span>
-            <span className="hidden sm:inline text-slate-400">부모님 병원 동행 매칭 및 실시간 안심 관제 플랫폼</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={handleResetData}
-              className="hover:text-white flex items-center gap-1 transition text-slate-400"
-              title="초기 더미 데이터 복원"
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased selection:bg-[#6edfec]/40">
+      {/* 1. 상단 글로벌 네비게이션 헤더 */}
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* 좌측 로고 */}
+            <div 
+              onClick={handleLogoClick} 
+              className="flex items-center gap-3 cursor-pointer group"
             >
-              <Icons.RotateCcw className="w-3.5 h-3.5" />
-              <span>데이터 리셋</span>
-            </button>
-            <button 
-              onClick={() => setIsB2BModalOpen(true)}
-              className="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition"
-            >
-              <Icons.TrendingUp className="w-3.5 h-3.5" />
-              <span>수익화 BM</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 헤더 네비게이션 */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* 브랜드 로고 */}
-          <div 
-            onClick={() => setActiveTab('home')}
-            className="flex items-center gap-2.5 cursor-pointer group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition">
-              <Icons.Heart className="w-5 h-5 fill-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg tracking-tight text-slate-900">위드케어</span>
-                <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200">WithCare</span>
+              <img 
+                src="assets/logo.png" 
+                alt="WithCare 로고" 
+                className="w-8 h-8 object-contain transition-transform group-hover:scale-105" 
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <div className="flex flex-col">
+                <span className="font-extrabold text-lg text-slate-900 tracking-tight leading-none">
+                  WithCare
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                  부모님 병원 동행 서비스
+                </span>
               </div>
-              <p className="text-[10px] text-slate-400 -mt-0.5">부모님 안심 병원 동행</p>
+            </div>
+
+            {/* 중앙 통합 메뉴: 서비스 소개 | 동행자 찾기 | 동행 예약 | 마이페이지 */}
+            <nav className="hidden md:flex items-center gap-1.5 text-xs font-bold">
+              <button
+                onClick={handleServiceIntroClick}
+                className={`px-3.5 py-2 rounded-xl transition cursor-pointer ${
+                  currentTab === 'home' 
+                    ? 'text-slate-900 bg-slate-100 font-extrabold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                서비스 소개
+              </button>
+              <button
+                onClick={() => setCurrentTab('nearFinder')}
+                className={`px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer ${
+                  currentTab === 'nearFinder' 
+                    ? 'text-slate-900 bg-slate-100 font-extrabold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <Icons.MapPin className="w-3.5 h-3.5 text-[#0bbecb]" />
+                <span>동행자 찾기</span>
+              </button>
+              <button
+                onClick={() => setCurrentTab('booking')}
+                className={`px-3.5 py-2 rounded-xl transition cursor-pointer ${
+                  currentTab === 'booking' 
+                    ? 'text-slate-900 bg-slate-100 font-extrabold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                동행 예약
+              </button>
+              <button
+                onClick={handleMyPageClick}
+                className={`px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${
+                  currentTab === 'myPage' 
+                    ? 'text-slate-900 bg-slate-100 font-extrabold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <Icons.User className="w-3.5 h-3.5 text-slate-500" />
+                <span>마이페이지</span>
+              </button>
+            </nav>
+
+            {/* 우측 로그인 / 로그아웃 버튼 */}
+            <div className="flex items-center gap-2">
+              {storeState.currentUser.isLoggedIn ? (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="hidden sm:inline font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                    {storeState.currentUser.role === 'MANAGER' 
+                      ? `${storeState.currentUser.name} 동행자` 
+                      : `${storeState.currentUser.name} 이용자`}
+                  </span>
+                  <button
+                    onClick={() => {
+                      window.withCareStore.logout();
+                      showToast('로그아웃되었습니다.', 'info');
+                    }}
+                    className="px-3 py-1.5 text-slate-600 hover:text-slate-900 font-bold rounded-lg border border-slate-200 hover:bg-slate-100 transition cursor-pointer"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className="px-4 py-1.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                >
+                  로그인
+                </button>
+              )}
             </div>
           </div>
 
-          {/* 중앙 네비 메뉴 */}
-          <nav className="hidden md:flex items-center gap-1 text-sm font-semibold">
+          {/* 모바일 4대 메뉴 바 (작은 화면에서도 서비스 소개 및 주요 기능 원터치) */}
+          <div className="md:hidden flex items-center justify-around py-2 border-t border-slate-100 text-xs font-bold text-slate-600">
             <button
-              onClick={() => setActiveTab('home')}
-              className={`px-3.5 py-2 rounded-xl transition ${
-                activeTab === 'home' ? 'text-sky-700 bg-sky-50 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              onClick={handleServiceIntroClick}
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                currentTab === 'home' ? 'text-slate-900 bg-slate-100 font-extrabold' : 'hover:text-slate-900'
               }`}
             >
               서비스 소개
             </button>
             <button
-              onClick={() => setActiveTab('ai')}
-              className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition ${
-                activeTab === 'ai' ? 'text-purple-700 bg-purple-50 font-bold' : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50/50'
+              onClick={() => setCurrentTab('nearFinder')}
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                currentTab === 'nearFinder' ? 'text-slate-900 bg-slate-100 font-extrabold' : 'hover:text-slate-900'
               }`}
             >
-              <Icons.Sparkles className="w-4 h-4 text-purple-600" />
-              <span>AI 병원 찾기</span>
+              동행자 찾기
             </button>
             <button
-              onClick={() => setActiveTab('booking')}
-              className={`px-3.5 py-2 rounded-xl transition ${
-                activeTab === 'booking' ? 'text-sky-700 bg-sky-50 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              onClick={() => setCurrentTab('booking')}
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                currentTab === 'booking' ? 'text-slate-900 bg-slate-100 font-extrabold' : 'hover:text-slate-900'
               }`}
             >
-              동행 예약 신청
+              동행 예약
             </button>
             <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`px-3.5 py-2 rounded-xl relative transition ${
-                activeTab === 'dashboard' ? 'text-sky-700 bg-sky-50 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              onClick={handleMyPageClick}
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                currentTab === 'myPage' ? 'text-slate-900 bg-slate-100 font-extrabold' : 'hover:text-slate-900'
               }`}
             >
-              <span>{currentUser.role === 'MANAGER' ? '매니저 마이페이지' : '환자 마이페이지'}</span>
-              <span className="ml-1.5 px-2 py-0.2 text-xs rounded-full bg-sky-100 text-sky-700 font-bold">
-                {reservations.length}
-              </span>
+              마이페이지
             </button>
-          </nav>
-
-          {/* 우측 로그인 상태 및 로그인/로그아웃 버튼 */}
-          <div className="flex items-center gap-2">
-            {currentUser.isLoggedIn ? (
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 pr-2 rounded-2xl">
-                <div className="w-7 h-7 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
-                  {currentUser.role === 'MANAGER' ? '🩺' : '👤'}
-                </div>
-                <div className="text-left hidden sm:block">
-                  <span className="text-xs font-bold text-slate-800 block leading-tight">
-                    {currentUser.name} 님
-                  </span>
-                  <span className="text-[10px] text-slate-500">
-                    {currentUser.role === 'MANAGER' ? '동행 매니저' : currentUser.type === 'NON_MEMBER' ? '비회원 환자' : '회원 보호자'}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setIsLoginModalOpen(true)}
-                  className="text-xs text-sky-700 hover:underline px-1.5 font-semibold"
-                >
-                  전환
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="text-xs bg-white hover:bg-slate-200 text-slate-600 px-2 py-1 rounded-lg border border-slate-200"
-                >
-                  로그아웃
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsLoginModalOpen(true)}
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs transition"
-              >
-                로그인 / 본인인증
-              </button>
-            )}
           </div>
-        </div>
-
-        {/* 모바일 탭 바 */}
-        <div className="md:hidden flex items-center justify-around border-t border-slate-200 bg-white py-2 px-1 text-[11px] font-medium">
-          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center py-1 ${activeTab === 'home' ? 'text-sky-600 font-bold' : 'text-slate-500'}`}>
-            <Icons.Hospital className="w-4 h-4" />
-            <span>소개</span>
-          </button>
-          <button onClick={() => setActiveTab('ai')} className={`flex flex-col items-center py-1 ${activeTab === 'ai' ? 'text-purple-600 font-bold' : 'text-slate-500'}`}>
-            <Icons.Sparkles className="w-4 h-4" />
-            <span>AI 병원</span>
-          </button>
-          <button onClick={() => setActiveTab('booking')} className={`flex flex-col items-center py-1 ${activeTab === 'booking' ? 'text-sky-600 font-bold' : 'text-slate-500'}`}>
-            <Icons.Calendar className="w-4 h-4" />
-            <span>예약신청</span>
-          </button>
-          <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center py-1 ${activeTab === 'dashboard' ? 'text-sky-600 font-bold' : 'text-slate-500'}`}>
-            <Icons.ClipboardCheck className="w-4 h-4" />
-            <span>마이페이지</span>
-          </button>
         </div>
       </header>
 
-      {/* 메인 뷰 */}
+      {/* 2. 메인 컨텐츠 영역 */}
       <main className="flex-1">
-        {activeTab === 'home' && (
-          <HomeView 
-            onGoBooking={() => setActiveTab('booking')}
-            onGoAI={() => setActiveTab('ai')}
-            onGoDashboard={() => setActiveTab('dashboard')}
-            onSelectHospital={handleSelectHospitalForBooking}
-            onOpenB2B={() => setIsB2BModalOpen(true)}
+        {currentTab === 'home' && (
+          <HomeView
+            onGoNearFinder={() => setCurrentTab('nearFinder')}
+            onGoBooking={() => setCurrentTab('booking')}
           />
         )}
 
-        {activeTab === 'ai' && (
-          <AIFinderView 
-            onSelectHospital={handleSelectHospitalForBooking}
+        {currentTab === 'nearFinder' && (
+          <NearFinderView
+            managers={storeState.managers}
+            locations={window.DAEJEON_LOCATIONS || []}
+            hospitals={window.DEFAULT_HOSPITALS || []}
+            onSelectManager={handleSelectManagerForBooking}
           />
         )}
 
-        {activeTab === 'booking' && (
-          <BookingView 
-            prefill={bookingPrefill}
-            patientProfile={patientProfile}
-            managers={managers}
-            currentUser={currentUser}
-            onBookingComplete={(newRes) => {
-              setActiveTab('dashboard');
-              showToast(`'${newRes.patientName}' 님의 예약이 접수되었습니다! 매니저와 1:1 대화방이 개설되었습니다.`, 'success');
+        {currentTab === 'booking' && (
+          <BookingView
+            patientProfile={storeState.patientProfile}
+            managers={storeState.managers}
+            hospitals={window.DEFAULT_HOSPITALS || []}
+            preselectedManager={preselectedManager}
+            preselectedHospital={preselectedHospital}
+            onComplete={(newRes) => {
+              showToast('동행 예약이 정상 접수되었습니다! 마이페이지에서 실시간 상태를 확인하세요.', 'success');
+              setCurrentTab('myPage');
             }}
           />
         )}
 
-        {activeTab === 'dashboard' && (
-          <DashboardRouter 
-            currentUser={currentUser}
-            patientProfile={patientProfile}
-            reservations={reservations}
-            managers={managers}
-            onOpenReport={(resId) => setActiveReportReservationId(resId)}
-            onOpenManagerReport={(resId) => setActiveManagerReportReservationId(resId)}
-            onOpenChat={(resId) => setActiveChatReservationId(resId)}
-            onSelectManagerFromAI={handleSelectManagerFromAI}
-            onGoBooking={() => setActiveTab('booking')}
-            showToast={showToast}
-          />
+        {currentTab === 'myPage' && (
+          storeState.currentUser.role === 'MANAGER' ? (
+            <CompanionMyPageView
+              currentUser={storeState.currentUser}
+              reservations={storeState.reservations}
+              urgentRequests={storeState.urgentRequests}
+              majorInsights={window.MAJOR_INSIGHTS || []}
+              onOpenManagerReport={(resId) => setActiveManagerReportResId(resId)}
+              onOpenChat={(resId) => setActiveChatResId(resId)}
+              onOpenCertModal={() => setIsVolunteerCertModalOpen(true)}
+              onAcceptUrgent={(urgId) => {
+                const res = window.withCareStore.acceptUrgentRequest(urgId, storeState.currentUser.managerId || 'mgr-1');
+                if (res) {
+                  showToast(`[${res.patientName}] 어르신 긴급 동행을 수락하였습니다. 봉사시간 4시간이 매칭되었습니다!`, 'success');
+                }
+              }}
+              showToast={showToast}
+            />
+          ) : (
+            <UserMyPageView
+              currentUser={storeState.currentUser}
+              patientProfile={storeState.patientProfile}
+              reservations={storeState.reservations}
+              managers={storeState.managers}
+              onOpenReport={(resId) => setActiveReportResId(resId)}
+              onOpenChat={(resId) => setActiveChatResId(resId)}
+              onSelectManagerFromAI={(mgr) => handleSelectManagerForBooking(mgr)}
+              onGoBooking={() => setCurrentTab('booking')}
+              showToast={showToast}
+            />
+          )
         )}
       </main>
 
-      {/* 로그인 모달 */}
+      {/* 3. 모달 레이어 */}
       {isLoginModalOpen && (
-        <LoginModal 
+        <LoginModal
           onClose={() => setIsLoginModalOpen(false)}
-          showToast={showToast}
-          onLoginSuccess={(role) => {
+          onSuccess={(user) => {
             setIsLoginModalOpen(false);
-            setActiveTab('dashboard');
+            setCurrentTab('myPage');
+            showToast(`${user.name} ${user.role === 'MANAGER' ? '동행자' : '이용자'}님, 환영합니다!`, 'success');
           }}
         />
       )}
 
       {/* 1:1 실시간 대화방 모달 */}
-      {activeChatReservationId && (
-        <ChatModal 
-          reservationId={activeChatReservationId}
-          currentUser={currentUser}
-          onClose={() => setActiveChatReservationId(null)}
+      {activeChatResId && (
+        <ChatModal
+          reservationId={activeChatResId}
+          currentUser={storeState.currentUser}
+          onClose={() => setActiveChatResId(null)}
+        />
+      )}
+
+      {/* 안심 리포트 및 만족도 평가 모달 */}
+      {activeReportResId && (
+        <ReportModal
+          reservationId={activeReportResId}
+          onClose={() => setActiveReportResId(null)}
           showToast={showToast}
         />
       )}
 
-      {/* 안심 리포트 모달 */}
-      {activeReportReservationId && (
-        <ReportModal 
-          reservationId={activeReportReservationId}
-          onClose={() => setActiveReportReservationId(null)}
+      {/* 안심 리포트 작성 모달 */}
+      {activeManagerReportResId && (
+        <ManagerReportEditorModal
+          reservationId={activeManagerReportResId}
+          onClose={() => setActiveManagerReportResId(null)}
           showToast={showToast}
         />
       )}
 
-      {/* 매니저 전용 리포트 작성 모달 */}
-      {activeManagerReportReservationId && (
-        <ManagerReportEditorModal 
-          reservationId={activeManagerReportReservationId}
-          onClose={() => setActiveManagerReportReservationId(null)}
-          showToast={showToast}
+      {/* 1365 / VMS 봉사활동 확인서 미리보기 모달 */}
+      {isVolunteerCertModalOpen && (
+        <VolunteerCertModal
+          currentUser={storeState.currentUser}
+          onClose={() => setIsVolunteerCertModalOpen(false)}
         />
       )}
 
-      {/* B2B / B2C 수익모델 상세 모달 */}
-      {isB2BModalOpen && (
-        <B2BModal onClose={() => setIsB2BModalOpen(false)} />
+      {/* 토스트 알림 */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-bold border border-slate-700 animate-bounce">
+          <span className="w-2 h-2 rounded-full bg-[#6edfec]"></span>
+          <span>{toast.message}</span>
+        </div>
       )}
 
-      {/* 푸터 */}
-      <footer className="bg-slate-900 text-slate-400 py-10 border-t border-slate-800 mt-20 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2 text-white font-extrabold text-base">
-                <Icons.Heart className="w-5 h-5 fill-white text-sky-500" />
-                <span>위드케어 (WithCare)</span>
-              </div>
-              <p className="text-slate-500 max-w-md">부모님의 병원 외래 진료 동행, 1:1 실시간 소통, 안심 리포트 제공 플랫폼</p>
-            </div>
-            <div className="text-slate-400 text-right sm:text-right">
-              <p>고객센터: 1544-9988 (평일 09:00 - 18:00)</p>
-              <p className="text-rose-400 font-semibold">{AMBULANCE_NOTICE}</p>
-            </div>
+      {/* 글로벌 푸터 */}
+      <footer className="bg-white border-t border-slate-200 py-8 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+            <span className="font-extrabold text-slate-800">위드케어 (WithCare)</span>
+            <span>· 대전광역시 거점 부모님 병원 동행 서비스 플랫폼</span>
           </div>
-          <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row justify-between items-center text-slate-500 gap-2">
-            <span>© 2026 WithCare. All rights reserved. University Project Demonstration.</span>
-            <div className="flex gap-4">
-              <span>이용약관</span>
-              <span>개인정보처리방침</span>
-              <span>배상책임보험</span>
-            </div>
+          <div className="text-slate-400">
+            대전광역시 거점 대학병원 공식 봉사 협약 시연 모델
           </div>
         </div>
       </footer>
@@ -474,496 +416,807 @@ function App() {
 }
 
 // ========================================================
-// 1. 로그인 모달 (환자/보호자 vs 매니저 로그인)
+// 2. 메인 랜딩페이지 (사용자 첨부 이미지: 얼굴 제외 상체~팔 크롭본 적용)
 // ========================================================
-function LoginModal({ onClose, showToast, onLoginSuccess }) {
-  const [loginRole, setLoginRole] = useState('GUARDIAN'); // 'GUARDIAN' | 'MANAGER'
-  const [guardianMode, setGuardianMode] = useState('MEMBER'); // 'MEMBER' | 'NON_MEMBER'
+function HomeView({ onGoNearFinder, onGoBooking }) {
+  return (
+    <div className="space-y-12 pb-16">
+      {/* Hero 섹션 */}
+      <section className="relative w-full min-h-[500px] sm:min-h-[560px] flex items-center justify-center overflow-hidden bg-slate-900">
+        {/* 상체~팔 위주 크롭본 배경 이미지 */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 hover:scale-105"
+          style={{ backgroundImage: `url('assets/hero_companion.jpg')` }}
+        ></div>
 
-  const [nonMemberName, setNonMemberName] = useState('홍길동');
-  const [nonMemberBirth, setNonMemberBirth] = useState('1985-05-15');
-  const [nonMemberPassword, setNonMemberPassword] = useState('1234');
-  const [selectedManagerId, setSelectedManagerId] = useState('mgr-1');
+        {/* 텍스트 시인성을 위한 소프트 딤 오버레이 (그라데이션 없이 플랫) */}
+        <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[0.5px]"></div>
 
-  const handleGuardianMemberLogin = () => {
-    window.withCareStore.login({
-      role: 'GUARDIAN',
-      type: 'MEMBER',
-      name: '김민수',
-      birth: '1982-08-25',
-      phone: '010-9876-5432'
-    });
-    showToast('회원(김민수 보호자)으로 로그인되었습니다. 환자 마이페이지로 이동합니다.', 'success');
-    onLoginSuccess('GUARDIAN');
+        {/* Hero 컨텐츠 */}
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6 py-16">
+          <span className="inline-block bg-[#6edfec]/20 text-[#6edfec] border border-[#6edfec]/40 text-xs sm:text-sm font-extrabold px-4 py-1.5 rounded-full">
+            대전광역시 의료전공 대학생 & 병원 동행 플랫폼
+          </span>
+
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+            부모님 병원 가는 길,<br />
+            근처 동행 매니저와 신속하게
+          </h1>
+
+          <div className="inline-block bg-white/10 backdrop-blur-md px-6 py-2.5 rounded-2xl border border-white/15 shadow-xs">
+            <p className="text-sm sm:text-lg text-white font-medium drop-shadow-xs">
+              내일의 의료인이 따뜻한 동행 매니저가 되어드립니다.
+            </p>
+          </div>
+
+          {/* 간결한 2개 버튼 */}
+          <div className="flex items-center justify-center gap-3 pt-4">
+            <button
+              onClick={onGoNearFinder}
+              className="px-6 sm:px-8 py-3.5 bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-sm sm:text-base rounded-xl shadow-md transition-all hover:scale-105 cursor-pointer"
+            >
+              동행자 찾기
+            </button>
+            <button
+              onClick={onGoBooking}
+              className="px-6 sm:px-8 py-3.5 bg-slate-900/90 hover:bg-black text-white font-extrabold text-sm sm:text-base rounded-xl shadow-md border border-slate-700 transition-all hover:scale-105 cursor-pointer"
+            >
+              예약하기
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 서비스 핵심 3대 신뢰 포인트 (플랫 화이트 카드) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#0bbecb] flex items-center justify-center font-black text-xs border border-slate-200">
+              01
+            </div>
+            <h3 className="font-extrabold text-base text-slate-900">대전권 의료전공 대학생 인증</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              충남대, 을지대, 건양대, 대전대 등 간호·의예·물리치료학과 재학생들의 학생증 및 심폐소생술(CPR/BLS) 수료 여부를 철저히 검증합니다.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#0bbecb] flex items-center justify-center font-black text-xs border border-slate-200">
+              02
+            </div>
+            <h3 className="font-extrabold text-base text-slate-900">1365·VMS 공식 봉사시간 연계</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              대학생 동행자에게는 1회 3~4시간의 공인 봉사시간과 함께 대학병원 취업 준비를 위한 환자 케어 포트폴리오를 제공합니다.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#0bbecb] flex items-center justify-center font-black text-xs border border-slate-200">
+              03
+            </div>
+            <h3 className="font-extrabold text-base text-slate-900">5단계 실시간 안심 케어 프로세스</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              자택 픽업부터 진료실 동행, 의사 소견 경청 및 복약 지도, 처방전 수령, 안전 귀가까지 전 과정을 마이페이지에서 투명하게 확인합니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 대전 권역 바로가기 배너 */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-2 text-center md:text-left">
+            <span className="bg-[#6edfec] text-slate-900 text-xs font-black px-3 py-1 rounded-full">
+              DAEJEON MVP SERVICE
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold">
+              지금 대전 전 지역에서 가까운 대학생 동행자를 찾아보세요
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              충남대학교병원, 대전을지대병원, 건양대병원, 대전성모병원 외래 진료 동행 지원
+            </p>
+          </div>
+
+          <button
+            onClick={onGoNearFinder}
+            className="px-6 py-3.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-extrabold text-sm rounded-2xl shadow-md transition cursor-pointer shrink-0"
+          >
+            내 근처 동행자 조회하기
+          </button>
+        </div>
+      </section>
+
+      {/* ======================================================== */}
+      {/* 4. 서비스 소개 & 교육 방법 및 비즈니스 모델 (양면 플랫폼 & 차별화 전략) */}
+      {/* ======================================================== */}
+      <section id="service-intro" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-12">
+        {/* 상단 섹션 헤더 */}
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <span className="inline-flex items-center bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black px-4 py-1.5 rounded-full">
+            WITHCARE BUSINESS MODEL & STRATEGY
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+            기존 전문 인력 중심 구조를 전환한<br />
+            <span className="text-[#0bbecb] underline decoration-[#6edfec] decoration-4 underline-offset-4">대학생 참여형 양면 플랫폼</span>
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 font-medium leading-relaxed">
+            기존 병원동행 서비스의 전문 인력 중심 구조를 대학생 참여형 모델로 전환하고, 
+            서비스 제공 범위를 <strong className="text-slate-900 font-extrabold">지역 대학병원으로 집중</strong>하여 
+            가격 경쟁력과 운영 효율성을 확보하는 양면 플랫폼 사업입니다.
+          </p>
+        </div>
+
+        {/* 핵심 가치 제안 박스 (Core Value Connection) */}
+        <div className="bg-slate-100/80 border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
+          <div className="space-y-1 text-center md:text-left">
+            <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider block">
+              CORE VALUE CONNECTION
+            </span>
+            <p className="text-sm sm:text-base text-slate-800 font-bold leading-relaxed">
+              단순히 기존 서비스보다 저렴한 병원동행 서비스를 제공하는 것이 아니라,{' '}
+              <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
+                병원 이용에 도움이 필요한 시니어의 수요
+              </span>와{' '}
+              <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
+                보건·의료·복지 분야의 현장 경험을 원하는 대학생의 수요
+              </span>를 연결하는 것이 핵심입니다.
+            </p>
+          </div>
+        </div>
+
+        {/* 양면 플랫폼 비즈니스 모델 구조도 (다이어그램) */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+            <div>
+              <span className="text-[11px] font-bold text-slate-400">PLATFORM ARCHITECTURE</span>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+                대학병원 특화 동행 양면 플랫폼 구조
+              </h3>
+            </div>
+            <span className="inline-flex items-center text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+              선순환 상생 모델 (Two-Sided Platform)
+            </span>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-5">
+            {/* 상단 2대 수요-공급 주체 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 시니어 · 보호자 */}
+              <div className="bg-slate-50 border border-slate-200 hover:border-[#6edfec] rounded-2xl p-6 transition-all shadow-xs">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Demand</span>
+                  <span className="text-[10px] font-bold bg-white text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
+                    수요자
+                  </span>
+                </div>
+                <h4 className="text-lg font-black text-slate-900">시니어 · 보호자</h4>
+                <p className="text-sm font-extrabold text-[#0bbecb] mt-1">
+                  합리적인 비용으로 병원 이용 지원
+                </p>
+                <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 기존 간병인 대비 부담을 낮춘 실속형 병원 동행
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 진료 접수, 원내 이동, 의사 소견 경청 지원
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 보호자를 위한 1:1 실시간 이동 알림 및 안심 리포트
+                  </li>
+                </ul>
+              </div>
+
+              {/* 대학생 · 취업준비생 */}
+              <div className="bg-slate-50 border border-slate-200 hover:border-[#6edfec] rounded-2xl p-6 transition-all shadow-xs">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Supply</span>
+                  <span className="text-[10px] font-bold bg-white text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
+                    공급자
+                  </span>
+                </div>
+                <h4 className="text-lg font-black text-slate-900">대학생 · 취업준비생</h4>
+                <p className="text-sm font-extrabold text-[#0bbecb] mt-1">
+                  유급 일경험 · 실무 역량 축적
+                </p>
+                <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 간호·의예·보건·사회복지 전공 맞춤형 현장 일경험
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 1365·VMS 공식 공인 봉사시간 인정 (회당 3~4시간)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 대학병원 취업 준비를 위한 공식 환자 케어 포트폴리오
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* 양방향 연결 */}
+            <div className="flex items-center justify-center py-0.5">
+              <div className="flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-1.5 rounded-full border border-slate-200 text-xs font-bold">
+                수요-공급 스마트 매칭 및 프로세스 연계
+              </div>
+            </div>
+
+            {/* 중앙 플랫폼: 대학병원 특화 동행 플랫폼 */}
+            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-md border-2 border-[#6edfec]/40">
+              <div className="text-center space-y-3">
+                <div className="inline-block bg-[#6edfec] text-slate-900 text-xs font-black px-3.5 py-1 rounded-full">
+                  CORE PLATFORM
+                </div>
+                <h4 className="text-xl sm:text-2xl font-black tracking-tight">
+                  대학병원 특화 동행 플랫폼
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-300">
+                  매칭부터 표준교육, 원내 동선 안내, 안전관리, 활동 기록까지 전 과정을 체계적으로 총괄 운영합니다.
+                </p>
+
+                {/* 5대 플랫폼 기능 칩 */}
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                    매칭
+                  </span>
+                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                    표준교육
+                  </span>
+                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                    병원별 동선 안내
+                  </span>
+                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                    안전관리
+                  </span>
+                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                    활동 기록
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 하단 지역 상생 협력: 지역 대학병원 & 지역 대학 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                <h5 className="font-extrabold text-sm text-slate-900">지역 대학병원</h5>
+                <p className="text-xs text-[#0bbecb] font-bold mt-0.5">현장 운영 · 안내 협력</p>
+                <p className="text-[11px] text-slate-500 mt-1">충남대병원, 대전을지대병원, 건양대병원 외래 진료 연계</p>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                <h5 className="font-extrabold text-sm text-slate-900">지역 대학교</h5>
+                <p className="text-xs text-[#0bbecb] font-bold mt-0.5">학생 모집 · 교육 협력</p>
+                <p className="text-[11px] text-slate-500 mt-1">간호·보건의료 전공생 선발 및 사전 직무·에티켓 교육</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 위드케어만의 차별화된 5대 핵심 강점 */}
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <span className="text-xs font-black text-[#0bbecb] tracking-wider uppercase">
+                WITHCARE KEY STRENGTHS
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
+                위드케어만의 차별화된 5대 핵심 강점
+              </h3>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              기존 민간 간병 및 단순 매칭 알바와 비교할 수 없는 위드케어만의 신뢰와 전문성
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* 전략 1: 병원별 특화 운영 */}
+            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  01
+                </span>
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                  병원별 특화 운영
+                </span>
+              </div>
+              <h4 className="text-base font-extrabold text-slate-900">
+                병원별 동선 및 절차 집중 교육
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                병원 내부 동선과 이용 절차를 사전 교육하고, 한정된 병원에서 운영 역량을 집중적으로 축적합니다.
+              </p>
+              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                정확하고 신속한 매뉴얼과 빠른 인수인계로 서비스 질 향상
+              </div>
+            </div>
+
+            {/* 전략 2: 청년 일경험 프로그램화 */}
+            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  02
+                </span>
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                  청년 일경험 프로그램화
+                </span>
+              </div>
+              <h4 className="text-base font-extrabold text-slate-900">
+                단순 알바를 넘어 역량 인증까지
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                단순 아르바이트 매칭을 넘어 교육 · 활동 · 피드백 · 역량 인증까지 유기적으로 연결합니다.
+              </p>
+              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                대학병원 취업 준비 및 의료 현장 직무 포트폴리오 연계
+              </div>
+            </div>
+
+            {/* 전략 3: 표준화된 안심 서비스 */}
+            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  03
+                </span>
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                  표준화된 안심 서비스
+                </span>
+              </div>
+              <h4 className="text-base font-extrabold text-slate-900">
+                체계적인 신원 확인 및 관리 시스템
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                자격증 대신 체계적인 교육, 철저한 신원 확인, 명확한 활동 범위 제한, 관리자 개입으로 신뢰를 확보합니다.
+              </p>
+              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                1:1 대화 모듈 및 보호자 실시간 안심 트래킹 상시 가동
+              </div>
+            </div>
+
+            {/* 전략 4: 병원별 전담 인력풀 */}
+            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  04
+                </span>
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                  병원별 전담 인력풀
+                </span>
+              </div>
+              <h4 className="text-base font-extrabold text-slate-900">
+                익숙한 병원 반복 활동으로 효율 개선
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                매번 낯선 병원으로 파견하기보다 익숙한 병원에서 반복 활동하여 운영 효율을 개선합니다.
+              </p>
+              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                복잡한 대학병원 채혈실·검사실 동선 지체 없는 이동 보장
+              </div>
+            </div>
+
+            {/* 전략 5: 정기 진료 고객 확보 */}
+            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3 md:col-span-2 lg:col-span-2">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  05
+                </span>
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                  정기 진료 고객 확보
+                </span>
+              </div>
+              <h4 className="text-base font-extrabold text-slate-900">
+                단발성 예약을 넘어 재이용 및 정기 관리 유도
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                단발성 예약뿐 아니라 만성질환 반복 진료, 동일 동행자 우선 매칭 등 재이용을 유도합니다.
+              </p>
+              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                환자의 진료 특성을 잘 아는 동행자와의 친밀한 라포(Rapport) 형성
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 핵심 포지셔닝 강조 카드 (이미지 2 하단) */}
+        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 relative overflow-hidden shadow-lg">
+          <div className="relative z-10 max-w-3xl space-y-3">
+            <span className="bg-[#6edfec] text-slate-900 text-[11px] font-black px-3.5 py-1 rounded-full">
+              핵심 포지셔닝 (Core Positioning)
+            </span>
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-snug">
+              단순 저가형 병원동행 플랫폼이 아닌,<br />
+              <span className="text-[#6edfec]">지역 대학병원에 특화된 청년 일경험 기반 진료 지원 서비스</span>
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              위드케어는 어르신에게는 자녀처럼 따뜻하고 안전한 병원 동행을 제공하고, 
+              지역 보건의료 청년에게는 가치 있는 실무 일경험과 봉사를 제공하여 지속 가능한 지역 의료 복지 생태계를 만듭니다.
+            </p>
+          </div>
+          <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-[#6edfec]/10 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ========================================================
+// 3. 신규 화면: 내 근처 동행자 찾기 (화이트 모드 GPS 지도 & 클릭 시에만 세부사항 표시 & 지도 클릭 이동)
+// ========================================================
+function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
+  // 내 위치 상태 (기본: 대전 서구 둔산동 x: 50, y: 42)
+  const [myPos, setMyPos] = useState({
+    x: 50,
+    y: 42,
+    name: '대전 서구 둔산동 (크로바Apt)'
+  });
+
+  // 사용자가 클릭한 동행자 (null이면 세부사항 숨김, 클릭 시 팝업 카드 열림!)
+  const [activeManager, setActiveManager] = useState(null);
+
+  // 지도 영역 레퍼런스
+  const mapContainerRef = useRef(null);
+
+  // 지도 위를 직접 클릭하여 내 위치 변경
+  const handleMapClick = (e) => {
+    if (!mapContainerRef.current) return;
+    const rect = mapContainerRef.current.getBoundingClientRect();
+    const clickX = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const clickY = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+
+    // 5% ~ 95% 범위 내로 제한
+    const clampedX = Math.max(8, Math.min(92, clickX));
+    const clampedY = Math.max(8, Math.min(92, clickY));
+
+    let areaName = '대전 서구 둔산 인근';
+    if (clampedX < 40 && clampedY < 50) areaName = '대전 유성구 궁동 인근';
+    else if (clampedX < 45 && clampedY >= 50) areaName = '대전 서구 관저/도안 인근';
+    else if (clampedX >= 60) areaName = '대전 중구 대사/대흥 인근';
+
+    setMyPos({ x: clampedX, y: clampedY, name: areaName });
   };
 
-  const handleGuardianNonMemberLogin = (e) => {
-    e.preventDefault();
-    window.withCareStore.login({
-      role: 'GUARDIAN',
-      type: 'NON_MEMBER',
-      name: nonMemberName,
-      birth: nonMemberBirth,
-      password: nonMemberPassword
+  // 상단 거점 버튼 클릭 시 내 위치 이동
+  const handlePresetLocation = (loc) => {
+    setMyPos({
+      x: loc.mapX || 50,
+      y: loc.mapY || 42,
+      name: loc.label
     });
-    showToast(`비회원(${nonMemberName} 님)으로 로그인되었습니다. 환자 마이페이지로 진입합니다.`, 'success');
-    onLoginSuccess('GUARDIAN');
   };
 
-  const handleManagerLogin = () => {
-    window.withCareStore.login({
-      role: 'MANAGER',
-      managerId: selectedManagerId
+  // 내 위치(myPos)를 기준으로 4명의 매니저가 항상 주변(반경)에 다채롭게 포진하도록 계산
+  const visibleManagers = useMemo(() => {
+    return managers.map((mgr) => {
+      // 내 위치에 상대 오프셋을 더해 위치 계산 (경계 내 클램핑)
+      const posX = Math.max(10, Math.min(90, myPos.x + (mgr.offsetX || 0)));
+      const posY = Math.max(12, Math.min(88, myPos.y + (mgr.offsetY || 0)));
+
+      // 유클리드 거리 기반 실시간 도보 시간 계산
+      const dist = Math.sqrt(Math.pow(posX - myPos.x, 2) + Math.pow(posY - myPos.y, 2));
+      const dynamicMinutes = Math.max(3, Math.round(dist * 0.5) + (mgr.etaMinutes ? (mgr.etaMinutes % 4) : 3));
+      const dynamicDistMeters = Math.round(dynamicMinutes * 70);
+
+      return {
+        ...mgr,
+        posX,
+        posY,
+        calcEtaText: `도보 ${dynamicMinutes}분 (약 ${dynamicDistMeters}m)`
+      };
     });
-    const mgr = window.withCareStore.getManagerById(selectedManagerId);
-    showToast(`${mgr.name} 매니저로 로그인되었습니다. 매니저 마이페이지로 진입합니다.`, 'success');
-    onLoginSuccess('MANAGER');
-  };
+  }, [managers, myPos]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="font-extrabold text-slate-900 text-base">로그인 및 권한 선택</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* 1. 상단 GPS 위치 컨트롤 바 (화이트 룩) */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0bbecb] animate-ping"></span>
+            <h2 className="text-xl font-extrabold text-slate-900">GPS 실시간 동행자 지도 (대전광역시)</h2>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            지도를 직접 클릭하거나 아래 거점 버튼을 누르면 내 위치가 이동하며, <strong>동행자 프로필 핀을 누르면 세부사항</strong>이 나타납니다.
+          </p>
         </div>
 
-        {/* 2대 분기: 환자/보호자 vs 매니저 */}
-        <div className="grid grid-cols-2 p-2.5 bg-slate-100 border-b border-slate-200 gap-2">
-          <button
-            onClick={() => setLoginRole('GUARDIAN')}
-            className={`py-2 rounded-xl text-xs font-bold transition ${
-              loginRole === 'GUARDIAN' ? 'bg-white text-sky-700 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            👤 환자 / 보호자 로그인
-          </button>
-          <button
-            onClick={() => setLoginRole('MANAGER')}
-            className={`py-2 rounded-xl text-xs font-bold transition ${
-              loginRole === 'MANAGER' ? 'bg-teal-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            🩺 동행 매니저 로그인
-          </button>
-        </div>
+        {/* 대전 주요 거점 빠른 이동 버튼들 */}
+        <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold">
+          <span className="text-slate-400 mr-1 text-[11px]">추천 거점:</span>
+          {locations.map((loc) => {
+            const isNear = Math.abs(loc.mapX - myPos.x) < 8 && Math.abs(loc.mapY - myPos.y) < 8;
 
-        <div className="p-6">
-          {loginRole === 'GUARDIAN' ? (
-            <div className="space-y-4">
-              <div className="flex border border-slate-200 rounded-xl p-1 bg-slate-50 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setGuardianMode('MEMBER')}
-                  className={`flex-1 py-1.5 font-bold rounded-lg transition ${
-                    guardianMode === 'MEMBER' ? 'bg-white text-sky-700 shadow-xs' : 'text-slate-500'
-                  }`}
-                >
-                  기존 회원 로그인
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGuardianMode('NON_MEMBER')}
-                  className={`flex-1 py-1.5 font-bold rounded-lg transition ${
-                    guardianMode === 'NON_MEMBER' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-500'
-                  }`}
-                >
-                  비회원 간편 로그인
-                </button>
-              </div>
-
-              {guardianMode === 'MEMBER' ? (
-                <div className="space-y-3 text-xs">
-                  <div className="bg-sky-50 border border-sky-100 rounded-xl p-3 text-sky-900">
-                    <p className="font-bold">등록 회원: 김민수 님 (보호자)</p>
-                    <p className="text-[11px] text-sky-700 mt-0.5">환자 정보 및 예약 내역이 안전하게 보관되어 있습니다.</p>
-                  </div>
-                  <button
-                    onClick={handleGuardianMemberLogin}
-                    className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl shadow-xs transition"
-                  >
-                    김민수(회원)로 로그인
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleGuardianNonMemberLogin} className="space-y-3 text-xs">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">성함 *</label>
-                    <input 
-                      type="text" 
-                      value={nonMemberName} 
-                      onChange={(e) => setNonMemberName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2"
-                      required 
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">생년월일 (YYYY-MM-DD) *</label>
-                    <input 
-                      type="date" 
-                      value={nonMemberBirth} 
-                      onChange={(e) => setNonMemberBirth(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2"
-                      required 
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">비밀번호 (조회용 4자리) *</label>
-                    <input 
-                      type="password" 
-                      value={nonMemberPassword} 
-                      onChange={(e) => setNonMemberPassword(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2"
-                      required 
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full py-3 bg-slate-900 text-white font-extrabold rounded-xl shadow-xs transition mt-2"
-                  >
-                    비회원으로 로그인
-                  </button>
-                </form>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3 text-xs">
-              <label className="block font-bold text-slate-700">활동 매니저 선택</label>
-              <div className="space-y-2">
-                {window.withCareStore.getManagers().map((mgr) => (
-                  <label 
-                    key={mgr.id}
-                    className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition ${
-                      selectedManagerId === mgr.id ? 'border-teal-600 bg-teal-50' : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <input 
-                      type="radio" 
-                      name="mgr" 
-                      checked={selectedManagerId === mgr.id}
-                      onChange={() => setSelectedManagerId(mgr.id)}
-                      className="text-teal-600"
-                    />
-                    <img src={mgr.avatar} alt={mgr.name} className="w-9 h-9 rounded-full object-cover border" />
-                    <div>
-                      <div className="font-bold text-slate-900">{mgr.name} 매니저 ({mgr.badge})</div>
-                      <span className="text-[10px] text-slate-500">{mgr.region} · 평점 {mgr.rating} ★</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-
+            return (
               <button
-                onClick={handleManagerLogin}
-                className="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white font-extrabold rounded-xl shadow-xs transition mt-2"
+                key={loc.id}
+                type="button"
+                onClick={() => handlePresetLocation(loc)}
+                className={`px-3 py-1.5 rounded-xl border transition cursor-pointer ${
+                  isNear 
+                    ? 'bg-slate-900 text-white border-slate-900 font-black shadow-xs' 
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
               >
-                선택한 매니저로 로그인
+                {loc.name.replace('대전 ', '')}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 2. 메인: 화이트 모드 GPS 지도 캔버스 */}
+      <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-md bg-[#6edfec]/30 text-slate-900 font-black text-[11px]">
+              GPS LIVE RADAR
+            </span>
+            <span className="font-extrabold text-slate-800">
+              현재 내 위치: <strong className="text-slate-900">{myPos.name}</strong>
+            </span>
+          </div>
+
+          <span className="text-slate-500 text-[11px]">
+            지도를 클릭하여 위치를 변경할 수 있습니다 (현재 반경 내 4명 대기 중)
+          </span>
+        </div>
+
+        {/* 화이트 모드 지도 뷰포트 */}
+        <div
+          ref={mapContainerRef}
+          onClick={handleMapClick}
+          className="relative w-full h-[460px] sm:h-[520px] bg-[#f8fafc] rounded-2xl overflow-hidden border border-slate-200 shadow-inner select-none cursor-crosshair"
+        >
+          {/* 화이트 지도 도로망 & 강줄기 SVG 백그라운드 */}
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 500 500">
+            <defs>
+              <pattern id="lightGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#f1f5f9" strokeWidth="1" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#lightGrid)" />
+
+            {/* 갑천 강줄기 (맑은 파스텔 블루) */}
+            <path d="M 120 0 Q 200 180 250 250 T 360 500" fill="none" stroke="#bae6fd" strokeWidth="20" opacity="0.8" strokeLinecap="round" />
+            <path d="M 120 0 Q 200 180 250 250 T 360 500" fill="none" stroke="#7dd3fc" strokeWidth="10" opacity="0.9" strokeLinecap="round" />
+
+            {/* 유등천 지류 */}
+            <path d="M 320 220 Q 340 320 380 500" fill="none" stroke="#bae6fd" strokeWidth="14" opacity="0.7" strokeLinecap="round" />
+
+            {/* 주요 도로망 (화이트 & 연회색 도로선) */}
+            <line x1="0" y1="210" x2="500" y2="230" stroke="#ffffff" strokeWidth="10" />
+            <line x1="0" y1="210" x2="500" y2="230" stroke="#cbd5e1" strokeWidth="2" opacity="0.7" />
+
+            <line x1="140" y1="0" x2="380" y2="500" stroke="#ffffff" strokeWidth="8" />
+            <line x1="140" y1="0" x2="380" y2="500" stroke="#cbd5e1" strokeWidth="2" opacity="0.7" />
+
+            <line x1="0" y1="360" x2="500" y2="340" stroke="#ffffff" strokeWidth="8" />
+            <line x1="0" y1="360" x2="500" y2="340" stroke="#cbd5e1" strokeWidth="2" opacity="0.7" />
+          </svg>
+
+          {/* 지도 지역 라벨 */}
+          <span className="absolute top-[28%] left-[16%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            유성구 (궁동/충남대)
+          </span>
+          <span className="absolute top-[36%] left-[46%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            서구 둔산동 (시청/청사)
+          </span>
+          <span className="absolute top-[68%] left-[60%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            중구 (대흥동/대사동)
+          </span>
+          <span className="absolute top-[76%] left-[14%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            서구 관저동 (건양대)
+          </span>
+
+          {/* 1. 병원 마커들 (보조 핀) */}
+          {hospitals.map(hosp => (
+            <div
+              key={hosp.id}
+              className="absolute z-10 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
+              style={{ left: `${hosp.mapX || 50}%`, top: `${hosp.mapY || 50}%` }}
+            >
+              <div className="w-5 h-5 rounded-md bg-emerald-700 text-white flex items-center justify-center text-[10px] font-black shadow-md border border-emerald-400">
+                H
+              </div>
+              <span className="text-[9px] text-emerald-800 font-extrabold whitespace-nowrap bg-white/95 px-1.5 py-0.5 rounded shadow-xs mt-0.5 border border-emerald-200">
+                {hosp.name}
+              </span>
+            </div>
+          ))}
+
+          {/* 2. 내 현재 위치 핀 (펄싱 레이더 링) */}
+          <div
+            className="absolute z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none transition-all duration-500 ease-out"
+            style={{ left: `${myPos.x}%`, top: `${myPos.y}%` }}
+          >
+            <div className="relative flex items-center justify-center">
+              <span className="w-10 h-10 rounded-full bg-[#6edfec]/40 animate-ping absolute"></span>
+              <span className="w-5 h-5 rounded-full bg-[#0bbecb] text-white flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white">
+                <span className="w-2 h-2 rounded-full bg-white"></span>
+              </span>
+            </div>
+            <span className="text-[10px] font-black text-slate-900 whitespace-nowrap bg-[#6edfec] px-2.5 py-0.5 rounded-full shadow-md mt-1 border border-white">
+              내 위치 ({myPos.name.replace('대전 ', '').split(' ')[0]})
+            </span>
+          </div>
+
+          {/* 3. 대학생 동행자 마커들 (클릭 가능 인터랙티브 핀) */}
+          {visibleManagers.map((mgr) => {
+            const isSelected = activeManager?.id === mgr.id;
+
+            return (
+              <button
+                key={mgr.id}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation(); // 지도 클릭 이벤트 전파 차단
+                  setActiveManager(mgr);
+                }}
+                className={`absolute z-30 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer transition-all duration-300 ${
+                  isSelected ? 'scale-125 z-40' : 'hover:scale-115 opacity-95'
+                }`}
+                style={{ left: `${mgr.posX}%`, top: `${mgr.posY}%` }}
+                title={`${mgr.name} (${mgr.badge}) 클릭하여 세부 프로필 보기`}
+              >
+                {/* 상단 소요 시간 말풍선 배지 */}
+                <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap mb-1 transition-all ${
+                  isSelected 
+                    ? 'bg-[#6edfec] text-slate-900 ring-2 ring-slate-900 font-black scale-105' 
+                    : 'bg-white text-slate-800 border border-slate-300 group-hover:border-[#0bbecb]'
+                }`}>
+                  ⏱️ {mgr.calcEtaText.split(' ')[0]}
+                </span>
+
+                {/* 원형 아바타 (로컬 SVG 적용) */}
+                <div className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full p-0.5 transition-all bg-white ${
+                  isSelected 
+                    ? 'ring-4 ring-[#0bbecb] shadow-xl animate-bounce' 
+                    : 'ring-2 ring-slate-300 shadow-md group-hover:ring-[#0bbecb]'
+                }`}>
+                  <img 
+                    src={mgr.avatar} 
+                    alt={mgr.name} 
+                    className="w-full h-full rounded-full object-cover" 
+                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                  />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border border-white"></span>
+                </div>
+
+                {/* 동행자 이름 */}
+                <span className={`text-[10px] font-bold mt-1 px-2 py-0.5 rounded-md shadow-xs ${
+                  isSelected ? 'bg-slate-900 text-white font-black' : 'text-slate-800 bg-white/95 border border-slate-200'
+                }`}>
+                  {mgr.name} ({mgr.badge.split(' ')[1] || '전공'})
+                </span>
+              </button>
+            );
+          })}
+
+          {/* 4. 프로필을 눌렀을 때만 나타나는 세부사항 오버레이 카드 (드롭다운/슬라이드업) */}
+          {activeManager && (
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-4 right-4 left-4 sm:left-auto sm:w-96 z-50 bg-white rounded-3xl p-5 shadow-2xl border-2 border-[#6edfec] space-y-4 animate-fadeIn"
+            >
+              <div className="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={activeManager.avatar} 
+                    alt={activeManager.name} 
+                    className="w-13 h-13 rounded-2xl object-cover border border-slate-200 shadow-xs" 
+                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="font-extrabold text-base text-slate-900">{activeManager.name}</h4>
+                      <span className="text-[10px] bg-slate-100 text-slate-800 font-extrabold px-2 py-0.5 rounded border border-slate-200">
+                        {activeManager.badge}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">{activeManager.university} {activeManager.major}</p>
+                    <div className="text-[11px] text-amber-500 font-bold">
+                      ★ {activeManager.rating} <span className="text-slate-400 font-normal">({activeManager.reviewCount}회 후기)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 닫기 버튼 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveManager(null)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  title="세부사항 닫기"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* 세부사항 내용 */}
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <span className="text-slate-500">내 위치 기준 도착:</span>
+                  <strong className="text-slate-900 font-black">{activeManager.calcEtaText}</strong>
+                </div>
+
+                <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <span className="text-slate-500">동행 이용 요금:</span>
+                  <div className="text-right">
+                    <strong className="text-slate-900 font-black">
+                      {activeManager.hourlyRate ? activeManager.hourlyRate.toLocaleString() : '18,000'}원/h
+                    </strong>
+                    <span className="text-[10px] text-slate-500 block">
+                      ({activeManager.hourlyRate === 21000 ? '전문 매니저' : '학생 매니저'} · 교통비 별도)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                    <Icons.ShieldCheck className="w-4 h-4 text-[#0bbecb]" />
+                    <span>자격 및 신원 검증</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-5">
+                    {activeManager.certification} · 인정 봉사 {activeManager.volunteerHours}시간
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="font-bold text-slate-800 block">주요 동행 병원:</span>
+                  <p className="text-[11px] text-slate-600 pl-2">
+                    {activeManager.primaryHospitals}
+                  </p>
+                </div>
+
+                <p className="text-[11px] text-slate-600 italic bg-[#6edfec]/10 p-2.5 rounded-xl border border-[#6edfec]/30">
+                  "{activeManager.intro}"
+                </p>
+              </div>
+
+              {/* 예약 CTA */}
+              <button
+                type="button"
+                onClick={() => onSelectManager(activeManager)}
+                className="w-full py-3 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>{activeManager.name} 동행자와 바로 예약하기</span>
               </button>
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
 
-// ========================================================
-// 2. 랜딩 페이지 (HomeView)
-// ========================================================
-function HomeView({ onGoBooking, onGoAI, onGoDashboard, onSelectHospital, onOpenB2B }) {
-  return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-sky-50/70 via-white to-slate-50 pt-16 pb-20 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-7 space-y-5">
-              <div className="inline-flex items-center gap-2 bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-xs font-bold">
-                <Icons.ShieldCheck className="w-4 h-4 text-sky-600" />
-                <span>자격증 100% 검증 전문 매니저 · 배상책임보험 가입</span>
-              </div>
+        {/* 3. 지도 하단: 대기 중인 동행자 프로필 미니 바 (클릭 시 세부사항 열림) */}
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-slate-700">대기 중인 대학생 동행자 목록 (프로필을 누르면 세부사항이 팝업됩니다):</span>
+            <span className="text-[11px] text-slate-400">총 {visibleManagers.length}명 활동 중</span>
+          </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                부모님 병원 가는 날,<br />
-                <span className="text-sky-600">든든한 전문 동행 매니저</span>를 만나보세요
-              </h1>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            {visibleManagers.map((mgr) => {
+              const isSelected = activeManager?.id === mgr.id;
 
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl font-normal">
-                직장 출근과 바쁜 일정으로 직접 동행하지 못하는 자녀의 마음을 대신합니다.<br className="hidden sm:inline" />
-                자택 픽업부터 진료실 동행, 1:1 실시간 소통, 처방약 수령까지 따뜻하고 전문적으로 케어합니다.
-              </p>
-
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button
-                  onClick={onGoBooking}
-                  className="px-6 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-sm shadow-md transition flex items-center gap-2"
+              return (
+                <div
+                  key={mgr.id}
+                  onClick={() => setActiveManager(mgr)}
+                  className={`p-3 rounded-2xl border transition cursor-pointer flex items-center gap-3 ${
+                    isSelected 
+                      ? 'border-[#0bbecb] bg-[#6edfec]/10 ring-2 ring-[#6edfec]' 
+                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                  }`}
                 >
-                  <Icons.Calendar className="w-4 h-4" />
-                  <span>간편 동행 예약하기</span>
-                </button>
-                <button
-                  onClick={onGoAI}
-                  className="px-5 py-3.5 rounded-xl bg-white hover:bg-purple-50 text-purple-700 font-bold text-sm border border-purple-200 shadow-xs transition flex items-center gap-1.5"
-                >
-                  <Icons.Sparkles className="w-4 h-4 text-purple-600" />
-                  <span>AI 증상 병원 찾기</span>
-                </button>
-              </div>
-
-              {/* 신뢰 지표 */}
-              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-200 text-center sm:text-left">
-                <div>
-                  <div className="text-2xl font-black text-slate-900">14,280+</div>
-                  <div className="text-xs text-slate-500">누적 안심 동행</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-teal-600">99.4%</div>
-                  <div className="text-xs text-slate-500">보호자 만족도</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-sky-600">100%</div>
-                  <div className="text-xs text-slate-500">자격증 전수 검증</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 우측 실시간 위치 안내 & 1:1 대화 미니 카드 */}
-            <div className="lg:col-span-5">
-              <div className="bg-white rounded-3xl shadow-lg border border-slate-200 p-6 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>실시간 동행 위치 안내</span>
-                  </span>
-                  <span className="text-[10px] bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded-full">라이브</span>
-                </div>
-
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
-                  <div className="flex justify-between font-bold text-slate-900">
-                    <span>김서연 매니저님이 자택으로 이동 중입니다</span>
-                    <span className="text-teal-600">도착 약 8분 전</span>
+                  <img 
+                    src={mgr.avatar} 
+                    alt={mgr.name} 
+                    className="w-10 h-10 rounded-xl object-cover border border-slate-200" 
+                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                  />
+                  <div className="overflow-hidden">
+                    <div className="font-extrabold text-slate-900 truncate">{mgr.name} ({mgr.badge.split(' ')[1] || '전공'})</div>
+                    <div className="text-[11px] text-[#0bbecb] font-bold">{mgr.calcEtaText.split(' ')[0]}</div>
                   </div>
-                  <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-teal-500 h-full w-3/5 rounded-full"></div>
-                  </div>
-                  <p className="text-[11px] text-slate-500">현재 위치: 마포역 인근 도로 주행 중 (약 1.2km 전방)</p>
                 </div>
-
-                <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/70 text-xs text-slate-800 space-y-1">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-amber-900">
-                    <span>💬 1:1 안심 실시간 대화방</span>
-                    <span>10:05</span>
-                  </div>
-                  <p className="text-[11px] text-slate-700">"보호자님, 어머님 댁 10분 전 도착 예정입니다! 편안하게 준비 부탁드립니다 😊"</p>
-                </div>
-
-                <button
-                  onClick={onGoDashboard}
-                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition flex items-center justify-center gap-1"
-                >
-                  <span>마이페이지에서 실시간 전체 화면 보기</span>
-                  <Icons.ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
-        </div>
-      </section>
-
-      {/* 3대 신뢰 포인트 */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-sky-600 mb-1">TRUST SYSTEM</h2>
-            <h3 className="text-2xl font-extrabold text-slate-900">가족을 믿고 맡길 수 있는 3단계 검증</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold">1</div>
-              <h4 className="font-bold text-slate-900 text-base">국가 자격증 100% 전수 검증</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">간호사, 요양보호사 1급, 사회복지사 등 공인 자격증 및 면허를 공공 시스템으로 전수 확인합니다.</p>
-            </div>
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold">2</div>
-              <h4 className="font-bold text-slate-900 text-base">심층 인성 & 돌봄 면접 통과</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">성범죄 이력 조회는 기본, 위급 상황 대처 능력과 어르신 공감 소통 역량 심층 면접을 실시합니다.</p>
-            </div>
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">3</div>
-              <h4 className="font-bold text-slate-900 text-base">40시간 필수 보건안전 교육</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">낙상 방지 보행 부축, 휠체어 상하차, 응급처치(CPR) 교육을 수료한 매니저만 동행에 투입됩니다.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 후기 */}
-      <section className="py-16 bg-slate-50 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <h3 className="text-2xl font-extrabold text-slate-900">직장인 보호자들의 생생한 안심 후기</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {GUARDIAN_TESTIMONIALS.map((t) => (
-              <div key={t.id} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Icons.Star key={i} className="w-4 h-4" filled={true} />
-                    ))}
-                  </div>
-                  <span className="text-[11px] bg-sky-50 text-sky-700 font-bold px-2 py-0.5 rounded">{t.tag}</span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">"{t.text}"</p>
-                <div className="pt-2 border-t border-slate-100 flex justify-between text-xs text-slate-500">
-                  <span className="font-bold text-slate-800">{t.author} ({t.relation})</span>
-                  <span>{t.hospital}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-// ========================================================
-// 3. AI 병원 찾기 뷰 (AIFinderView)
-// ========================================================
-function AIFinderView({ onSelectHospital }) {
-  const [query, setQuery] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState(null);
-
-  const runAnalysis = (inputQuery) => {
-    const text = inputQuery.trim();
-    if (!text) return;
-
-    setIsAnalyzing(true);
-    setAnalysisResult(null);
-
-    setTimeout(() => {
-      let matched = SYMPTOM_ANALYSIS_PRESETS.find(p => 
-        text.includes('다리') || text.includes('저림') || text.includes('걷기') || text.includes('보행')
-      );
-
-      if (!matched && (text.includes('가슴') || text.includes('숨') || text.includes('심장') || text.includes('답답'))) {
-        matched = SYMPTOM_ANALYSIS_PRESETS[1];
-      } else if (!matched && (text.includes('눈') || text.includes('뿌연') || text.includes('백내장') || text.includes('시야'))) {
-        matched = SYMPTOM_ANALYSIS_PRESETS[2];
-      } else if (!matched && (text.includes('무릎') || text.includes('관절') || text.includes('계단') || text.includes('쑤심'))) {
-        matched = SYMPTOM_ANALYSIS_PRESETS[3];
-      }
-
-      if (!matched) {
-        matched = {
-          department: '가정의학과 / 종합외래',
-          analysisSummary: `'${text}' 증상에 대한 기초 진단 및 원인 감별을 위해 상급 종합병원 전문의 진료를 권장합니다.`,
-          suggestedHospitalIds: ['hosp-1', 'hosp-2', 'hosp-3']
-        };
-      }
-
-      const hospitalList = matched.suggestedHospitalIds 
-        ? matched.suggestedHospitalIds.map(id => RECOMMENDED_HOSPITALS.find(h => h.id === id)).filter(Boolean)
-        : RECOMMENDED_HOSPITALS.slice(0, 3);
-
-      setAnalysisResult({
-        queryText: text,
-        department: matched.department,
-        summary: matched.analysisSummary,
-        hospitals: hospitalList
-      });
-
-      setIsAnalyzing(false);
-    }, 700);
-  };
-
-  return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="text-center max-w-xl mx-auto mb-8">
-        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">AI 자연어 증상 기반 전문 병원 추천</h2>
-        <p className="text-slate-500 text-xs sm:text-sm mt-1">부모님의 증상을 입력하시면 추천 진료과와 제휴 전문 병원을 찾아드립니다.</p>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-6 max-w-2xl mx-auto mb-8 space-y-3">
-        <label className="block text-xs font-bold text-slate-700">증상 자연어 입력 (예: 어머니가 자꾸 다리가 저리고 걷기 힘드셔)</label>
-        <div className="flex gap-2">
-          <input 
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && runAnalysis(query)}
-            placeholder="어머니가 자꾸 다리가 저리고 걷기 힘드셔, 무릎이 시큰거려요..."
-            className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <button
-            onClick={() => runAnalysis(query)}
-            disabled={!query.trim() || isAnalyzing}
-            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition"
-          >
-            {isAnalyzing ? '분석 중...' : 'AI 분석'}
-          </button>
-        </div>
-
-        <div className="pt-2 flex flex-wrap gap-1.5 items-center text-xs">
-          <span className="text-[11px] text-slate-400">빠른 선택:</span>
-          {SYMPTOM_ANALYSIS_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => {
-                setQuery(preset.fullQuery);
-                runAnalysis(preset.fullQuery);
-              }}
-              className="bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 px-2.5 py-1 rounded-lg text-[11px] transition"
-            >
-              {preset.chipText}
-            </button>
-          ))}
         </div>
       </div>
-
-      {analysisResult && (
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="bg-purple-900 text-white rounded-2xl p-6 shadow-md">
-            <span className="bg-purple-400/20 text-purple-300 text-[11px] font-bold px-2 py-0.5 rounded">AI 추천 진료과</span>
-            <h3 className="text-xl font-black mt-1 mb-1">{analysisResult.department}</h3>
-            <p className="text-xs text-purple-100 leading-relaxed">{analysisResult.summary}</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {analysisResult.hospitals.map((hosp) => (
-              <div key={hosp.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="relative h-36 bg-slate-200">
-                    <img src={hosp.image} alt={hosp.name} className="w-full h-full object-cover" />
-                    <span className="absolute bottom-2 right-2 bg-teal-600 text-white text-xs font-bold px-2 py-0.5 rounded shadow">
-                      {hosp.driveTime}
-                    </span>
-                  </div>
-                  <div className="p-4 space-y-1.5 text-xs">
-                    <div className="flex justify-between font-bold text-slate-900 text-sm">
-                      <span>{hosp.name}</span>
-                      <span className="text-amber-500">★ {hosp.rating}</span>
-                    </div>
-                    <p className="text-sky-700 font-semibold">{hosp.department}</p>
-                    <p className="text-slate-500 text-[11px]">{hosp.address} (거리 {hosp.distanceKm})</p>
-                  </div>
-                </div>
-                <div className="p-4 pt-0">
-                  <button
-                    onClick={() => onSelectHospital(hosp.name, hosp.department.split('/')[0].trim())}
-                    className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition"
-                  >
-                    이 병원으로 동행 예약하기
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -971,324 +1224,356 @@ function AIFinderView({ onSelectHospital }) {
 // ========================================================
 // 4. 동행 예약 신청 폼 (BookingView)
 // ========================================================
-function BookingView({ prefill, patientProfile, managers, currentUser, onBookingComplete }) {
-  const [patientName, setPatientName] = useState(patientProfile.name);
-  const [patientBirth, setPatientBirth] = useState(patientProfile.birth);
-  const [patientPhone, setPatientPhone] = useState(patientProfile.phone);
-  const [patientRegion, setPatientRegion] = useState(patientProfile.region);
-
-  const [guardianName, setGuardianName] = useState(currentUser.name || patientProfile.guardianName);
-  const [guardianPhone, setGuardianPhone] = useState(currentUser.phone || patientProfile.guardianPhone);
-
-  const [symptomsDescription, setSymptomsDescription] = useState(patientProfile.symptoms);
-  const [currentMedications, setCurrentMedications] = useState(patientProfile.medications);
-  const [useWheelchair, setUseWheelchair] = useState(patientProfile.useWheelchair);
-  const [mobility, setMobility] = useState('ASSISTED');
-
-  const [messageToDoctor, setMessageToDoctor] = useState('최근 기립 시 어지럼증 증상이 있어 혈압약 용량 점검 부탁드립니다.');
-  const [messageToManager, setMessageToManager] = useState(patientProfile.notes || '귀가 어두우시니 의사 소견을 꼼꼼히 메모해 주세요.');
-
-  const [transportOption, setTransportOption] = useState('TAXI_TRANSIT');
-  const [hospital, setHospital] = useState(prefill.hospital || '신촌 세브란스병원');
-  const [department, setDepartment] = useState(prefill.department || '정형외과 / 관절센터');
-  const [date, setDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().split('T')[0];
+function BookingView({ patientProfile, managers, hospitals, preselectedManager, preselectedHospital, onComplete }) {
+  const [formData, setFormData] = useState({
+    patientName: patientProfile.name || '김순자',
+    patientBirth: patientProfile.birth || '1950-04-12',
+    hospital: preselectedHospital ? preselectedHospital.name : (hospitals[0]?.name || '충남대학교병원'),
+    department: '순환기내과',
+    date: '2026-11-25',
+    time: '10:00',
+    mobility: '거동 불편·부축 필요',
+    pickupAddress: patientProfile.address || '대전광역시 서구 둔산로 123 (크로바Apt)',
+    transportType: 'TAXI',
+    transportLabel: '택시/대중교통 (실비 환자부담)',
+    includePharmacy: true,
+    managerId: preselectedManager ? preselectedManager.id : (managers[0]?.id || 'mgr-1'),
+    messageToDoctor: '최근 아침 혈압 변동 및 기립 시 어지럼증 여부 확인',
+    messageToManager: '계단 보행 시 천천히 부축 부탁드리며 진료실 설명 꼼꼼히 메모 요청합니다.',
+    agreeTerms: true
   });
-  const [time, setTime] = useState('10:30');
-  const [pickupAddress, setPickupAddress] = useState(patientProfile.address);
-  const [serviceDuration, setServiceDuration] = useState('2시간 기본');
-  const [assignedManagerId, setAssignedManagerId] = useState(prefill.managerId || null);
 
-  const [options, setOptions] = useState({
-    pharmacy: true,
-    paymentAssist: true,
-    wheelchairRental: false
-  });
-  const [agreePrivacy, setAgreePrivacy] = useState(true);
+  const selectedManager = useMemo(() => {
+    return managers.find(m => m.id === formData.managerId) || managers[0];
+  }, [managers, formData.managerId]);
 
-  useEffect(() => {
-    if (prefill.hospital) setHospital(prefill.hospital);
-    if (prefill.department) setDepartment(prefill.department);
-    if (prefill.managerId) setAssignedManagerId(prefill.managerId);
-  }, [prefill]);
-
-  const costCalculation = useMemo(() => {
-    let base = 45000;
-    if (serviceDuration === '3시간 심층') base = 65000;
-    if (serviceDuration === '4시간 전일') base = 85000;
-
-    let mobilityCost = mobility === 'ASSISTED' ? 10000 : (mobility === 'WHEELCHAIR' || useWheelchair) ? 20000 : 0;
-    let transportCost = transportOption === 'PERSONAL_CAR' ? 15000 : 0;
-    let optionCost = (options.pharmacy ? 10000 : 0) + (options.wheelchairRental ? 10000 : 0);
-
-    return {
-      base,
-      mobilityCost,
-      transportCost,
-      optionCost,
-      total: base + mobilityCost + transportCost + optionCost
-    };
-  }, [serviceDuration, mobility, useWheelchair, transportOption, options]);
+  const estimatedCost = useMemo(() => {
+    const rate = selectedManager?.hourlyRate || 18000;
+    return rate * 2;
+  }, [selectedManager]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!agreePrivacy) {
-      alert('개인정보 수집 및 제공 동의서에 동의하셔야 예약이 가능합니다.');
+    if (!formData.agreeTerms) {
+      alert('개인정보 및 의료동행 이용약관에 동의해 주세요.');
       return;
     }
 
-    const newRes = window.withCareStore.createReservation({
-      patientName,
-      patientBirth,
-      patientPhone,
-      patientRegion,
-      guardianName,
-      guardianPhone,
-      mobility: useWheelchair ? 'WHEELCHAIR' : mobility,
-      useWheelchair,
-      currentMedications,
-      symptomsDescription,
-      messageToDoctor,
-      messageToManager,
-      transportOption,
-      agreePrivacy,
-      hospital,
-      department,
-      date,
-      time,
-      pickupAddress,
-      options,
-      serviceDuration,
-      cost: costCalculation.total,
-      managerId: assignedManagerId
+    const created = window.withCareStore.createReservation({
+      ...formData,
+      cost: estimatedCost
     });
 
-    onBookingComplete(newRes);
+    onComplete(created);
   };
 
-  const assignedManager = assignedManagerId ? managers.find(m => m.id === assignedManagerId) : null;
-
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-6">
-        <h2 className="text-2xl font-extrabold text-slate-900">병원 안심 동행 예약 신청</h2>
-        <p className="text-slate-500 text-xs sm:text-sm mt-0.5">환자 기본 정보와 이동 수단, 개별 의견란을 작성해 주세요.</p>
-      </div>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
+        <div className="border-b border-slate-100 pb-4">
+          <span className="text-[#0bbecb] text-xs font-extrabold">BOOKING STEP</span>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">병원 동행 간편 예약 신청</h2>
+          <p className="text-xs text-slate-500 mt-1">
+            대전 지역 대학생 동행 매니저가 부모님의 안전한 병원 방문을 1:1로 케어합니다.
+          </p>
+        </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-8 space-y-6">
-          {assignedManager && (
-            <div className="bg-teal-50 border border-teal-200 rounded-2xl p-3.5 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-3">
-                <img src={assignedManager.avatar} alt={assignedManager.name} className="w-10 h-10 rounded-xl object-cover" />
-                <div>
-                  <span className="font-bold text-teal-900">{assignedManager.name} 매니저 지정 예약 중</span>
-                  <p className="text-[11px] text-teal-700">{assignedManager.badge} · 평점 {assignedManager.rating} ★</p>
-                </div>
-              </div>
-              <button type="button" onClick={() => setAssignedManagerId(null)} className="text-slate-500 underline text-[11px]">
-                지정 취소
-              </button>
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="space-y-6 text-xs">
+          {/* 섹션 1. 환자 기본 정보 */}
+          <div className="space-y-3">
+            <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px]">1</span>
+              <span>환자 정보 및 거동 상태</span>
+            </h4>
 
-          {/* 1. 환자 정보 */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3 text-xs">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">1. 환자 및 보호자 정보</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">환자 성함 *</label>
-                <input type="text" value={patientName} onChange={(e) => setPatientName(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2" required />
+                <input
+                  type="text"
+                  value={formData.patientName}
+                  onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium"
+                  required
+                />
               </div>
               <div>
                 <label className="block font-bold text-slate-700 mb-1">생년월일 *</label>
-                <input type="date" value={patientBirth} onChange={(e) => setPatientBirth(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2" required />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">환자 연락처</label>
-                <input type="text" value={patientPhone} onChange={(e) => setPatientPhone(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2" />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">거주 지역 (시/군/구)</label>
-                <input type="text" value={patientRegion} onChange={(e) => setPatientRegion(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2" />
+                <input
+                  type="date"
+                  value={formData.patientBirth}
+                  onChange={(e) => setFormData({ ...formData, patientBirth: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium"
+                  required
+                />
               </div>
             </div>
-          </div>
 
-          {/* 2. 사전 문진 & 개별 의견란 */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3 text-xs">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">2. 사전 문진 및 개별 의견란 (분리 폼)</h3>
             <div>
-              <label className="block font-bold text-slate-700 mb-1">주요 증상 정리 *</label>
-              <textarea rows="2" value={symptomsDescription} onChange={(e) => setSymptomsDescription(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5" required />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">현재 복용 중인 약</label>
-                <input type="text" value={currentMedications} onChange={(e) => setCurrentMedications(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2" />
-              </div>
-              <div className="flex items-end pb-1">
-                <label className="flex items-center gap-2 p-2 border border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer w-full">
-                  <input type="checkbox" checked={useWheelchair} onChange={(e) => { setUseWheelchair(e.target.checked); if (e.target.checked) setMobility('WHEELCHAIR'); }} className="w-4 h-4 text-sky-600 rounded" />
-                  <span className="font-bold text-slate-800 text-[11px]">휠체어 이용 필수 여부 체크</span>
-                </label>
-              </div>
-            </div>
-
-            {/* 개별 의견란 분리 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="bg-sky-50/60 p-3.5 rounded-xl border border-sky-100 space-y-1">
-                <label className="block font-bold text-sky-900 text-[11px]">💬 의사에게 하고 싶은 말 (진료 상담 질문)</label>
-                <textarea rows="2" value={messageToDoctor} onChange={(e) => setMessageToDoctor(e.target.value)} className="w-full bg-white border border-sky-200 rounded-lg p-2 text-[11px]" />
-              </div>
-              <div className="bg-teal-50/60 p-3.5 rounded-xl border border-teal-100 space-y-1">
-                <label className="block font-bold text-teal-900 text-[11px]">🤝 매니저에게 하고 싶은 말 (부축 당부)</label>
-                <textarea rows="2" value={messageToManager} onChange={(e) => setMessageToManager(e.target.value)} className="w-full bg-white border border-teal-200 rounded-lg p-2 text-[11px]" />
+              <label className="block font-bold text-slate-700 mb-1">거동 상태 선택 *</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['혼자 걸음', '거동 불편·부축 필요', '휠체어 이용'].map(opt => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, mobility: opt })}
+                    className={`py-2.5 px-2 rounded-xl font-bold border transition text-center cursor-pointer ${
+                      formData.mobility === opt 
+                        ? 'border-slate-900 bg-slate-900 text-white' 
+                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* 3. 이동 수단 3선택 */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3 text-xs">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">3. 이동 수단 선택</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {TRANSPORT_OPTIONS.map((t) => (
-                <div
-                  key={t.id}
-                  onClick={() => setTransportOption(t.id)}
-                  className={`p-3.5 rounded-xl border-2 cursor-pointer transition ${
-                    transportOption === t.id ? 'border-sky-600 bg-sky-50/70 font-bold' : 'border-slate-200 bg-slate-50'
-                  }`}
+          {/* 섹션 2. 병원 일정 */}
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px]">2</span>
+              <span>방문 병원 및 일정</span>
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">방문 병원 (대전 권역) *</label>
+                <select
+                  value={formData.hospital}
+                  onChange={(e) => setFormData({ ...formData, hospital: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-bold cursor-pointer"
                 >
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[10px] bg-white px-1.5 py-0.2 rounded border">{t.badge}</span>
-                    <span className="text-[11px] text-sky-700">{t.costDesc}</span>
-                  </div>
-                  <div className="font-extrabold text-xs text-slate-900">{t.name}</div>
-                  <p className="text-[10px] text-slate-500 font-normal mt-0.5">{t.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-[11px] text-rose-800">
-              {AMBULANCE_NOTICE}
-            </div>
-          </div>
-
-          {/* 4. 병원 일정 및 픽업 주소 */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3 text-xs">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">4. 병원 일정 및 주소</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">병원명 *</label>
-                <input type="text" value={hospital} onChange={(e) => setHospital(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold" required />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">진료과 *</label>
-                <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold" required />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">방문 날짜 *</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2" required />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">희망 시간 *</label>
-                <select value={time} onChange={(e) => setTime(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2">
-                  {['09:30', '10:00', '10:30', '11:00', '14:00', '14:30', '15:30', '16:00'].map(t => (
-                    <option key={t} value={t}>{t}</option>
+                  {hospitals.map(h => (
+                    <option key={h.id} value={h.name}>{h.name} ({h.region})</option>
                   ))}
                 </select>
               </div>
-              <div className="sm:col-span-2">
-                <label className="block font-bold text-slate-700 mb-1">자택 픽업 상세 주소 *</label>
-                <input type="text" value={pickupAddress} onChange={(e) => setPickupAddress(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2" required />
-              </div>
-            </div>
 
-            <div className="pt-2 border-t border-slate-100">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} className="w-4 h-4 text-sky-600 rounded" required />
-                <span className="font-bold text-slate-800 text-[11px]">[필수] 개인정보 수집 및 배정 매니저 업무 제공 동의</span>
-              </label>
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">진료과 *</label>
+                <select
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-bold cursor-pointer"
+                >
+                  {['순환기내과', '정형외과', '안과', '신경과', '소화기내과', '재활의학과', '이비인후과'].map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">방문 날짜 *</label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">방문 시간 *</label>
+                <input
+                  type="time"
+                  value={formData.time}
+                  onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium"
+                  required
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 우측 실시간 견적 박스 */}
-        <div className="lg:col-span-4 sticky top-20 space-y-4">
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-md space-y-4 text-xs">
-            <h3 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-2 flex justify-between">
-              <span>실시간 예상 견적</span>
-              <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded">정찰제</span>
-            </h3>
+          {/* 섹션 3. 동행 옵션 & 픽업 주소 */}
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px]">3</span>
+              <span>자택 픽업 주소 & 이동 수단</span>
+            </h4>
 
-            <div className="space-y-2 text-slate-600">
-              <div className="flex justify-between">
-                <span>기본 동행 ({serviceDuration})</span>
-                <span className="font-bold text-slate-900">{costCalculation.base.toLocaleString()}원</span>
-              </div>
-              {costCalculation.mobilityCost > 0 && (
-                <div className="flex justify-between">
-                  <span>거동 지원 ({useWheelchair ? '휠체어' : '부축'})</span>
-                  <span className="font-bold text-slate-900">+{costCalculation.mobilityCost.toLocaleString()}원</span>
-                </div>
-              )}
-              {costCalculation.transportCost > 0 && (
-                <div className="flex justify-between">
-                  <span>매니저 자차 유류비</span>
-                  <span className="font-bold text-slate-900">+{costCalculation.transportCost.toLocaleString()}원</span>
-                </div>
-              )}
-              {costCalculation.optionCost > 0 && (
-                <div className="flex justify-between">
-                  <span>약국 수령 대행</span>
-                  <span className="font-bold text-slate-900">+{costCalculation.optionCost.toLocaleString()}원</span>
-                </div>
-              )}
-              <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                <span className="font-bold text-slate-900">최종 금액</span>
-                <span className="text-xl font-black text-sky-600">{costCalculation.total.toLocaleString()}원</span>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">자택 픽업지 주소 *</label>
+              <input
+                type="text"
+                value={formData.pickupAddress}
+                onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">이동 수단 선택 * (※ 구급차 지원 제외)</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, transportType: 'TAXI', transportLabel: '택시/대중교통 (실비 환자부담)' })}
+                  className={`p-3 rounded-xl border text-left font-bold cursor-pointer ${
+                    formData.transportType === 'TAXI' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-slate-50 text-slate-700'
+                  }`}
+                >
+                  <div>택시 / 대중교통</div>
+                  <div className="text-[10px] opacity-75">교통비 별도 (실비 환자 부담)</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, transportType: 'OWN_CAR', transportLabel: '보호자 자차 / 도보 동행' })}
+                  className={`p-3 rounded-xl border text-left font-bold cursor-pointer ${
+                    formData.transportType === 'OWN_CAR' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-slate-50 text-slate-700'
+                  }`}
+                >
+                  <div>도보 / 보호자 자차</div>
+                  <div className="text-[10px] opacity-75">별도 교통비 없음 (0원)</div>
+                </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-sm shadow-md transition"
-            >
-              동행 예약 신청 완료
-            </button>
+            <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.includePharmacy}
+                onChange={(e) => setFormData({ ...formData, includePharmacy: e.target.checked })}
+                className="w-4 h-4 rounded text-slate-900"
+              />
+              <span className="font-bold text-slate-800">진료 후 원외 약국 처방약 수령 및 복약 지도 동행 포함</span>
+            </label>
           </div>
-        </div>
-      </form>
+
+          {/* 섹션 4. 배정 희망 동행 매니저 선택 */}
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px]">4</span>
+                <span>배정 희망 동행 매니저 선택</span>
+              </h4>
+              <span className="text-[11px] font-bold text-sky-800 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-200 w-fit">
+                전문 매니저 21,000원/h · 학생 매니저 18,000원/h (교통비 별도)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {managers.map(mgr => (
+                <div
+                  key={mgr.id}
+                  onClick={() => setFormData({ ...formData, managerId: mgr.id })}
+                  className={`p-3.5 rounded-2xl border flex items-center justify-between cursor-pointer transition ${
+                    formData.managerId === mgr.id 
+                      ? 'border-[#0bbecb] bg-[#6edfec]/10 ring-2 ring-[#6edfec]' 
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={mgr.avatar} 
+                      alt={mgr.name} 
+                      className="w-10 h-10 rounded-xl object-cover" 
+                      onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                    />
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-slate-900">{mgr.name}</span>
+                        <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                          mgr.hourlyRate === 21000 
+                            ? 'bg-slate-900 text-white' 
+                            : 'bg-[#6edfec]/30 text-slate-900'
+                        }`}>
+                          {mgr.hourlyRate === 21000 ? '전문 매니저' : '학생 매니저'}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">{mgr.badge} · 평점 {mgr.rating} ★</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-black text-slate-900 block">
+                      {mgr.hourlyRate.toLocaleString()}원/h
+                    </span>
+                    <span className="text-[10px] text-slate-400">교통비 별도</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 섹션 5. 전달사항 및 사전 문진 */}
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px]">5</span>
+              <span>사전 문진 및 전달 메모</span>
+            </h4>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">의사 선생님께 하고 싶은 말 (진료 메모)</label>
+              <textarea
+                rows="2"
+                value={formData.messageToDoctor}
+                onChange={(e) => setFormData({ ...formData, messageToDoctor: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">동행 매니저에게 하고 싶은 말 (부축 유의점 등)</label>
+              <textarea
+                rows="2"
+                value={formData.messageToManager}
+                onChange={(e) => setFormData({ ...formData, messageToManager: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium"
+              />
+            </div>
+          </div>
+
+          {/* 견적 박스 & 약관 동의 */}
+          <div className="bg-slate-900 text-white p-5 rounded-2xl space-y-3">
+            <div className="flex justify-between items-center text-sm font-bold border-b border-slate-800 pb-3">
+              <div>
+                <div>기본 2시간 동행 예상 견적</div>
+                <div className="text-[11px] text-slate-400 font-normal mt-0.5">
+                  {selectedManager?.name} ({selectedManager?.hourlyRate === 21000 ? '전문 매니저 21,000원' : '학생 매니저 18,000원'}/h 기준)
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[#6edfec] text-lg font-black">{estimatedCost.toLocaleString()}원</span>
+                <span className="text-[10px] text-slate-400 block font-normal">교통비 별도</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-slate-400 leading-relaxed">
+              * 기본 2시간 기준 금액이며, 이동 교통비(택시·대중교통)는 환자 부담 실비로 별도 처리됩니다. (구급차 미지원)
+            </div>
+
+            <label className="flex items-center gap-2 pt-1 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.agreeTerms}
+                onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
+                className="w-4 h-4 rounded text-[#6edfec]"
+              />
+              <span className="text-slate-200 font-bold">[필수] 병원 동행 서비스 이용약관 및 개인정보 활용에 동의합니다.</span>
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-4 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-black text-sm rounded-2xl shadow-md transition cursor-pointer"
+          >
+            동행 예약 신청 완료하기
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
 
 // ========================================================
-// 5. 마이페이지 라우터 (환자 마이페이지 vs 매니저 마이페이지)
-// ========================================================
-function DashboardRouter(props) {
-  const { currentUser } = props;
-
-  if (currentUser.role === 'MANAGER') {
-    return <ManagerMyPageView {...props} />;
-  }
-  return <PatientMyPageView {...props} />;
-}
-
-// ========================================================
 // 5-0. 실시간 5단계 동행 프로세스 트래커 컴포넌트
-// (원형 스텝퍼 + 각 단계 넘어갈 때마다 세부 설명 + 실시간 위치 표기)
 // ========================================================
 function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton = true }) {
   const currentStep = reservation.step || 1;
-  // 유저가 원형 스텝을 클릭하여 해당 단계의 세부 설명을 자유롭게 열람할 수 있도록 상태 관리
   const [selectedStep, setSelectedStep] = useState(currentStep);
 
-  // 예약의 실제 step이 변경되면(예: 매니저가 단계 전진 또는 시연 버튼 클릭) 선택 스텝도 최신으로 자동 동기화
   useEffect(() => {
     setSelectedStep(currentStep);
   }, [currentStep]);
@@ -1298,12 +1583,11 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
 
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4">
-      {/* 1. 상단 타이틀 및 현재 진행 단계 배지 */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
         <div className="flex items-center gap-2">
           <div className="relative flex items-center justify-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-ping absolute"></span>
-            <span className="w-2 h-2 rounded-full bg-teal-600"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0bbecb] animate-ping absolute"></span>
+            <span className="w-2 h-2 rounded-full bg-[#0bbecb]"></span>
           </div>
           <span className="font-extrabold text-slate-900 text-sm">⏱️ 실시간 5단계 동행 프로세스 트래커</span>
         </div>
@@ -1315,17 +1599,14 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
         </div>
       </div>
 
-      {/* 2. 5단계 원형 스텝퍼 바 (사용자 선호 프로세스 형식 복원) */}
       <div className="relative pt-2 pb-1 px-4 sm:px-10">
-        {/* 가로 진행 게이지 선 */}
         <div className="absolute top-7 left-10 right-10 sm:left-16 sm:right-16 h-1 bg-slate-200 z-0">
           <div 
-            className="h-full bg-teal-600 transition-all duration-500 ease-out"
+            className="h-full bg-slate-900 transition-all duration-500 ease-out"
             style={{ width: `${((Math.max(1, currentStep) - 1) / 4) * 100}%` }}
           ></div>
         </div>
 
-        {/* 5개 원형 단계 */}
         <div className="relative z-10 flex justify-between items-start">
           {TRACKING_STEPS_META.map((stepMeta) => {
             const isDone = currentStep > stepMeta.step;
@@ -1340,31 +1621,24 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
                 title={`클릭하여 ${stepMeta.step}단계 [${stepMeta.name}] 세부 설명 보기`}
                 className="group flex flex-col items-center focus:outline-hidden cursor-pointer"
               >
-                {/* 원형 아이콘 */}
                 <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all duration-300 ${
                   isDone
                     ? 'bg-emerald-600 text-white shadow-xs group-hover:scale-105'
                     : isCurrent
-                      ? 'bg-teal-600 text-white ring-4 ring-teal-200 shadow-md scale-110 font-extrabold animate-pulse'
+                      ? 'bg-slate-900 text-white ring-4 ring-[#6edfec] shadow-md scale-110 font-extrabold animate-pulse'
                       : 'bg-white text-slate-400 border-2 border-slate-300 group-hover:border-slate-400'
                 } ${isSelected && !isCurrent ? 'ring-2 ring-slate-400' : ''}`}>
-                  {isDone ? '✔' : stepMeta.step}
+                  {isDone ? '완료' : stepMeta.step}
                 </div>
 
-                {/* 단계명 */}
                 <span className={`mt-2 text-[11px] sm:text-xs font-bold text-center whitespace-nowrap transition-colors ${
-                  isCurrent 
-                    ? 'text-teal-900 font-extrabold' 
-                    : isDone 
-                      ? 'text-emerald-700' 
-                      : 'text-slate-400'
+                  isCurrent ? 'text-slate-900 font-extrabold' : isDone ? 'text-emerald-700' : 'text-slate-400'
                 }`}>
                   {stepMeta.name}
                 </span>
 
-                {/* 현재 진행 마커 */}
                 {isCurrent && (
-                  <span className="text-[10px] text-teal-700 font-extrabold bg-teal-50 px-1.5 py-0.5 rounded mt-0.5 border border-teal-200">
+                  <span className="text-[10px] text-slate-900 font-extrabold bg-[#6edfec] px-1.5 py-0.5 rounded mt-0.5">
                     진행 중
                   </span>
                 )}
@@ -1374,13 +1648,11 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
         </div>
       </div>
 
-      {/* 3. 단계별 세부 설명 박스 & 실시간 위치 표기 */}
-      <div className="bg-white rounded-2xl border border-teal-200 p-4 sm:p-5 shadow-xs space-y-3">
-        {/* 상단 브리핑 헤더 */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div className="flex items-center gap-2">
             <span className={`px-2.5 py-0.5 rounded-md font-extrabold text-xs ${
-              selectedStep === currentStep ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-700'
+              selectedStep === currentStep ? 'bg-[#6edfec]/30 text-slate-900' : 'bg-slate-100 text-slate-700'
             }`}>
               {selectedStep}단계 {selectedStep === currentStep ? '실시간 브리핑' : '단계 안내'}
             </span>
@@ -1389,16 +1661,14 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
             </h5>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-teal-700 font-bold bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-100 w-fit">
-            <Icons.Clock className="w-3.5 h-3.5 text-teal-600" />
+          <div className="flex items-center gap-1.5 text-xs text-slate-800 font-bold bg-slate-100 px-2.5 py-1 rounded-lg w-fit">
+            <Icons.Clock className="w-3.5 h-3.5 text-slate-600" />
             <span>상태 안내: {activeMeta.eta}</span>
           </div>
         </div>
 
-        {/* 단계 넘어갈 때마다 붙는 세부 설명 */}
-        <div className="bg-slate-50/90 rounded-xl p-3.5 border border-slate-200 text-xs leading-relaxed space-y-1">
+        <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs leading-relaxed space-y-1">
           <div className="flex items-center gap-1.5 font-bold text-slate-800">
-            <span className="text-teal-600">📋</span>
             <span>단계별 동행 세부 프로세스 설명</span>
             {selectedStep !== currentStep && (
               <span className="text-[10px] text-slate-400 font-normal">
@@ -1406,36 +1676,34 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
               </span>
             )}
           </div>
-          <p className="text-slate-700 pl-5 text-[12px] font-medium leading-normal">
+          <p className="text-slate-700 pl-1 text-[12px] font-medium leading-normal">
             {activeMeta.stepDetail}
           </p>
         </div>
 
-        {/* 실시간 위치 표기 (그대로 유지) */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-sky-50/80 p-3 rounded-xl border border-sky-100">
-          <Icons.MapPin className="w-4 h-4 text-sky-600 shrink-0" />
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-sky-50/70 p-3 rounded-xl border border-sky-100">
+          <Icons.MapPin className="w-4 h-4 text-[#0bbecb] shrink-0" />
           <span className="text-slate-500 shrink-0">실시간 위치 안내:</span>
           <span className="text-slate-900 font-bold">{activeMeta.locationText}</span>
         </div>
 
-        {/* 발표 시연 편의 버튼 */}
         <div className="flex flex-wrap items-center justify-between pt-1 gap-2 border-t border-slate-100 text-xs">
           <span className="text-[11px] text-slate-400">
-            💡 발표 시연 시 다음 단계 버튼을 클릭하면 세부 설명과 위치가 실시간으로 갱신됩니다.
+            발표 시연 시 다음 단계 버튼을 클릭하면 세부 설명과 위치가 실시간으로 갱신됩니다.
           </span>
           <div className="flex gap-2">
             {currentStep < 5 && showAdvanceButton && onAdvanceStep && (
               <button
                 type="button"
                 onClick={() => onAdvanceStep(reservation.id, currentStep)}
-                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-extrabold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer"
+                className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer"
               >
-                <span>다음 단계로 진행 시연 (➜ {currentStep + 1}단계)</span>
+                <span>다음 단계 진행 ({currentStep + 1}단계)</span>
               </button>
             )}
             {currentStep >= 5 && (
               <span className="text-emerald-700 font-extrabold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                🎉 모든 동행 프로세스가 안전하게 완료되었습니다!
+                모든 동행 프로세스가 안전하게 완료되었습니다.
               </span>
             )}
           </div>
@@ -1446,13 +1714,10 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
 }
 
 // ========================================================
-// 5-A. 환자 마이페이지 (환자 정보 입력/조회 + AI 매니저 추천 축소 내장)
+// 5-A. 이용자 마이페이지 (UserMyPageView)
 // ========================================================
-function PatientMyPageView({ currentUser, patientProfile, reservations, managers, onOpenReport, onOpenChat, onSelectManagerFromAI, onGoBooking, showToast }) {
-  // 마이페이지 서브탭: 'reservations' | 'profile' | 'aiManagers'
+function UserMyPageView({ currentUser, patientProfile, reservations, managers, onOpenReport, onOpenChat, onSelectManagerFromAI, onGoBooking, showToast }) {
   const [subTab, setSubTab] = useState('reservations');
-
-  // 환자 정보 수정 폼 상태
   const [profileForm, setProfileForm] = useState({ ...patientProfile });
 
   const handleProfileSave = (e) => {
@@ -1461,50 +1726,50 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
     showToast('환자 기본 정보가 성공적으로 저장되었습니다! 다음 예약에 자동 반영됩니다.', 'success');
   };
 
-  // AI 추천 매니저 (축소형 2인)
   const aiManagers = useMemo(() => managers.filter(m => m.isAiPick), [managers]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* 마이페이지 상단 프로필 헤더 */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-lg">
-            👤
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-[#6edfec]/20 text-slate-900 flex items-center justify-center font-bold text-xs border border-[#6edfec]/40">
+            환자
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-extrabold text-slate-900">{patientProfile.name} 어르신 (환자 마이페이지)</h2>
-              <span className="text-xs bg-sky-100 text-sky-800 font-bold px-2.5 py-0.5 rounded-full">
+              <h2 className="text-xl font-extrabold text-slate-900">{patientProfile.name} 어르신 (이용자 마이페이지)</h2>
+              <span className="text-xs bg-slate-100 text-slate-800 font-bold px-2.5 py-0.5 rounded-full border border-slate-200">
                 보호자: {currentUser.name}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">거주지: {patientProfile.address} · 주요 증상: {patientProfile.symptoms}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              거주지: {patientProfile.address} · 주요 증상: {patientProfile.symptoms}
+            </p>
           </div>
         </div>
+
         <button
           onClick={onGoBooking}
-          className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+          className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
         >
           새 동행 예약하기
         </button>
       </div>
 
-      {/* 마이페이지 서브탭 (3개 탭) */}
-      <div className="flex border-b border-slate-200 gap-3 mb-6 text-xs font-bold">
+      <div className="flex border-b border-slate-200 gap-3 text-xs font-bold">
         <button
           onClick={() => setSubTab('reservations')}
           className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 cursor-pointer ${
-            subTab === 'reservations' ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+            subTab === 'reservations' ? 'border-slate-900 text-slate-900 font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           <Icons.Calendar className="w-4 h-4" />
-          <span>내 동행 예약 & 실시간 위치 트래커 ({reservations.length})</span>
+          <span>내 동행 예약 & 실시간 5단계 트래커 ({reservations.length})</span>
         </button>
         <button
           onClick={() => setSubTab('profile')}
           className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 cursor-pointer ${
-            subTab === 'profile' ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+            subTab === 'profile' ? 'border-slate-900 text-slate-900 font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           <Icons.User className="w-4 h-4" />
@@ -1513,15 +1778,14 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
         <button
           onClick={() => setSubTab('aiManagers')}
           className={`pb-3 px-1 transition border-b-2 flex items-center gap-1.5 cursor-pointer ${
-            subTab === 'aiManagers' ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+            subTab === 'aiManagers' ? 'border-slate-900 text-slate-900 font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           <Icons.Sparkles className="w-4 h-4 text-purple-600" />
-          <span>내 조건 맞춤 AI 추천 매니저</span>
+          <span>내 조건 맞춤 AI 추천 동행자</span>
         </button>
       </div>
 
-      {/* 서브탭 1: 내 예약 및 실시간 위치 트래커 */}
       {subTab === 'reservations' && (
         <div className="space-y-6">
           {reservations.map((item) => {
@@ -1530,7 +1794,6 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
 
             return (
               <div key={item.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5">
-                {/* 1. 예약 카드 헤더 */}
                 <div className="flex flex-wrap justify-between items-center gap-2 border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2">
                     <span className="font-extrabold text-base text-slate-900">{item.id}</span>
@@ -1540,11 +1803,10 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
                     item.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
                     item.status === 'REQUESTED' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
                   }`}>
-                    {item.status === 'REQUESTED' ? '예약 대기중' : item.status === 'COMPLETED' ? '동행 완료' : `실시간 동행 진행 중 (${trackingMeta.name})`}
+                    {item.status === 'REQUESTED' ? '동행자 매칭 중' : item.status === 'COMPLETED' ? '동행 완료' : `실시간 동행 진행 중 (${trackingMeta.name})`}
                   </span>
                 </div>
 
-                {/* 2. 4열 핵심 정보 그리드 (이전 카드 복원) */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl text-xs border border-slate-100">
                   <div>
                     <span className="text-slate-400 block text-[11px]">환자 및 거동 상태</span>
@@ -1560,43 +1822,47 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[11px]">자택 픽업지 & 견적</span>
-                    <strong className="text-sky-700">{item.cost.toLocaleString()}원 ({item.transportLabel})</strong>
+                    <strong className="text-slate-900">{item.cost.toLocaleString()}원 ({item.transportLabel})</strong>
                   </div>
                 </div>
 
-                {/* 3. 복원된 5단계 원형 프로세스 트래커 (단계별 세부 설명 + 실시간 위치 표기) */}
                 <RealtimeProcessTracker 
                   reservation={item}
                   onAdvanceStep={(resId, currentStep) => {
                     const next = currentStep >= 5 ? 5 : currentStep + 1;
                     window.withCareStore.updateStep(resId, next);
                     const nextMeta = TRACKING_STEPS_META.find(m => m.step === next);
-                    showToast(`위치 상태를 [${nextMeta.statusTitle}] 단계로 갱신했습니다.`, 'success');
+                    showToast(`동행 상태를 [${nextMeta.statusTitle}] 단계로 전진했습니다.`, 'success');
                   }}
                   showAdvanceButton={true}
                 />
 
-                {/* 4. 배정된 매니저 카드 & 1:1 대화방 / 안심 리포트 버튼 */}
                 {manager && (
                   <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
-                    <div className="flex items-center gap-3">
-                      <img src={manager.avatar} alt={manager.name} className="w-12 h-12 rounded-xl object-cover border border-slate-100" />
+                    <div className="flex items-center gap-3.5">
+                      <img 
+                        src={manager.avatar} 
+                        alt={manager.name} 
+                        className="w-12 h-12 rounded-xl object-cover border border-slate-100" 
+                        onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                      />
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 text-sm">{manager.name} 매니저</span>
-                          <span className="text-[10px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded font-extrabold border border-teal-200">
-                            {manager.badge}
+                          <span className="font-bold text-slate-900 text-sm">{manager.name} 동행자</span>
+                          <span className="text-[10px] bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-extrabold border border-slate-200">
+                            {manager.badge} ({manager.major})
                           </span>
                         </div>
-                        <div className="text-slate-500 text-[11px] mt-0.5">평점 {manager.rating} ★ · 연락처: {manager.phone}</div>
+                        <div className="text-slate-500 text-[11px] mt-0.5">평점 {manager.rating} ★ · 봉사 {manager.volunteerHours}시간 누적</div>
                         <p className="text-slate-600 text-[11px] mt-1 line-clamp-1">"{manager.intro}"</p>
                       </div>
                     </div>
+
                     <div className="flex gap-2 w-full sm:w-auto">
                       <button
                         type="button"
                         onClick={() => onOpenChat(item.id)}
-                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Icons.MessageSquare className="w-4 h-4" />
                         <span>1:1 안심 대화방</span>
@@ -1605,7 +1871,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
                         <button
                           type="button"
                           onClick={() => onOpenReport(item.id)}
-                          className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                          className="flex-1 sm:flex-initial px-4 py-2.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                         >
                           <Icons.ClipboardCheck className="w-4 h-4" />
                           <span>안심 리포트 보기</span>
@@ -1620,12 +1886,11 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
         </div>
       )}
 
-      {/* 서브탭 2: 환자 기본 정보 관리 (조회 및 수정 폼) */}
       {subTab === 'profile' && (
         <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs max-w-2xl mx-auto text-xs space-y-4">
           <div className="border-b border-slate-100 pb-3">
-            <h3 className="font-extrabold text-base text-slate-900">환자 기본 인적사항 및 건강 정보 관리</h3>
-            <p className="text-slate-500 text-[11px] mt-0.5">이곳에 저장된 정보는 새로운 동행 예약 시 자동으로 적용됩니다.</p>
+            <h3 className="font-extrabold text-base text-slate-900">환자 기본 인적사항 및 건강 정보</h3>
+            <p className="text-slate-500 text-[11px] mt-0.5">저장된 정보는 새로운 동행 예약 시 자동 반영됩니다.</p>
           </div>
 
           <form onSubmit={handleProfileSave} className="space-y-3.5">
@@ -1660,7 +1925,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
                 />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 mb-1">거주 지역 (구 단위)</label>
+                <label className="block font-bold text-slate-700 mb-1">거주 지역 (대전 구 단위)</label>
                 <input 
                   type="text" 
                   value={profileForm.region} 
@@ -1691,7 +1956,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1">정기 복용 약 (혈압약 등)</label>
+              <label className="block font-bold text-slate-700 mb-1">정기 복용 약</label>
               <input 
                 type="text" 
                 value={profileForm.medications} 
@@ -1701,7 +1966,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1">매니저 전달 기본 메모</label>
+              <label className="block font-bold text-slate-700 mb-1">동행자 전달 기본 메모</label>
               <textarea 
                 rows="2"
                 value={profileForm.notes} 
@@ -1712,7 +1977,7 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
 
             <button
               type="submit"
-              className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl shadow-xs transition mt-2 cursor-pointer"
+              className="w-full py-3 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl shadow-xs transition mt-2 cursor-pointer"
             >
               환자 정보 저장하기
             </button>
@@ -1720,15 +1985,14 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
         </div>
       )}
 
-      {/* 서브탭 3: 마이페이지 내장 AI 매니저 추천 (기능 축소) */}
       {subTab === 'aiManagers' && (
         <div className="space-y-4">
           <div className="bg-slate-900 text-white p-5 rounded-2xl flex items-center justify-between text-xs">
             <div>
-              <span className="bg-teal-400 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded">AI MATCHING</span>
-              <h4 className="text-base font-bold text-white mt-1">{patientProfile.name} 어르신의 증상에 최적화된 추천 매니저</h4>
+              <span className="bg-[#6edfec] text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded">AI MATCHING</span>
+              <h4 className="text-base font-bold text-white mt-1">{patientProfile.name} 어르신의 증상에 최적화된 추천 대학생</h4>
             </div>
-            <span className="text-slate-400 text-[11px] hidden sm:inline">인재검증 완료</span>
+            <span className="text-slate-400 text-[11px] hidden sm:inline">재학 및 CPR 인증 완료</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -1736,10 +2000,15 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
               <div key={mgr.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3 flex flex-col justify-between">
                 <div>
                   <div className="flex gap-3 items-center">
-                    <img src={mgr.avatar} alt={mgr.name} className="w-12 h-12 rounded-xl object-cover" />
+                    <img 
+                      src={mgr.avatar} 
+                      alt={mgr.name} 
+                      className="w-12 h-12 rounded-xl object-cover" 
+                      onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                    />
                     <div>
-                      <div className="font-bold text-slate-900 text-sm">{mgr.name} 매니저 ({mgr.badge})</div>
-                      <p className="text-[11px] text-teal-700 font-semibold">{mgr.aiPickReason}</p>
+                      <div className="font-bold text-slate-900 text-sm">{mgr.name} ({mgr.badge})</div>
+                      <p className="text-[11px] text-[#0bbecb] font-semibold">{mgr.aiPickReason}</p>
                       <span className="text-amber-500 text-[11px]">★ {mgr.rating} (후기 {mgr.reviewCount}회)</span>
                     </div>
                   </div>
@@ -1748,9 +2017,9 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
                 <button
                   type="button"
                   onClick={() => onSelectManagerFromAI(mgr)}
-                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition cursor-pointer"
+                  className="w-full py-2.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition cursor-pointer"
                 >
-                  이 매니저로 동행 예약하기
+                  이 동행자로 예약하기
                 </button>
               </div>
             ))}
@@ -1762,222 +2031,327 @@ function PatientMyPageView({ currentUser, patientProfile, reservations, managers
 }
 
 // ========================================================
-// 5-B. 매니저 마이페이지 (업무 관리 & 위치 단계 전진)
+// 5-B. 동행자 마이페이지 (CompanionMyPageView)
 // ========================================================
-function ManagerMyPageView({ currentUser, reservations, onOpenManagerReport, onOpenChat, showToast }) {
-  const handleAccept = (resId) => {
-    window.withCareStore.acceptReservation(resId, currentUser.managerId || 'mgr-1');
-    showToast('예약을 수락하였습니다! 1:1 대화방이 활성화되었습니다.', 'success');
-  };
-
+function CompanionMyPageView({ currentUser, reservations, urgentRequests, majorInsights, onOpenManagerReport, onOpenChat, onOpenCertModal, onAcceptUrgent, showToast }) {
   const handleAdvanceStep = (resId, currentStep) => {
     const next = currentStep >= 5 ? 5 : currentStep + 1;
     window.withCareStore.updateStep(resId, next);
     const meta = TRACKING_STEPS_META.find(m => m.step === next);
-    showToast(`위치 상태를 [${meta.statusTitle}] 단계로 갱신했습니다.`, 'success');
+    showToast(`동행 위치 상태를 [${meta.statusTitle}] 단계로 갱신했습니다.`, 'success');
   };
 
+  const currentVolunteerHours = currentUser.volunteerHours || 38;
+
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="bg-teal-900 text-white rounded-3xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-teal-800 text-white flex items-center justify-center font-bold text-xl">
-            🩺
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#6edfec] text-slate-900 flex items-center justify-center font-black text-sm">
+            동행자
           </div>
           <div>
-            <h2 className="text-xl font-extrabold">{currentUser.name}의 업무 마이페이지</h2>
-            <p className="text-teal-300 text-xs mt-0.5">{currentUser.badge} · 인재검증 시스템 통과 매니저</p>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black">{currentUser.name} 동행자님의 마이페이지</h2>
+              <span className="bg-[#6edfec]/20 text-[#6edfec] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#6edfec]/30">
+                {currentUser.badge || '충남대 간호학과'}
+              </span>
+            </div>
+            <p className="text-slate-400 text-xs mt-1">
+              대전광역시 거점 대학병원 전문 병원 동행 활동 중
+            </p>
           </div>
         </div>
-        <span className="text-xs bg-white/10 px-3 py-1.5 rounded-xl border border-white/15">
-          실시간 배정 대기 건 관리
-        </span>
-      </div>
 
-      <div className="space-y-6">
-        {reservations.map((item) => {
-          const isRequested = item.status === 'REQUESTED';
-
-          return (
-            <div key={item.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4 text-xs">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                <span className="font-extrabold text-slate-900 text-base">{item.id} · {item.patientName} 어르신 ({item.hospital})</span>
-                <span className={`px-3 py-1 rounded-full font-bold ${isRequested ? 'bg-amber-100 text-amber-800' : 'bg-teal-100 text-teal-800'}`}>
-                  {isRequested ? '신규 동행 요청' : '진행 업무'}
-                </span>
-              </div>
-
-              {/* 4열 업무 요약 정보 */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
-                <div>일시: <strong className="text-slate-900 block mt-0.5">{item.date} {item.time}</strong></div>
-                <div>진료과: <strong className="text-slate-900 block mt-0.5">{item.department}</strong></div>
-                <div>이동수단: <strong className="text-slate-900 block mt-0.5">{item.transportLabel}</strong></div>
-                <div>정산 예정액: <strong className="text-teal-700 block mt-0.5">{item.cost.toLocaleString()}원</strong></div>
-              </div>
-
-              <div className="bg-slate-50 p-3 rounded-xl text-slate-700 border border-slate-100">
-                <span className="font-bold text-slate-900">보호자 전달사항:</span> {item.messageToManager}
-              </div>
-
-              {/* 진행 중 업무일 경우 5단계 프로세스 트래커 & 단계별 설명 박스 노출 */}
-              {!isRequested && (
-                <RealtimeProcessTracker 
-                  reservation={item}
-                  onAdvanceStep={handleAdvanceStep}
-                  showAdvanceButton={true}
-                />
-              )}
-
-              {/* 매니저 액션 툴바 */}
-              <div className="pt-2 border-t border-slate-100 flex flex-wrap justify-between items-center gap-2">
-                <div className="flex gap-2">
-                  {isRequested && (
-                    <button
-                      type="button"
-                      onClick={() => handleAccept(item.id)}
-                      className="px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
-                    >
-                      이 예약 즉시 수락하기
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onOpenChat(item.id)}
-                    className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-                  >
-                    <Icons.MessageSquare className="w-4 h-4" />
-                    <span>보호자 1:1 대화</span>
-                  </button>
-                  {item.step >= 4 && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenManagerReport(item.id)}
-                      className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition shadow-xs cursor-pointer"
-                    >
-                      진료 리포트 작성/확인
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-
-// ========================================================
-// 6. 1:1 실시간 대화방 모달 (ChatModal)
-// ========================================================
-function ChatModal({ reservationId, currentUser, onClose, showToast }) {
-  const [messages, setMessages] = useState(() => window.withCareStore.getChatHistory(reservationId));
-  const [inputText, setInputText] = useState('');
-  const chatBottomRef = useRef(null);
-
-  const reservation = window.withCareStore.getReservationById(reservationId);
-  const manager = reservation && reservation.managerId 
-    ? window.withCareStore.getManagerById(reservation.managerId) 
-    : DEFAULT_MANAGERS[0];
-
-  useEffect(() => {
-    const unsubscribe = window.withCareStore.subscribe(() => {
-      setMessages([...window.withCareStore.getChatHistory(reservationId)]);
-    });
-    return () => unsubscribe();
-  }, [reservationId]);
-
-  useEffect(() => {
-    if (chatBottomRef.current) {
-      chatBottomRef.current.scrollTop = chatBottomRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const handleSend = (textToSend) => {
-    const text = textToSend || inputText;
-    if (!text || !text.trim()) return;
-
-    const senderRole = currentUser.role === 'MANAGER' ? 'MANAGER' : 'GUARDIAN';
-    const senderName = currentUser.name || (senderRole === 'GUARDIAN' ? '보호자' : `${manager.name} 매니저`);
-
-    window.withCareStore.sendChatMessage(reservationId, text, senderRole, senderName);
-    setInputText('');
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-slate-100 rounded-3xl max-w-md w-full h-[580px] flex flex-col shadow-2xl border border-slate-300 overflow-hidden text-xs">
-        {/* 헤더 */}
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-slate-200">
-          <div className="flex items-center gap-2.5">
-            <img src={manager.avatar} alt={manager.name} className="w-8 h-8 rounded-full object-cover border" />
-            <div>
-              <div className="font-extrabold text-sm text-slate-900">{manager.name} 매니저</div>
-              <p className="text-[10px] text-slate-500">환자: {reservation.patientName} 님 안심 동행</p>
-            </div>
+        <div className="flex items-center gap-4 bg-slate-800/80 p-3 sm:p-4 rounded-2xl border border-slate-700">
+          <div>
+            <span className="text-[11px] text-slate-400 block font-semibold">누적 인정 봉사시간</span>
+            <span className="text-xl font-black text-[#6edfec]">{currentVolunteerHours}시간</span>
+            <span className="text-[10px] text-slate-500 block">1365·VMS 공식 연계</span>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold px-1">✕</button>
-        </div>
-
-        {/* 퀵 메시지 칩 바 */}
-        <div className="bg-slate-200/60 px-3 py-1.5 flex gap-1.5 overflow-x-auto text-[10px] border-b border-slate-200">
-          <button onClick={() => handleSend('출발하실 때 연락 주세요!')} className="bg-white text-slate-700 px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap">
-            "출발하실 때 연락 주세요!"
-          </button>
-          <button onClick={() => handleSend('병원 로비 도착 및 접수 완료했습니다')} className="bg-white text-slate-700 px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap">
-            "병원 로비 접수 완료했습니다"
+          <button
+            onClick={onOpenCertModal}
+            className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer"
+          >
+            확인서 미리보기
           </button>
         </div>
+      </div>
 
-        {/* 메시지 영역 */}
-        <div ref={chatBottomRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-          {messages.map((m) => {
-            const isMe = (m.sender === currentUser.role) || (currentUser.role === 'GUARDIAN' && m.sender === 'GUARDIAN');
-            const isSystem = m.sender === 'SYSTEM';
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+            <h3 className="font-extrabold text-lg text-slate-900">
+              지금 당장 동행인 구해요! (실시간 긴급 환자 요청)
+            </h3>
+          </div>
+          <span className="text-xs text-rose-600 font-bold bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
+            수락 즉시 봉사 3~4시간 인정
+          </span>
+        </div>
 
-            if (isSystem) {
-              return (
-                <div key={m.id} className="text-center my-1.5">
-                  <span className="bg-slate-200 text-slate-600 text-[10px] px-2.5 py-0.5 rounded-full">
-                    {m.text}
-                  </span>
-                </div>
-              );
-            }
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          {urgentRequests.map(urg => {
+            const isAccepted = urg.status === 'ACCEPTED';
 
             return (
-              <div key={m.id} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                {!isMe && (
-                  <img src={m.avatar || manager.avatar} alt={m.senderName} className="w-7 h-7 rounded-full object-cover border shrink-0" />
+              <div 
+                key={urg.id} 
+                className={`rounded-2xl p-4 border transition flex flex-col justify-between space-y-3 ${
+                  isAccepted ? 'bg-slate-100 border-slate-200 opacity-60' : 'bg-white border-slate-200 shadow-xs'
+                }`}
+              >
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <span className="font-extrabold text-slate-900 text-sm">{urg.patientName}</span>
+                    <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded text-[11px]">
+                      {urg.time}
+                    </span>
+                  </div>
+
+                  <div className="text-slate-600 space-y-0.5 text-[11px]">
+                    <div>병원: <strong className="text-slate-800">{urg.hospital} ({urg.department})</strong></div>
+                    <div>픽업: <strong className="text-slate-800">{urg.pickupLocation}</strong></div>
+                    <div>상태: <strong className="text-slate-800">{urg.mobility}</strong></div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    "{urg.note}"
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <span className="font-extrabold text-slate-900">{urg.volunteerCredit}</span>
+                  {isAccepted ? (
+                    <span className="text-slate-500 font-bold">수락 완료</span>
+                  ) : (
+                    <button
+                      onClick={() => onAcceptUrgent(urg.id)}
+                      className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl shadow-xs transition cursor-pointer"
+                    >
+                      즉시 수락하기
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="font-extrabold text-lg text-slate-900">
+          내 동행 배정 업무 관리
+        </h3>
+
+        <div className="space-y-6">
+          {reservations.map((item) => {
+            const isRequested = item.status === 'REQUESTED';
+
+            return (
+              <div key={item.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4 text-xs">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                  <span className="font-extrabold text-slate-900 text-base">{item.id} · {item.patientName} 어르신 ({item.hospital})</span>
+                  <span className={`px-3 py-1 rounded-full font-bold ${isRequested ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-900 border border-slate-200'}`}>
+                    {isRequested ? '신규 요청' : '배정 진행 업무'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                  <div>일시: <strong className="text-slate-900 block mt-0.5">{item.date} {item.time}</strong></div>
+                  <div>진료과: <strong className="text-slate-900 block mt-0.5">{item.department}</strong></div>
+                  <div>이동수단: <strong className="text-slate-900 block mt-0.5">{item.transportLabel}</strong></div>
+                  <div>정산 예정액: <strong className="text-slate-900 block mt-0.5">{item.cost.toLocaleString()}원</strong></div>
+                </div>
+
+                <div className="bg-slate-50 p-3 rounded-xl text-slate-700 border border-slate-100">
+                  <span className="font-bold text-slate-900">보호자 전달사항:</span> {item.messageToManager}
+                </div>
+
+                {!isRequested && (
+                  <RealtimeProcessTracker 
+                    reservation={item}
+                    onAdvanceStep={handleAdvanceStep}
+                    showAdvanceButton={true}
+                  />
                 )}
-                <div className={`max-w-[70%] space-y-0.5 ${isMe ? 'items-end text-right' : 'items-start text-left'}`}>
-                  {!isMe && <span className="text-[10px] text-slate-500 block ml-1">{m.senderName}</span>}
-                  <div className={`flex items-end gap-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`p-2.5 rounded-2xl break-words shadow-xs ${isMe ? 'bg-amber-300 text-slate-900 rounded-tr-none' : 'bg-white text-slate-900 rounded-tl-none'}`}>
-                      {m.text}
-                    </div>
-                    <span className="text-[9px] text-slate-400 whitespace-nowrap">{m.time}</span>
+
+                <div className="pt-2 border-t border-slate-100 flex flex-wrap justify-between items-center gap-2">
+                  <div className="flex gap-2">
+                    {isRequested && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.withCareStore.acceptReservation(item.id, currentUser.managerId || 'mgr-1');
+                          showToast('예약을 수락하였습니다! 1:1 대화방이 활성화되었습니다.', 'success');
+                        }}
+                        className="px-4 py-2.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
+                      >
+                        이 예약 즉시 수락하기
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onOpenChat(item.id)}
+                      className="px-4 py-2 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <Icons.MessageSquare className="w-4 h-4" />
+                      <span>이용자 1:1 대화</span>
+                    </button>
+                    {item.step >= 4 && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenManagerReport(item.id)}
+                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition shadow-xs cursor-pointer"
+                      >
+                        진료 리포트 작성/확인
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
+      </div>
 
-        {/* 하단 입력창 */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="bg-white p-2.5 border-t border-slate-200 flex gap-2">
-          <input 
-            type="text" 
+      <div className="space-y-4">
+        <h3 className="font-extrabold text-lg text-slate-900">
+          전공별 동행 현황 (비슷한 학과 학생들은 주로 이런 병원에 동행하고 있어요!)
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+          {majorInsights.map(m => (
+            <div key={m.majorName} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
+                <div>
+                  <h4 className="font-extrabold text-base text-slate-900">{m.majorName}</h4>
+                  <span className="text-slate-400 text-[11px]">활동 대학생 {m.totalStudents}명</span>
+                </div>
+                <span className="text-xs bg-slate-100 text-slate-800 font-extrabold px-2.5 py-1 rounded-full">
+                  평균 {m.avgHours}h
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-[11px] font-bold text-slate-500">주요 동행 병원 TOP 3:</span>
+                {m.topHospitals.map((h, i) => (
+                  <div key={h.name} className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    <div>
+                      <span className="font-bold text-slate-900 mr-1.5">{i + 1}. {h.name}</span>
+                      <span className="text-[10px] text-slate-400">({h.badge})</span>
+                    </div>
+                    <span className="font-extrabold text-[#0bbecb]">{h.share}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-[11px] text-slate-600 bg-[#6edfec]/10 p-3 rounded-xl border border-[#6edfec]/30 italic leading-relaxed">
+                {m.reviewQuote}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ========================================================
+// 6. 1:1 실시간 대화방 모달 (ChatModal)
+// ========================================================
+function ChatModal({ reservationId, currentUser, onClose }) {
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const chatScrollRef = useRef(null);
+
+  const reservation = useMemo(() => {
+    return window.withCareStore.reservations.find(r => r.id === reservationId) || window.withCareStore.reservations[0];
+  }, [reservationId]);
+
+  const loadMessages = () => {
+    setMessages(window.withCareStore.getMessages(reservationId));
+  };
+
+  useEffect(() => {
+    loadMessages();
+    const unsubscribe = window.withCareStore.subscribe(() => {
+      loadMessages();
+    });
+    return unsubscribe;
+  }, [reservationId]);
+
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    window.withCareStore.sendMessage(reservationId, currentUser.role, inputText);
+    setInputText('');
+  };
+
+  const isManager = currentUser.role === 'MANAGER';
+  const otherPartyTitle = isManager 
+    ? `${reservation.patientName} 어르신 보호자` 
+    : `${window.withCareStore.getManagerById(reservation.managerId)?.name || '담당'} 동행자`;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col h-[580px] overflow-hidden border border-slate-200">
+        <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#6edfec] animate-pulse"></span>
+            <div>
+              <h4 className="font-bold text-sm text-white">{otherPartyTitle} 1:1 대화</h4>
+              <p className="text-[10px] text-slate-400">예약번호 {reservationId} · 대전 실시간 안심 소통</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition cursor-pointer">
+            ✕
+          </button>
+        </div>
+
+        <div ref={chatScrollRef} className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+          {messages.map((m) => {
+            const isMe = m.sender === currentUser.role;
+
+            return (
+              <div key={m.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                <span className="text-[10px] text-slate-400 mb-0.5 px-1">{m.senderName}</span>
+                <div className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl shadow-xs font-medium leading-relaxed ${
+                  isMe 
+                    ? 'bg-slate-900 text-white rounded-br-none' 
+                    : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
+                }`}>
+                  {m.text}
+                </div>
+                <span className="text-[9px] text-slate-400 mt-0.5 px-1">{m.time}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-200 flex gap-2">
+          <input
+            type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="메시지를 입력하세요..."
-            className="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none"
+            placeholder="메시지를 입력하세요 (예: 자택 1층 도착했습니다!)"
+            className="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium focus:outline-hidden"
           />
-          <button type="submit" className="bg-sky-600 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl transition cursor-pointer"
+          >
             전송
           </button>
         </form>
@@ -1987,199 +2361,91 @@ function ChatModal({ reservationId, currentUser, onClose, showToast }) {
 }
 
 // ========================================================
-// 7. 안심 리포트 모달 (ReportModal)
+// 7. 안심 리포트 및 만족도 평가 모달 (ReportModal)
 // ========================================================
 function ReportModal({ reservationId, onClose, showToast }) {
-  const reservation = window.withCareStore.getReservationById(reservationId);
-  const report = reservation ? reservation.report : null;
-  const manager = reservation && reservation.managerId ? window.withCareStore.getManagerById(reservation.managerId) : DEFAULT_MANAGERS[0];
+  const reservation = useMemo(() => {
+    return window.withCareStore.reservations.find(r => r.id === reservationId) || window.withCareStore.reservations[0];
+  }, [reservationId]);
 
-  const [rating, setRating] = useState(5);
-  const [selectedTags, setSelectedTags] = useState(['친절하고 따뜻해요', '의사 소견을 상세히 전해줘요']);
-  const [reviewComment, setReviewComment] = useState('');
+  const report = reservation.report || {};
+  const [rating, setRating] = useState(reservation.ratingGiven || 5);
+  const [review, setReview] = useState(reservation.reviewText || '');
+  const [submitted, setSubmitted] = useState(Boolean(reservation.ratingGiven));
 
-  if (!reservation || !report) return null;
-
-  const toggleTag = (tag) => {
-    setSelectedTags(selectedTags.includes(tag) ? selectedTags.filter(t => t !== tag) : [...selectedTags, tag]);
-  };
-
-  const handleSubmitReview = (e) => {
+  const handleReviewSubmit = (e) => {
     e.preventDefault();
-    window.withCareStore.addReview(reservationId, {
-      rating,
-      tags: selectedTags,
-      comment: reviewComment || '매니저님 덕분에 직장에서도 부모님 진료를 안심하고 챙길 수 있었습니다. 정말 감사합니다!'
-    });
-    showToast('소중한 별점과 후기가 등록되었으며, 매니저 평점에 실시간 반영되었습니다!', 'success');
-  };
-
-  const handleTogglePremiumLock = () => {
-    window.withCareStore.togglePremiumUnlock(reservationId);
-    showToast(report.premiumReportUnlocked ? '심층 리포트가 잠금 상태로 전환되었습니다.' : '프리미엄 심층 건강 리포트가 잠금 해제되었습니다!', 'info');
+    window.withCareStore.submitReview(reservationId, rating, review);
+    setSubmitted(true);
+    showToast('소중한 별점과 후기가 등록되었으며, 동행자 평점에 반영되었습니다!', 'success');
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-        <div className="sticky top-0 bg-white/95 backdrop-blur px-6 py-4 border-b border-slate-200 flex justify-between items-center z-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto space-y-5 border border-slate-200 text-xs">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
           <div>
-            <h3 className="font-extrabold text-slate-900 text-base">병원 동행 안심 리포트</h3>
-            <p className="text-xs text-slate-500">{reservation.patientName} 님 · {reservation.hospital} ({reservation.department})</p>
+            <span className="text-[#0bbecb] text-[10px] font-extrabold">SAFE CARE REPORT</span>
+            <h3 className="font-extrabold text-base text-slate-900">외래 진료 결과 안심 리포트</h3>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
         </div>
 
-        <div className="p-6 space-y-5 text-xs">
-          {/* 매니저 코멘트 */}
-          <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 flex items-center gap-3">
-            <img src={manager.avatar} alt={manager.name} className="w-12 h-12 rounded-xl object-cover" />
-            <div>
-              <div className="font-bold text-slate-900">{manager.name} 매니저 ({manager.badge})</div>
-              <p className="text-emerald-950 mt-0.5">"{report.managerMessage}"</p>
-            </div>
-          </div>
+        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+          <span className="font-bold text-slate-900 block text-xs">진료 소견 및 요약</span>
+          <p className="text-slate-700 leading-relaxed font-medium">{report.summary || '진료 소견 메모 완료.'}</p>
+        </div>
 
-          {/* 1. 전문의 진료 소견 및 복약 안내 */}
-          <div className="space-y-1.5">
-            <h4 className="font-bold text-slate-900">1. 전문의 진료 소견 및 복약 안내</h4>
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 leading-relaxed font-medium">
-              {report.medicalSummary}
-            </div>
-          </div>
+        <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100 space-y-1">
+          <span className="font-bold text-slate-900 block text-xs">처방약 복용 지도 안내</span>
+          <p className="text-slate-700 leading-relaxed">{report.pharmacyGuide || '처방전 수령 및 복약 지도 완료.'}</p>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-sky-50 p-3 rounded-xl border border-sky-200">
-              <span className="font-bold text-sky-800 block">다음 병원 재진 예약일</span>
-              <span className="font-extrabold text-slate-900 mt-1 block">{report.nextAppointment}</span>
-            </div>
-            <div className="bg-teal-50 p-3 rounded-xl border border-teal-200">
-              <span className="font-bold text-teal-800 block">처방약 수령 및 복약 지도</span>
-              <span className="font-bold text-slate-900 mt-1 block">{report.prescriptions}</span>
-            </div>
+        <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 space-y-1">
+          <div className="flex items-center gap-1.5 font-bold text-purple-900 text-xs">
+            <Icons.Sparkles className="w-4 h-4 text-purple-600" />
+            <span>AI 진료실 음성 메모 요약</span>
           </div>
+          <p className="text-purple-800 leading-relaxed font-medium">{report.aiAudioSummary || '[AI 요약] 원활한 외래 상담 완료.'}</p>
+        </div>
 
-          {/* 2. AI 음성 녹음 요약 */}
-          <div className="bg-purple-50 p-4 rounded-xl border border-purple-200 space-y-2">
-            <div className="flex justify-between items-center font-bold text-purple-950">
-              <span>2. 진료실 AI 음성 녹음본 핵심 요약</span>
-              <span className="text-[10px] bg-purple-200 text-purple-900 px-2 py-0.5 rounded">STT 정확도 98.4%</span>
-            </div>
-            <ul className="list-disc list-inside space-y-1 text-slate-700">
-              {SAMPLE_AI_VOICE_SUMMARY.keyBulletPoints.map((pt, i) => (
-                <li key={i}>{pt}</li>
-              ))}
-            </ul>
-          </div>
-
-          {/* 3. 프리미엄 잠금 BM */}
-          <div className="border border-amber-200 rounded-xl p-4 bg-amber-50/50 space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-amber-900">3. 심층 건강 리포트 (프리미엄 모델)</span>
-              <button onClick={handleTogglePremiumLock} className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-1 rounded">
-                {report.premiumReportUnlocked ? '🔒 잠그기' : '🔓 잠금 해제 체험'}
+        <form onSubmit={handleReviewSubmit} className="pt-3 border-t border-slate-100 space-y-3">
+          <h4 className="font-bold text-slate-900">동행자 만족도 평가 (평점에 실시간 반영)</h4>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                className={`text-xl transition cursor-pointer ${star <= rating ? 'text-amber-400 scale-110' : 'text-slate-300'}`}
+              >
+                ★
               </button>
+            ))}
+            <span className="font-extrabold text-slate-700 ml-2">{rating}점 / 5점</span>
+          </div>
+
+          <textarea
+            rows="2"
+            value={review}
+            onChange={(e) => setReview(e.target.value)}
+            placeholder="동행자님의 친절도 및 병원 케어에 대한 한줄평을 남겨주세요."
+            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium"
+            disabled={submitted}
+          />
+
+          {!submitted ? (
+            <button
+              type="submit"
+              className="w-full py-2.5 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl transition cursor-pointer"
+            >
+              별점 및 이용후기 등록하기
+            </button>
+          ) : (
+            <div className="text-center text-emerald-600 font-extrabold py-1">
+              후기 등록이 완료되었습니다. 감사합니다.
             </div>
-            {report.premiumReportUnlocked ? (
-              <p className="text-slate-700 bg-white p-2.5 rounded-lg border border-amber-200">
-                📊 AI 혈압/혈당 추세 분석: 최근 3개월 변동성 정상 구간 유지. 기립성 저혈압 주의 권고.
-              </p>
-            ) : (
-              <div className="text-slate-500 bg-white/70 p-3 rounded-lg border border-dashed border-amber-300 text-center">
-                🔒 월정액 프리미엄 구독 시 AI 혈압 추세 및 맞춤 재활 가이드가 제공됩니다.
-              </div>
-            )}
-          </div>
-
-          {/* 만족도 평가 */}
-          <div className="pt-4 border-t border-slate-200 space-y-3">
-            <h4 className="font-bold text-slate-900">매니저 만족도 평가 (매니저 평점에 실시간 반영)</h4>
-            {reservation.review ? (
-              <div className="bg-amber-50 p-3 rounded-xl border border-amber-200">
-                <span className="text-amber-500 font-bold">★ {reservation.review.rating}.0점</span>
-                <p className="text-slate-800 font-medium mt-1">"{reservation.review.comment}"</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmitReview} className="space-y-3">
-                <div className="flex items-center gap-1 text-amber-400">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <button key={s} type="button" onClick={() => setRating(s)} className="text-lg">
-                      ★
-                    </button>
-                  ))}
-                  <span className="text-slate-900 font-bold ml-2">{rating}.0점</span>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {['친절하고 따뜻해요', '의사 소견을 상세히 전해줘요', '시간 약속을 철저히 지켜요'].map((t) => (
-                    <button key={t} type="button" onClick={() => toggleTag(t)} className={`px-2 py-1 rounded border text-[11px] ${selectedTags.includes(t) ? 'bg-sky-600 text-white' : 'bg-white text-slate-600'}`}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
-                <textarea rows="2" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="감사 후기를 남겨주세요..." className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-xs" />
-                <button type="submit" className="w-full py-2.5 bg-sky-600 text-white font-bold rounded-xl">
-                  리뷰 등록 (평점 즉시 반영)
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ========================================================
-// 8. 매니저 전용 리포트 작성 모달
-// ========================================================
-function ManagerReportEditorModal({ reservationId, onClose, showToast }) {
-  const reservation = window.withCareStore.getReservationById(reservationId);
-  const existingReport = reservation ? reservation.report : null;
-
-  const [medicalSummary, setMedicalSummary] = useState(existingReport ? existingReport.medicalSummary : '전문의 진료 완료. X-ray 결과 골밀도 양호하며 염증 소견 경미함.');
-  const [nextAppointment, setNextAppointment] = useState(existingReport ? existingReport.nextAppointment : '4주 뒤 정기 외래 진료');
-  const [prescriptions, setPrescriptions] = useState(existingReport ? existingReport.prescriptions : '처방약 14일분 수령 및 아침/저녁 식후 30분 복약 설명 완료');
-  const [managerMessage, setManagerMessage] = useState(existingReport ? existingReport.managerMessage : '어르신 편안하게 진료 잘 마치셨습니다. 안심하세요!');
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    window.withCareStore.saveReport(reservationId, {
-      medicalSummary,
-      nextAppointment,
-      prescriptions,
-      managerMessage
-    });
-    showToast('안심 리포트가 성공적으로 등록되었습니다.', 'success');
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 text-xs space-y-4">
-        <h3 className="font-extrabold text-base text-slate-900 border-b pb-2">진료 결과 안심 리포트 작성</h3>
-        <form onSubmit={handleSave} className="space-y-3">
-          <div>
-            <label className="block font-bold mb-1">전문의 진료 소견 요약 *</label>
-            <textarea rows="3" value={medicalSummary} onChange={(e) => setMedicalSummary(e.target.value)} className="w-full bg-slate-50 border rounded-xl p-2.5" required />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block font-bold mb-1">다음 재진일 *</label>
-              <input type="text" value={nextAppointment} onChange={(e) => setNextAppointment(e.target.value)} className="w-full bg-slate-50 border rounded-xl p-2" required />
-            </div>
-            <div>
-              <label className="block font-bold mb-1">처방약 복약 안내 *</label>
-              <input type="text" value={prescriptions} onChange={(e) => setPrescriptions(e.target.value)} className="w-full bg-slate-50 border rounded-xl p-2" required />
-            </div>
-          </div>
-          <div>
-            <label className="block font-bold mb-1">보호자 안심 메시지</label>
-            <textarea rows="2" value={managerMessage} onChange={(e) => setManagerMessage(e.target.value)} className="w-full bg-slate-50 border rounded-xl p-2" />
-          </div>
-          <div className="pt-2 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="px-3.5 py-2 bg-slate-100 rounded-xl">취소</button>
-            <button type="submit" className="px-5 py-2 bg-teal-600 text-white font-bold rounded-xl">리포트 저장</button>
-          </div>
+          )}
         </form>
       </div>
     </div>
@@ -2187,34 +2453,309 @@ function ManagerReportEditorModal({ reservationId, onClose, showToast }) {
 }
 
 // ========================================================
-// 9. B2B / B2C 수익모델 상세 모달 (B2BModal)
+// 8. 안심 리포트 작성 모달 (ManagerReportEditorModal)
 // ========================================================
-function B2BModal({ onClose }) {
+function ManagerReportEditorModal({ reservationId, onClose, showToast }) {
+  const reservation = useMemo(() => {
+    return window.withCareStore.reservations.find(r => r.id === reservationId) || window.withCareStore.reservations[0];
+  }, [reservationId]);
+
+  const [form, setForm] = useState({
+    summary: reservation.report?.summary || `${reservation.hospital} ${reservation.department} 외래 진료 완료. 의사 선생님께서 처방해 주신 약 복용 안내 완료.`,
+    doctorAdvice: reservation.report?.doctorAdvice || '다음 재진 일정 4주 후 예약됨.',
+    pharmacyGuide: reservation.report?.pharmacyGuide || '1일 2회 식후 30분 미온수와 함께 복용.',
+    aiAudioSummary: reservation.report?.aiAudioSummary || `[AI 요약] ${reservation.patientName} 어르신 진료 안정적 완료.`
+  });
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    window.withCareStore.saveReport(reservationId, form);
+    showToast('진료 결과 안심 리포트가 성공적으로 등록되었습니다!', 'success');
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 text-xs space-y-4">
-        <div className="flex justify-between items-center border-b pb-3">
-          <h3 className="font-extrabold text-base text-slate-900">위드케어 비즈니스 수익화 모델 (BM)</h3>
-          <button onClick={onClose} className="text-slate-400 font-bold">✕</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 border border-slate-200 space-y-4 text-xs">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div>
+            <span className="text-[#0bbecb] text-[10px] font-extrabold">REPORT EDITOR</span>
+            <h3 className="font-extrabold text-base text-slate-900">외래 결과 안심 리포트 작성</h3>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {B2B_MODEL_POINTS.map((bm, i) => (
-            <div key={i} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-              <span className="text-[10px] bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded">{bm.badge}</span>
-              <h5 className="font-bold text-slate-900 text-xs mt-1">{bm.title}</h5>
-              <p className="text-slate-600 text-[11px] leading-relaxed">{bm.desc}</p>
+
+        <form onSubmit={handleSave} className="space-y-3">
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">진료 결과 핵심 요약 *</label>
+            <textarea
+              rows="3"
+              value={form.summary}
+              onChange={(e) => setForm({ ...form, summary: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">의사 소견 및 주의사항 *</label>
+            <input
+              type="text"
+              value={form.doctorAdvice}
+              onChange={(e) => setForm({ ...form, doctorAdvice: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">처방약 복용법 및 약국 수령 확인 *</label>
+            <input
+              type="text"
+              value={form.pharmacyGuide}
+              onChange={(e) => setForm({ ...form, pharmacyGuide: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl shadow-xs transition mt-2 cursor-pointer"
+          >
+            리포트 최종 저장 및 보호자 전송
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ========================================================
+// 9. 1365 / VMS 봉사활동 확인서 미리보기 모달 (VolunteerCertModal)
+// ========================================================
+function VolunteerCertModal({ currentUser, onClose }) {
+  const printDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const hours = currentUser.volunteerHours || 38;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 space-y-6 text-xs max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold text-slate-900 text-sm">1365 · VMS 연계 봉사활동 확인서</span>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
+        </div>
+
+        <div className="border-2 border-slate-800 p-6 rounded-2xl bg-slate-50/50 space-y-6 text-slate-800">
+          <div className="text-center space-y-1">
+            <span className="text-[10px] text-slate-500 font-bold tracking-widest">[ 제 2026-V-0882 호 ]</span>
+            <h2 className="text-xl font-black tracking-widest text-slate-900">봉 사 활 동 확 인 서</h2>
+          </div>
+
+          <div className="border-t border-b border-slate-300 py-3 space-y-2 text-xs">
+            <div className="grid grid-cols-2 gap-2">
+              <div>성 명: <strong className="text-slate-900">{currentUser.name}</strong></div>
+              <div>소 속: <strong className="text-slate-900">{currentUser.university || '충남대학교'} {currentUser.major || '간호학과'}</strong></div>
             </div>
-          ))}
+            <div>활동기간: <strong>2026. 09. 01 ~ 2026. 11. 20</strong></div>
+            <div>활동처: <strong>위드케어 대전광역시 시니어 병원동행 지원단 (충남대병원·을지대병원)</strong></div>
+            <div>인정시간: <strong className="text-[#0bbecb] text-sm">총 {hours} 시간</strong> (1회당 3~4시간 인정)</div>
+          </div>
+
+          <div className="text-center text-xs text-slate-700 leading-relaxed py-2">
+            위 사람은 대전광역시 의료소외계층 및 거동불편 노인 환자의<br />
+            병원 외래진료 동행과 낙상예방 케어 의료봉사활동에 성실히 참여하였음을 확인합니다.
+          </div>
+
+          <div className="text-center space-y-1 pt-2">
+            <div className="font-bold text-slate-700">{printDate}</div>
+            <div className="font-extrabold text-slate-900 text-sm tracking-wider">
+              위드케어 병원동행 운영협의회장 [직인생략]
+            </div>
+          </div>
         </div>
-        <div className="pt-2 flex justify-end">
-          <button onClick={onClose} className="px-4 py-2 bg-slate-800 text-white font-bold rounded-xl">닫기</button>
+
+        <div className="flex gap-2 justify-end pt-2">
+          <button
+            onClick={() => window.print()}
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition cursor-pointer"
+          >
+            인쇄 / PDF 저장
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition cursor-pointer"
+          >
+            닫기
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-// 렌더링 마운트
-const rootElement = document.getElementById('root');
-const root = ReactDOM.createRoot(rootElement);
-root.render(<App />);
+// ========================================================
+// 10. 로그인 모달 (대표 동행자 김서연 1인 간소화)
+// ========================================================
+function LoginModal({ onClose, onSuccess }) {
+  const [role, setRole] = useState('GUARDIAN'); // 'GUARDIAN' | 'MANAGER'
+  const [type, setType] = useState('MEMBER');
+
+  const [name, setName] = useState('김민수');
+  const [birth, setBirth] = useState('1982-08-25');
+
+  const defaultManager = window.withCareStore.managers[0] || {
+    id: 'mgr-1',
+    name: '김서연',
+    badge: '충남대 간호학과',
+    university: '충남대학교',
+    major: '간호학과 3학년',
+    avatar: 'assets/avatar_kim.svg'
+  };
+
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    const user = window.withCareStore.login({
+      role,
+      type,
+      name,
+      birth,
+      managerId: defaultManager.id
+    });
+    onSuccess(user);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-7 border border-slate-200 space-y-5 text-xs">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+            <h3 className="font-extrabold text-base text-slate-900">위드케어 로그인</h3>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
+        </div>
+
+        {/* 1. 권한 선택 탭 */}
+        <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
+          <button
+            type="button"
+            onClick={() => setRole('GUARDIAN')}
+            className={`py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer ${
+              role === 'GUARDIAN' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            이용자 (환자/보호자)
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('MANAGER')}
+            className={`py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer ${
+              role === 'MANAGER' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            동행자 (대학생)
+          </button>
+        </div>
+
+        <form onSubmit={handleLoginSubmit} className="space-y-4">
+          {role === 'GUARDIAN' ? (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setType('MEMBER')}
+                  className={`flex-1 py-1.5 rounded-lg font-bold border transition cursor-pointer ${
+                    type === 'MEMBER' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-600'
+                  }`}
+                >
+                  회원 로그인 (김민수)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setType('NON_MEMBER')}
+                  className={`flex-1 py-1.5 rounded-lg font-bold border transition cursor-pointer ${
+                    type === 'NON_MEMBER' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-600'
+                  }`}
+                >
+                  비회원 간편 로그인
+                </button>
+              </div>
+
+              {type === 'NON_MEMBER' ? (
+                <div className="space-y-2 pt-1">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">성함 *</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="이름 입력"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">생년월일 (YYYY-MM-DD) *</label>
+                    <input
+                      type="date"
+                      value={birth}
+                      onChange={(e) => setBirth(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-slate-700 space-y-1">
+                  <span className="font-extrabold text-slate-900 block">기본 보호자 계정 (데모 시연용)</span>
+                  <div className="text-[11px]">이름: 김민수 / 환자: 김순자 어르신</div>
+                  <div className="text-[11px] text-[#0bbecb] font-bold">클릭 시 이용자 마이페이지로 즉시 진입합니다.</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <label className="block font-bold text-slate-700">시연용 대표 대학생 동행자 계정</label>
+              <div className="p-4 rounded-2xl border-2 border-slate-900 bg-[#6edfec]/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={defaultManager.avatar} 
+                    alt={defaultManager.name} 
+                    className="w-12 h-12 rounded-xl object-cover" 
+                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                  />
+                  <div>
+                    <div className="font-black text-slate-900 text-sm">{defaultManager.name} 동행자</div>
+                    <div className="text-slate-600 text-[11px] mt-0.5">{defaultManager.university} {defaultManager.major}</div>
+                    <span className="text-[#0bbecb] font-extrabold text-[10px]">인정 봉사 {defaultManager.volunteerHours}시간 누적</span>
+                  </div>
+                </div>
+                <span className="bg-slate-900 text-white text-[10px] font-black px-2.5 py-1 rounded-lg">
+                  대표 계정
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                원클릭으로 접속하여 동행자 마이페이지(봉사시간, 확인서 미리보기, 긴급 환자 요청 수락)를 시연할 수 있습니다.
+              </p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="w-full py-3.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-black rounded-xl shadow-xs transition cursor-pointer"
+          >
+            {role === 'MANAGER' ? '동행자 마이페이지로 접속하기' : '이용자 마이페이지로 접속하기'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ========================================================
+// 11. React DOM 렌더링
+// ========================================================
+ReactDOM.render(<App />, document.getElementById('root'));

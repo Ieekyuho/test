@@ -1,4 +1,5 @@
-// data.js - 위드케어(WithCare) 병원 동행서비스 데이터셋 v3.0
+// data.js - 위드케어(WithCare) 병원 동행서비스 데이터셋 v3.4
+// 대전광역시 MVP 모델 & 의료 관련 전공 대학생 동행 매니저 전용
 
 // ========================================================
 // 1. 환자 기본 프로필 (마이페이지 조회 및 수정용 기본값)
@@ -8,551 +9,475 @@ const DEFAULT_PATIENT_PROFILE = {
   birth: '1950-04-12',
   gender: '여성',
   phone: '010-3344-9988',
-  address: '서울시 마포구 독막로 12길 15, 102동 402호',
-  region: '서울 마포구',
-  symptoms: '퇴행성 무릎 관절 통증, 계단 보행 시 심한 통증 및 10분 이상 연속 보행 어려움',
+  address: '대전광역시 서구 둔산로 123, 크로바아파트 105동 802호',
+  region: '대전 서구 둔산동',
+  symptoms: '퇴행성 무릎 관절염, 계단 보행 시 통증 및 10분 이상 연속 보행 부축 필요',
   medications: '혈압약(아침 식후 1정), 관절염 소염진통제(아침/저녁)',
   useWheelchair: false,
   guardianName: '김민수 (자녀)',
   guardianPhone: '010-9876-5432',
-  notes: '귀가 조금 어두우시니 병원 외래 진료 시 의사 선생님 소견을 꼼꼼하게 전달해 주시기 바랍니다.'
+  notes: '보행 시 무릎 통증이 있으시니 천천히 부축해 주시고, 병원 진료 시 의사 선생님 소견과 다음 내원일을 꼼꼼히 메모 부탁드립니다.'
 };
 
 // ========================================================
-// 2. 전문 매니저 인재 검증 시스템 & 프로필 데이터
+// 2. 의료 관련 전공 대학생 및 전문 동행 매니저 프로필 데이터 (로컬 SVG 아바타 적용)
+// 전문 매니저 21,000원/h / 학생 매니저 18,000원/h (교통비 별도)
 // ========================================================
 const DEFAULT_MANAGERS = [
   {
     id: 'mgr-1',
     name: '김서연',
     gender: '여성',
-    age: 42,
-    region: '서울 마포구/서대문구',
-    hourlyRate: 25000,
-    title: '시니어 전문 안심 케어 매니저',
-    badge: '요양보호사 1급 · 간호조무사',
-    avatar: 'https://images.unsplash.com/photo-1594824813637-bf7f6e07fd64?auto=format&fit=crop&q=80&w=300',
+    age: 22,
+    university: '충남대학교',
+    major: '간호학과 3학년',
+    managerType: 'STUDENT',
+    managerTypeLabel: '학생 매니저',
+    badge: '충남대 간호 3학년 (학생)',
+    certification: '대한적십자사 CPR / BLS 기본소생술 수료',
     rating: 4.98,
-    reviewCount: 148,
-    completedTrips: 215,
-    phone: '010-8234-5678',
-    hasDriverLicense: true,
-    driverLicenseType: '1종 보통 (자차 동행 운행 가능)',
-    certifications: ['요양보호사 1급', '간호조무사', 'CPR 심폐소생술 전문'],
-    experience: '종합병원 간호조무 5년, 노인주간보호센터 3년',
-    intro: '어르신의 눈높이에서 편안하고 안전하게 병원 진료를 돕겠습니다. 의사 소견과 복약법을 꼼꼼하게 메모해 가족분께 전달해 드립니다.',
-    verified: true,
-    verificationBadges: ['국가 자격증 전수 검증', '심층 면접 통과', '40시간 안전교육 이수'],
+    reviewCount: 42,
+    volunteerHours: 38,
+    hourlyRate: 18000,
+    region: '대전 서구 / 유성구',
+    baseLocation: '대전 유성구 대학로 (충남대 대덕캠퍼스 인근)',
+    primaryHospitals: '충남대학교병원, 대전을지대학교병원',
+    etaMinutes: 7,
+    etaText: '도보 7분 (약 480m)',
+    avatar: 'assets/avatar_kim.svg',
+    offsetX: -8, // 내 위치 기준 상대 오프셋%
+    offsetY: -10,
+    tags: ['학생 매니저', '간호학과', 'CPR 자격', '친절한 말벗', '휠체어 숙련'],
+    title: '어르신의 눈높이에 맞춘 따뜻한 예비 간호사',
+    intro: '충남대학교 간호학과 3학년에 재학 중입니다. 외래 실습 경험과 CPR 수료를 바탕으로 어르신을 제 가족처럼 안전하고 정성껏 모시겠습니다.',
     isAiPick: true,
-    aiPickReason: '거동 불편 및 순환기/내과 질환 케어 최적화 매니저'
+    aiPickReason: '무릎 관절 환자 부축 및 충남대병원 동행 경험 18회 보유'
   },
   {
     id: 'mgr-2',
-    name: '최정민',
+    name: '박준혁',
     gender: '남성',
-    age: 38,
-    region: '서울 서초구/강남구',
-    hourlyRate: 28000,
-    title: '휠체어·이동지원 전문 매니저',
-    badge: '사회복지사 1급 · 요양보호사 1급',
-    avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300',
+    age: 24,
+    university: '을지대학교',
+    major: '의예과 본과 1학년',
+    managerType: 'EXPERT',
+    managerTypeLabel: '전문 매니저',
+    badge: '을지대 의예과 (전문)',
+    certification: '응급처치 전문과정 수료 / 대한심폐소생협회 인증',
     rating: 4.95,
-    reviewCount: 112,
-    completedTrips: 174,
-    phone: '010-4521-9876',
-    hasDriverLicense: true,
-    driverLicenseType: '1종 보통 (SUV 자차 보유, 휠체어 적재 가능)',
-    certifications: ['사회복지사 1급', '요양보호사 1급', '휠체어 이동지원 전문'],
-    experience: '휠체어 및 거동불편 이동 지원 전문, 노인복지관 4년',
-    intro: '내 부모님을 모시듯 정성껏 부축해 드리고 차량 승하차 및 진료실 이동까지 안전하게 케어합니다.',
-    verified: true,
-    verificationBadges: ['국가 자격증 전수 검증', '심층 면접 통과', '40시간 안전교육 이수'],
+    reviewCount: 35,
+    volunteerHours: 45,
+    hourlyRate: 21000,
+    region: '대전 중구 / 서구',
+    baseLocation: '대전 서구 둔산동 (을지대병원 인근)',
+    primaryHospitals: '대전을지대학교병원, 대전성모병원',
+    etaMinutes: 4,
+    etaText: '도보 4분 (약 310m)',
+    avatar: 'assets/avatar_park.svg',
+    offsetX: 10,
+    offsetY: -6,
+    tags: ['전문 매니저', '의예과', '진료 소견 메모', '복약 지도', '든든한 부축'],
+    title: '진료실 핵심 소견을 꼼꼼히 정리해 드리는 예비 의사',
+    intro: '을지대학교 의과대학 본과 1학년 재학 중입니다. 진료실에서 교수님의 처방과 설명을 정확히 경청하고 보호자님께 명쾌하게 전달해 드립니다.',
     isAiPick: true,
-    aiPickReason: '휠체어 상하차 및 관절/척추 수술 후 재활 진료 이동 특화'
+    aiPickReason: '의학적 소견 경청 능력 우수 & 둔산동 거주 접근성 최상'
   },
   {
     id: 'mgr-3',
-    name: '박미라',
+    name: '이민지',
     gender: '여성',
-    age: 46,
-    region: '서울 송파구/강동구',
-    hourlyRate: 30000,
-    title: '의료 동행 전문 간호 매니저',
-    badge: '간호사 면허 · 요양보호사 1급',
-    avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300',
-    rating: 5.0,
-    reviewCount: 89,
-    completedTrips: 130,
-    phone: '010-3392-1144',
-    hasDriverLicense: false,
-    driverLicenseType: '대중교통 / 택시 동행 전문',
-    certifications: ['간호사 면허', '요양보호사 1급', '노인 전문간호 과정'],
-    experience: '대학병원 병동 간호사 8년 근무',
-    intro: '전문적인 임상 지식을 바탕으로 의사 상담 내용을 보호자 입장에서 명확하고 알기 쉽게 브리핑해 드립니다.',
-    verified: true,
-    verificationBadges: ['국가 자격증 전수 검증', '심층 면접 통과', '40시간 안전교육 이수'],
+    age: 21,
+    university: '건양대학교',
+    major: '간호학과 2학년',
+    managerType: 'STUDENT',
+    managerTypeLabel: '학생 매니저',
+    badge: '건양대 간호 2학년 (학생)',
+    certification: '보건복지부 인성교육 이수 / 응급처치 수료',
+    rating: 4.92,
+    reviewCount: 28,
+    volunteerHours: 26,
+    hourlyRate: 18000,
+    region: '대전 서구 / 유성구',
+    baseLocation: '대전 서구 관저동 (건양대 메디컬캠퍼스)',
+    primaryHospitals: '건양대학교병원, 충남대학교병원',
+    etaMinutes: 9,
+    etaText: '도보 9분 (약 620m)',
+    avatar: 'assets/avatar_lee.svg',
+    offsetX: -12,
+    offsetY: 12,
+    tags: ['학생 매니저', '간호학과', '밝은 에너지', '약국 처방전 수령', '키오스크 접수 대행'],
+    title: '손녀처럼 다정하고 씩씩한 간호대 동행 매니저',
+    intro: '건양대학교 간호학과 2학년입니다. 어르신들의 병원 원내 무인 접수부터 수납, 약국 조제 수령까지 편안하게 챙겨드립니다.',
     isAiPick: false,
-    aiPickReason: '대학병원 임상 간호 경험 기반 복합 만성질환 케어'
+    aiPickReason: '건양대병원 외래 동행 최다 매칭 매니저'
   },
   {
     id: 'mgr-4',
-    name: '이성훈',
+    name: '최현우',
     gender: '남성',
-    age: 35,
-    region: '서울 영등포구/구로구',
-    hourlyRate: 25000,
-    title: '안심 안전 동행 매니저',
-    badge: '응급구조사 2급 · 요양보호사',
-    avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300',
-    rating: 4.92,
-    reviewCount: 96,
-    completedTrips: 142,
-    phone: '010-7711-2358',
-    hasDriverLicense: true,
-    driverLicenseType: '1종 대형 / 보통',
-    certifications: ['응급구조사 2급', '요양보호사 1급'],
-    experience: '응급이송단 4년 근무, 응급처치 강사',
-    intro: '비상 상황에서도 침착하고 신속하게 대응하며, 편안하고 든든한 동행을 약속드립니다.',
-    verified: true,
-    verificationBadges: ['국가 자격증 전수 검증', '심층 면접 통과', '40시간 안전교육 이수'],
+    age: 23,
+    university: '대전대학교',
+    major: '물리치료학과 3학년',
+    managerType: 'EXPERT',
+    managerTypeLabel: '전문 매니저',
+    badge: '대전대 물리치료 (전문)',
+    certification: '보행 보조 및 낙상예방 케어 수료',
+    rating: 4.97,
+    reviewCount: 31,
+    volunteerHours: 32,
+    hourlyRate: 21000,
+    region: '대전 동구 / 중구',
+    baseLocation: '대전 중구 대흥동 (대전성모병원 인근)',
+    primaryHospitals: '가톨릭대 대전성모병원, 충남대학교병원',
+    etaMinutes: 11,
+    etaText: '도보 11분 (약 780m)',
+    avatar: 'assets/avatar_choi.svg',
+    offsetX: 14,
+    offsetY: 10,
+    tags: ['전문 매니저', '물리치료학과', '낙상 예방', '보행 부축 전문가', '재활외래 특화'],
+    title: '안전한 보행을 책임지는 물리치료 전공 매니저',
+    intro: '대전대학교 물리치료학과 3학년입니다. 보행이 불편하시거나 관절 질환이 있으신 어르신들의 낙상 방지와 편안한 이동을 책임집니다.',
     isAiPick: false,
-    aiPickReason: '응급상황 대처 및 낙상 방지 안전 동행 특화'
+    aiPickReason: '거동 불편 및 휠체어 이용 환자 선호도 1위'
   }
 ];
 
 // ========================================================
-// 3. 이동 수단 옵션 (구급차 제외 명시)
+// 3. 대전광역시 주요 대학/종합병원 데이터셋
 // ========================================================
-const TRANSPORT_OPTIONS = [
-  {
-    id: 'TAXI_TRANSIT',
-    name: '택시 / 대중교통 동행',
-    costDesc: '교통비 환자 실비 부담',
-    badge: '기본 옵션',
-    desc: '택시 호출 또는 지하철/저상버스 탑승 시 매니저가 밀착 부축하여 이동합니다.'
-  },
-  {
-    id: 'PERSONAL_CAR',
-    name: '매니저 자차 동행',
-    costDesc: '유류비 지원금 +15,000원',
-    badge: '도어 투 도어',
-    desc: '운전면허 검증 매니저의 차량으로 자택 앞에서 병원 현관까지 편안하게 모십니다.'
-  },
-  {
-    id: 'WALK',
-    name: '도보 동행 (인근 병원)',
-    costDesc: '추가 비용 없음 (0원)',
-    badge: '도보 10~15분 이내',
-    desc: '자택 인근 동네 병원이나 도보 이동 가능한 거리의 의료기관 방문 시 적합합니다.'
-  }
-];
-
-const AMBULANCE_NOTICE = "※ 구급차 지원 제외 안내: 응급 상황 시 119 구급차를 이용하셔야 하며, 본 서비스는 일반 외래 진료 동행 목적입니다.";
-
-// ========================================================
-// 4. 추천 전문 병원 DB (정문 외관사진, 주행 소요시간, 전문과)
-// ========================================================
-const RECOMMENDED_HOSPITALS = [
+const DEFAULT_HOSPITALS = [
   {
     id: 'hosp-1',
-    name: '신촌 세브란스병원',
-    department: '정형외과 / 척추관절센터',
-    category: '상급종합병원',
-    rating: 4.9,
-    reviewCount: 1820,
-    distanceKm: '3.2km',
-    driveTime: '자차 기준 약 12~15분 소요',
-    address: '서울시 서대문구 연세로 50-1',
-    phone: '1599-1004',
-    doctorCount: 24,
-    image: 'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&q=80&w=600',
-    tags: ['보건복지부 상급종합', '위드케어 단독 제휴', '패스트트랙 접수'],
-    isPartner: true,
-    b2bBanner: '위드케어 제휴 혜택: 원내 외래 접수 패스트트랙 및 전용 대기석 지원'
+    name: '충남대학교병원',
+    category: '상급종합병원 (국립)',
+    region: '대전 중구 대사동',
+    address: '대전광역시 중구 문화로 282',
+    mapX: 68,
+    mapY: 65,
+    departments: ['순환기내과', '정형외과', '신경과', '소화기내과', '안과'],
+    partnered: true,
+    description: '대전·충남 거점 상급종합병원으로 대학생 의료봉사단 공식 연계 병원'
   },
   {
     id: 'hosp-2',
-    name: '서울성모병원',
-    department: '정형외과 / 류마티스내과',
-    category: '상급종합병원',
-    rating: 4.85,
-    reviewCount: 1450,
-    distanceKm: '5.1km',
-    driveTime: '자차 기준 약 18~22분 소요',
-    address: '서울시 서초구 반포대로 222',
-    phone: '1588-1511',
-    doctorCount: 19,
-    image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600',
-    tags: ['관절치료 우수기관', '휠체어 접근성 우수', '원내 무장애 시설'],
-    isPartner: true,
-    b2bBanner: '동행 매니저 전용 환자 픽업 존 운영 중'
+    name: '건양대학교병원',
+    category: '상급종합병원 (사립)',
+    region: '대전 서구 관저동',
+    address: '대전광역시 서구 관저동로 158',
+    mapX: 24,
+    mapY: 78,
+    departments: ['안과', '정형외과', '심혈관센터', '내분비내과', '재활의학과'],
+    partnered: true,
+    description: '서구 관저동 위치, 최신 외래 센터 및 환자 안심 동행 전용 접수 창구 보유'
   },
   {
     id: 'hosp-3',
-    name: '바른세상병원',
-    department: '정형외과 / 척추신경외과',
-    category: '보건복지부 지정 관절·척추 전문병원',
-    rating: 4.88,
-    reviewCount: 960,
-    distanceKm: '4.5km',
-    driveTime: '자차 기준 약 15~18분 소요',
-    address: '서울시 강남구 논현로 642',
-    phone: '1577-5075',
-    doctorCount: 14,
-    image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600',
-    tags: ['전문병원 인증 마크', '당일 MRI 검사 연계', '원스톱 진료'],
-    isPartner: true,
-    b2bBanner: '제휴 혜택: 척추/관절 정밀진단 패키지 연계 할인'
+    name: '대전을지대학교병원',
+    category: '종합병원',
+    region: '대전 서구 둔산동',
+    address: '대전광역시 서구 둔산서로 95',
+    mapX: 52,
+    mapY: 38,
+    departments: ['정형외과', '신경외과', '심장내과', '이비인후과'],
+    partnered: true,
+    description: '정부대전청사 및 둔산 중심가 위치, 둔산동 거주 어르신 방문 선호도 1위'
   },
   {
     id: 'hosp-4',
-    name: '서울아산병원',
-    department: '순환기내과 / 심장병원',
-    category: '상급종합병원',
-    rating: 4.95,
-    reviewCount: 2310,
-    distanceKm: '8.4km',
-    driveTime: '자차 기준 약 25~30분 소요',
-    address: '서울시 송파구 올림픽로 43길 88',
-    phone: '1688-7575',
-    doctorCount: 32,
-    image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=600',
-    tags: ['심혈관질환 전국 1위', '위드케어 우수 파트너'],
-    isPartner: true,
-    b2bBanner: '고령 심혈관 환자 맞춤 동행 서비스 연계'
+    name: '가톨릭대학교 대전성모병원',
+    category: '종합병원',
+    region: '대전 중구 대흥동',
+    address: '대전광역시 중구 대흥로 64',
+    mapX: 74,
+    mapY: 56,
+    departments: ['소화기내과', '신경과', '정형외과', '비뇨의학과'],
+    partnered: true,
+    description: '원도심 중심 가톨릭 의료기관, 따뜻한 호스피스 및 만성질환 케어 특화'
   }
 ];
 
 // ========================================================
-// 5. 실시간 동행 위치 안내 트래커 (단계별 시뮬레이션 메타)
+// 4. 내 근처 동행자 찾기용 GPS 시뮬레이션 거점 데이터
+// ========================================================
+const DAEJEON_LOCATIONS = [
+  { 
+    id: 'loc-1', 
+    name: '대전 서구 둔산동', 
+    label: '대전 서구 둔산동 (시청/크로바Apt)', 
+    nearHospital: '대전을지대학교병원', 
+    mapX: 50, 
+    mapY: 42,
+    activeManagers: 4 
+  },
+  { 
+    id: 'loc-2', 
+    name: '대전 유성구 대학로/궁동', 
+    label: '대전 유성구 궁동 (충남대 대덕캠)', 
+    nearHospital: '충남대학교병원', 
+    mapX: 32, 
+    mapY: 34,
+    activeManagers: 4 
+  },
+  { 
+    id: 'loc-3', 
+    name: '대전 중구 대사동/대흥동', 
+    label: '대전 중구 대사동 (충남대병원/성모병원)', 
+    nearHospital: '충남대학교병원, 대전성모병원', 
+    mapX: 70, 
+    mapY: 62,
+    activeManagers: 4 
+  },
+  { 
+    id: 'loc-4', 
+    name: '대전 서구 관저동/도안동', 
+    label: '대전 서구 관저동 (건양대병원 인근)', 
+    nearHospital: '건양대학교병원', 
+    mapX: 28, 
+    mapY: 74,
+    activeManagers: 4 
+  }
+];
+
+// ========================================================
+// 5. "지금 당장 동행인 구해요!" (즉각적인 환자 수요 신청 피드)
+// ========================================================
+const URGENT_REQUESTS = [
+  {
+    id: 'urg-101',
+    patientName: '박*옥 어르신 (76세)',
+    hospital: '충남대학교병원',
+    department: '순환기내과',
+    time: '오늘 14:00 (급구)',
+    pickupLocation: '대전 서구 둔산동 크로바아파트',
+    mobility: '부축 보행 필요 (무릎 관절염)',
+    volunteerCredit: '봉사 4시간 인정',
+    hourlyPay: 20000,
+    status: 'WAITING',
+    note: '오후 14시 진료 예약인데 보호자가 급한 출장으로 부득이 신청합니다. 둔산동 자택 픽업부터 진료실 동행 부탁드립니다.'
+  },
+  {
+    id: 'urg-102',
+    patientName: '이*수 어르신 (81세)',
+    hospital: '대전을지대학교병원',
+    department: '정형외과',
+    time: '오늘 16:30 (접수 대기)',
+    pickupLocation: '대전 서구 월평동 무지개아파트',
+    mobility: '휠체어 대여 및 이동 보조 필요',
+    volunteerCredit: '봉사 3시간 인정',
+    hourlyPay: 20000,
+    status: 'WAITING',
+    note: '깁스 푼 뒤 재활 경과 확인 진료입니다. 병원 키오스크 접수와 휠체어 이동을 도와주실 대학생 동행자님 모십니다.'
+  },
+  {
+    id: 'urg-103',
+    patientName: '정*선 어르신 (73세)',
+    hospital: '건양대학교병원',
+    department: '안과 (망막 검진)',
+    time: '내일 09:30',
+    pickupLocation: '대전 서구 관저동 구봉마을',
+    mobility: '혼자 걸으시나 안약 점안 후 시야 흐림',
+    volunteerCredit: '봉사 4시간 인정',
+    hourlyPay: 20000,
+    status: 'WAITING',
+    note: '산동 검사 후 귀가 시 혼자 걷기 어려우시니 약국 수령과 자택 안전 귀가까지 꼼꼼히 부탁드립니다.'
+  }
+];
+
+// ========================================================
+// 6. "비슷한 학과 학생들은 주로 이런 병원에 동행하고 있어요!" 통계
+// ========================================================
+const MAJOR_INSIGHTS = [
+  {
+    majorName: '간호학과',
+    totalStudents: 142,
+    avgHours: 36.5,
+    topHospitals: [
+      { name: '충남대학교병원', share: '44%', badge: '외래 진료 및 복약 지도' },
+      { name: '대전을지대학교병원', share: '32%', badge: '주사·검사실 안내' },
+      { name: '가톨릭대 대전성모병원', share: '24%', badge: '노인 환자 말벗 케어' }
+    ],
+    reviewQuote: '"수업에서 배운 환자 응대와 의사 소견 청취를 실제로 체감하며 큰 보람과 취업 스펙을 쌓고 있어요."'
+  },
+  {
+    majorName: '의예과 / 의학과',
+    totalStudents: 68,
+    avgHours: 42.0,
+    topHospitals: [
+      { name: '대전을지대학교병원', share: '46%', badge: '교수님 진료 소견 정리' },
+      { name: '충남대학교병원', share: '38%', badge: '심장·혈관 검진 동행' },
+      { name: '건양대학교병원', share: '16%', badge: '중증 외래 접수 보조' }
+    ],
+    reviewQuote: '"환자와 의사 사이의 소통 가교 역할을 하며 예비 의료인으로서의 책임감을 배웁니다."'
+  },
+  {
+    majorName: '물리치료학과',
+    totalStudents: 54,
+    avgHours: 31.0,
+    topHospitals: [
+      { name: '가톨릭대 대전성모병원', share: '52%', badge: '낙상 예방 및 안전 보행' },
+      { name: '충남대학교병원', share: '30%', badge: '재활의학과 휠체어 보조' },
+      { name: '대전한국병원', share: '18%', badge: '관절 수술 후 외래 동행' }
+    ],
+    reviewQuote: '"보행이 불편한 어르신의 이동을 직접 보조하며 임상 물리치료 테크닉을 실전에서 익힙니다."'
+  }
+];
+
+// ========================================================
+// 7. 실시간 5단계 동행 프로세스 트래커 메타
 // ========================================================
 const TRACKING_STEPS_META = [
   {
     step: 1,
-    label: '예약 접수',
-    statusTitle: '매니저 배정 대기 중',
-    locationText: '동행 요청이 접수되어 전담 매니저 배정 중입니다.',
-    percent: 15,
-    eta: '매칭 확정 대기'
+    name: '예약 완료',
+    statusTitle: '① 예약 완료 (대전 대학생 동행자 매칭 중)',
+    stepDetail: '보호자님의 동행 신청이 정상 접수되었으며, 대전권 의료 관련 학과(간호/의예/물리치료 등) 인증 대학생 동행자를 매칭하고 있습니다.',
+    locationText: '접수 완료 · 대전 서구/유성구 매니저 풀 매칭 중',
+    percent: 20,
+    badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
+    eta: '매칭 진행 중'
   },
   {
     step: 2,
-    label: '매니저 출발',
-    statusTitle: '김서연 매니저님이 자택으로 이동 중입니다 🚗',
-    locationText: '현재 위치: 마포역 인근 도로 주행 중 (약 1.2km 전방)',
-    percent: 35,
-    eta: '자택 도착까지 약 8분'
+    name: '동행자 배정',
+    statusTitle: '② 동행자 배정 완료 (자택 출발 준비)',
+    stepDetail: '의료 전공 동행자가 배정되었습니다. 문진표와 주의사항을 확인한 뒤 자택으로 출발 준비 중입니다. 1:1 대화방을 통해 소통하실 수 있습니다.',
+    locationText: '현재 위치: 대전 유성구 대학로 인근 (약 800m 전방 이동 중)',
+    percent: 40,
+    badgeColor: 'bg-sky-100 text-sky-800 border-sky-300',
+    eta: '자택 도착까지 약 7분 전'
   },
   {
     step: 3,
-    label: '자택 픽업 & 부축',
-    statusTitle: '자택 앞 도착 및 어르신 건강 상태 확인 완료 🤝',
-    locationText: '현재 위치: 서울시 마포구 독막로 자택 앞 승차 완료',
-    percent: 55,
-    eta: '병원으로 출발'
+    name: '자택 픽업',
+    statusTitle: '③ 자택 픽업 완료 (병원으로 이동 중)',
+    stepDetail: '동행자가 자택 1층에서 어르신을 직접 대면하여 낙상 위험을 점검한 뒤, 안전하게 차량/대중교통에 탑승하여 병원으로 이동 중입니다.',
+    locationText: '현재 위치: 둔산대로 주행 중 (충남대병원/을지대병원 방향)',
+    percent: 60,
+    badgeColor: 'bg-teal-100 text-teal-800 border-teal-300',
+    eta: '병원 도착 예정'
   },
   {
     step: 4,
-    label: '병원 진료 동행',
-    statusTitle: '병원 외래 진료실 대기 및 의사 상담 동행 중 🏥',
-    locationText: '현재 위치: 신촌 세브란스병원 본관 3층 순환기내과 진료실 앞',
+    name: '병원 진료 중',
+    statusTitle: '④ 병원 도착 및 외래 진료 동행 중',
+    stepDetail: '병원 본관 도착 후 무인 키오스크 접수를 마치고 외래 진료실에 동행하여 대기 중입니다. 의사 선생님 소견과 복약 지도를 꼼꼼히 메모하고 있습니다.',
+    locationText: '현재 위치: 충남대학교병원 본관 외래 진료실 앞 대기',
     percent: 80,
-    eta: '진료 및 처방약 수령 중'
+    badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
+    eta: '진료실 대기 & 상담 진행 중'
   },
   {
     step: 5,
-    label: '안전 귀가 완료',
-    statusTitle: '자택 거실까지 안전하게 모셔다드렸습니다 🏠',
-    locationText: '자택 도착 완료 · 복약 지도 및 안심 리포트 작성 완료',
+    name: '귀가 완료',
+    statusTitle: '⑤ 안전 귀가 및 안심 리포트 완료',
+    stepDetail: '처방전 약국 수령을 마치고 어르신을 자택 안까지 안전하게 모셔다드렸습니다. 진료 핵심 요약과 복약 지도서가 포함된 안심 리포트가 등록되었습니다.',
+    locationText: '자택 도착 완료 · 복약 설명서 전달 완료',
     percent: 100,
-    eta: '동행 케어 종료'
+    badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    eta: '동행 완료 (봉사 4시간 적립)'
   }
 ];
 
 // ========================================================
-// 6. 1:1 실시간 안심 대화방 (초기 메시지 내역)
+// 8. 1:1 실시간 대화방 초기 내역
 // ========================================================
 const DEFAULT_CHAT_HISTORY = {
   'RES-2026-101': [
     {
       id: 'c-1',
       sender: 'MANAGER',
-      senderName: '김서연 매니저',
-      avatar: 'https://images.unsplash.com/photo-1594824813637-bf7f6e07fd64?auto=format&fit=crop&q=80&w=300',
-      time: '10:05',
-      text: '안녕하세요, 보호자님! 오늘 어머님 병원 동행을 담당하게 된 김서연 매니저입니다. 예약 시간 10분 전에 자택 1층 로비로 도착하겠습니다 😊'
+      senderName: '김서연 동행자 (충남대 간호)',
+      text: '안녕하세요, 보호자님! 오늘 어르신 충남대병원 순환기내과 동행을 맡은 충남대학교 간호학과 3학년 김서연입니다. 출발 15분 전 자택 앞에서 다시 연락드리겠습니다.',
+      time: '08:30'
     },
     {
       id: 'c-2',
       sender: 'GUARDIAN',
       senderName: '김민수 (보호자)',
-      avatar: null,
-      time: '10:07',
-      text: '네 매니저님, 감사합니다! 어머니께서 오늘 아침에 무릎이 조금 더 쑤신다고 하셔서 천천히 부축 부탁드립니다.'
+      text: '네, 김서연 학생님 반갑습니다. 어머니께서 무릎이 조금 불편하시니 계단 내려오실 때 천천히 부축 부탁드릴게요.',
+      time: '08:32'
     },
     {
       id: 'c-3',
       sender: 'MANAGER',
-      senderName: '김서연 매니저',
-      avatar: 'https://images.unsplash.com/photo-1594824813637-bf7f6e07fd64?auto=format&fit=crop&q=80&w=300',
-      time: '10:08',
-      text: '네, 확인했습니다! 무릎에 무리가 가지 않도록 엘리베이터 이동 및 진료실까지 천천히 보행 보조하겠습니다. 출발하실 때 다시 연락드릴게요.'
-    }
-  ],
-  'RES-2026-102': [
-    {
-      id: 'c-10',
-      sender: 'MANAGER',
-      senderName: '최정민 매니저',
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300',
-      time: '13:40',
-      text: '보호자님, 아버님 모시고 서울성모병원 본관 도착하여 정형외과 외래 접수 마쳤습니다! 현재 진료 대기 3번째입니다.'
-    },
-    {
-      id: 'c-11',
-      sender: 'GUARDIAN',
-      senderName: '박지혜 (보호자)',
-      avatar: null,
-      time: '13:42',
-      text: '실시간 공유 감사해요! 교수님께 지난주에 계단 내려갈 때 찌릿했던 증상 꼭 여쭤봐 주세요.'
+      senderName: '김서연 동행자 (충남대 간호)',
+      text: '네, 걱정 마세요! 어르신 낙상 예방에 유의하여 안전하게 엘리베이터 이용하겠습니다. 진료실 질문 리스트도 잘 챙겼습니다.',
+      time: '08:35'
     }
   ]
 };
 
 // ========================================================
-// 7. AI 음성 녹음 요약 시뮬레이션
+// 9. 초기 예약 내역 데이터
 // ========================================================
-const SAMPLE_AI_VOICE_SUMMARY = {
-  audioDuration: '14분 32초 (외래 진료실 대화)',
-  sttAccuracy: '98.4%',
-  transcriptPreview: [
-    { speaker: '의사', text: '어르신, 지난달 처방해 드린 혈압약 드시면서 어지럽거나 속 쓰린 건 없으셨어요?' },
-    { speaker: '환자', text: '속은 괜찮은데 아침에 일어날 때 가끔 핑 돌 때가 있어요.' },
-    { speaker: '매니저', text: '선생님, 보호자분께서 어르신 기립 시 어지럼증 횟수가 주 2~3회 정도 있었다고 전해주셨습니다.' },
-    { speaker: '의사', text: '아, 그렇다면 혈압 강하제 용량을 살짝 조절하겠습니다. 아침 약에서 이뇨제 성분을 반 알 줄여볼게요.' }
-  ],
-  keyBulletPoints: [
-    '혈압약 성분 중 이뇨제 성분 50% 감량 처방 (기립성 어지럼증 예방 목적)',
-    '무릎 관절 연골 마모 소견: 주 3회 30분 평지 걷기 및 온찜질 권고',
-    '다음 재진일: 4주 뒤 수요일 오전 10시로 확정'
-  ]
-};
-
-// ========================================================
-// 8. 초기 예약 데이터셋
-// ========================================================
-const INITIAL_RESERVATIONS = [
+const DEFAULT_RESERVATIONS = [
   {
     id: 'RES-2026-101',
     patientName: '김순자',
     patientBirth: '1950-04-12',
-    patientAge: 76,
-    patientGender: '여성',
-    patientPhone: '010-3344-9988',
-    patientRegion: '서울 마포구',
-    guardianName: '김민수 (자녀)',
-    guardianPhone: '010-9876-5432',
-    mobility: 'ASSISTED',
-    mobilityLabel: '거동 불편 · 부축 필요',
-    useWheelchair: false,
-    currentMedications: '혈압약(아침 1정), 관절염 소염진통제',
-    symptomsDescription: '계단 오르내릴 때 오른쪽 무릎에 시큰거리는 통증이 심함.',
-    messageToDoctor: '최근 아침 기립 시 어지럼증이 잦아 혈압약 용량 점검 부탁드립니다.',
-    messageToManager: '귀가 어두우시니 선생님 소견을 꼼꼼히 메모해 주세요.',
-    transportOption: 'TAXI_TRANSIT',
-    transportLabel: '택시 / 대중교통 동행',
-    agreePrivacy: true,
-    hospital: '신촌 세브란스병원',
+    hospital: '충남대학교병원',
     department: '순환기내과',
-    doctor: '이진우 교수',
-    date: '2026-10-28',
-    time: '10:30',
-    pickupAddress: '서울시 마포구 독막로 12길 15, 102동 402호',
-    options: { pharmacy: true, paymentAssist: true, wheelchairRental: false },
-    serviceDuration: '2시간 기본',
-    cost: 55000,
-    status: 'REQUESTED',
-    step: 1,
-    managerId: null,
-    report: null,
-    review: null,
-    createdAt: '2026-10-27 10:15'
+    date: '2026-11-20',
+    time: '09:30',
+    mobility: '거동 불편·부축 필요',
+    pickupAddress: '대전광역시 서구 둔산로 123 (크로바아파트)',
+    transportType: 'TAXI',
+    transportLabel: '택시/대중교통 (실비 환자부담)',
+    includePharmacy: true,
+    messageToDoctor: '최근 아침 기상 시 가슴 답답함 증상이 주 2회 정도 있으셨습니다.',
+    messageToManager: '귀가 어두우시니 원내 이동 시 큰 소리로 친절하게 안내 부탁드립니다.',
+    cost: 36000,
+    step: 4,
+    status: 'IN_PROGRESS',
+    managerId: 'mgr-1',
+    volunteerHoursEarned: 4,
+    report: {
+      summary: '충남대병원 순환기내과 진료 완료. 심전도 및 혈압 정상 범위 내 유지 중이나, 아침 가슴 답답 증상 관련하여 경구 약 1종 추가 처방됨. 3개월 후 재진 예약 완료.',
+      doctorAdvice: '아침 기상 후 급격한 보행 지양, 처방된 혈압 조절제 매일 아침 식후 30분에 규칙적으로 복용할 것.',
+      pharmacyGuide: '새로 추가된 혈압약은 어지럼증이 나타날 수 있으므로 기상 직후 충분한 물과 함께 복용 지도 완료.',
+      aiAudioSummary: '[AI 녹음 요약] 환자분 혈압 안정적임. 가슴 통증 빈도 모니터링 필요하며 차기 진료는 2027년 2월 24일 오전 10시 외래 예약됨.',
+      isLockedDeepReport: true
+    }
   },
   {
     id: 'RES-2026-102',
-    patientName: '박영철',
-    patientBirth: '1945-11-03',
-    patientAge: 81,
-    patientGender: '남성',
-    patientPhone: '010-4455-6677',
-    patientRegion: '서울 서초구',
-    guardianName: '박지혜 (자녀)',
-    guardianPhone: '010-2233-4455',
-    mobility: 'WHEELCHAIR',
-    mobilityLabel: '휠체어 이용 필수',
-    useWheelchair: true,
-    currentMedications: '당뇨약, 관절소염진통제',
-    symptomsDescription: '고관절 인공관절 수술 후 정기 검진.',
-    messageToDoctor: '수술 부위 주변에 뻐근한 느낌이 지속되는지 확인.',
-    messageToManager: '휠체어 차량 적재 및 승하차 시 낙상 주의 부탁드립니다.',
-    transportOption: 'PERSONAL_CAR',
-    transportLabel: '매니저 자차 동행',
-    agreePrivacy: true,
-    hospital: '서울성모병원',
+    patientName: '김순자',
+    patientBirth: '1950-04-12',
+    hospital: '대전을지대학교병원',
     department: '정형외과',
-    doctor: '김태호 과장',
-    date: '2026-10-27',
+    date: '2026-11-05',
     time: '14:00',
-    pickupAddress: '서울시 서초구 반포대로 201, 303동 1102호',
-    options: { pharmacy: true, paymentAssist: true, wheelchairRental: true },
-    serviceDuration: '3시간 심층',
-    cost: 85000,
-    status: 'IN_PROGRESS',
-    step: 4,
-    managerId: 'mgr-2',
-    report: null,
-    review: null,
-    createdAt: '2026-10-26 15:30'
-  },
-  {
-    id: 'RES-2026-103',
-    patientName: '이옥순',
-    patientBirth: '1953-06-20',
-    patientAge: 73,
-    patientGender: '여성',
-    patientPhone: '010-5566-7788',
-    patientRegion: '서울 송파구',
-    guardianName: '이수진 (자녀)',
-    guardianPhone: '010-7788-9900',
-    mobility: 'INDEPENDENT',
-    mobilityLabel: '혼자 보행 가능',
-    useWheelchair: false,
-    currentMedications: '소염 안약, 인공눈물',
-    symptomsDescription: '백내장 수술 후 3개월 정기 검진.',
-    messageToDoctor: '야간 빛 번짐 증상 경과 확인.',
-    messageToManager: '진료 후 눈부심이 있을 수 있으니 부축 부탁드립니다.',
-    transportOption: 'TAXI_TRANSIT',
-    transportLabel: '택시 / 대중교통 동행',
-    agreePrivacy: true,
-    hospital: '서울아산병원',
-    department: '안과',
-    doctor: '정우석 교수',
-    date: '2026-10-25',
-    time: '09:30',
-    pickupAddress: '서울시 송파구 올림픽로 300, 105동 801호',
-    options: { pharmacy: true, paymentAssist: true, wheelchairRental: false },
-    serviceDuration: '2시간 기본',
-    cost: 45000,
-    status: 'COMPLETED',
+    mobility: '거동 불편·부축 필요',
+    pickupAddress: '대전광역시 서구 둔산로 123',
+    transportType: 'OWN_CAR',
+    transportLabel: '도보 / 자차',
+    includePharmacy: true,
+    messageToDoctor: '무릎 관절 주사 경과 확인차 내원합니다.',
+    messageToManager: '병원 외래 센터 앞 키오스크 수납 대행 부탁드립니다.',
+    cost: 42000,
     step: 5,
-    managerId: 'mgr-1',
+    status: 'COMPLETED',
+    managerId: 'mgr-2',
+    volunteerHoursEarned: 4,
+    ratingGiven: 5,
+    reviewText: '박준혁 의예과 학생님이 교수님 설명을 너무 명쾌하게 받아적어 주셔서 자녀 입장에서 정말 안심이 되었습니다! 강력 추천합니다.',
     report: {
-      completedAt: '2026-10-25 12:40',
-      medicalSummary: '안과 백내장 수술 후 3개월 경과 정기 검진 완료. 양안 교정시력 0.9로 수술 경과 매우 양호하며 각막 및 안압 모두 정상 수치 확인되었습니다.',
-      nextAppointment: '2027-01-20 (수) 10:00 (6개월 정기 검진 예약 완료)',
-      prescriptions: '인공눈물(히알루론산 점안액 0.15%) 3박스 처방 및 수령 완료. 취침 전 및 건조할 때 1방울씩 점안 지도 완료.',
-      patientCondition: '진료 중 산동제 점안으로 귀가 시 약간 눈부심 호소하셨으나 보호 선글라스 착용 후 자택 침실까지 안전하게 부축해 드렸습니다.',
-      managerMessage: '어머님께서 진료 내내 마음 편히 웃으시며 즐겁게 다녀오셨습니다. 다음 진료 때도 믿고 맡겨주세요!',
-      aiVoiceSummary: SAMPLE_AI_VOICE_SUMMARY,
-      premiumReportUnlocked: false,
-      timeline: [
-        { time: '09:00', title: '자택 픽업 완료', desc: '자택 도착 후 어르신 컨디션 확인 및 탑승' },
-        { time: '09:25', title: '병원 도착 및 접수', desc: '신관 안과 외래 접수 및 안압/시력 검사' },
-        { time: '10:15', title: '진료실 동행', desc: '의사 소견 경청 및 메모 전달' },
-        { time: '11:10', title: '처방약 수령', desc: '1층 약국에서 복약 지도 확인' },
-        { time: '12:15', title: '안전 귀가 완료', desc: '자택 복약 설명서 냉장고 부착' }
-      ],
-      photos: [
-        { label: '처방전 및 복약안내문', url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400' },
-        { label: '병원 진료비 영수증', url: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=400' },
-        { label: '안심 귀가 확인', url: 'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&q=80&w=400' }
-      ]
-    },
-    review: {
-      rating: 5,
-      tags: ['친절하고 따뜻해요', '의사 소견을 상세히 전해줘요', '시간 약속을 철저히 지켜요'],
-      comment: '직장 출근 때문에 어머니 백내장 검진에 못 가 마음이 무거웠는데, 김서연 매니저님이 의사 소견부터 약 복용법까지 사진과 함께 꼼꼼히 보내주셔서 너무 안심되었습니다!',
-      createdAt: '2026-10-25 14:10'
-    },
-    createdAt: '2026-10-24 11:20'
+      summary: '대전을지대병원 정형외과 외래 완료. 우측 무릎 관절염 염증 수치 현저히 완화됨. 물리치료 처방 및 소염진통제 2주분 수령 완료.',
+      doctorAdvice: '계단 이용 줄이고 평지 위주로 하루 20분씩 가볍게 걷기 운동 권장.',
+      pharmacyGuide: '소염진통제 1일 2회 식후 복용. 위장 장애 예방용 위보호제 병용.',
+      aiAudioSummary: '[AI 녹음 요약] 염증 호전 확인. 무리한 등산이나 쪼그려 앉기 금지 지도.',
+      isLockedDeepReport: false
+    }
   }
 ];
 
-const SYMPTOM_ANALYSIS_PRESETS = [
-  {
-    id: 'sym-1',
-    chipText: '다리 저림 & 보행 곤란',
-    fullQuery: '어머니가 자꾸 다리가 저리고 10분 이상 걷기 힘들어하셔',
-    department: '정형외과 / 척추신경외과',
-    analysisSummary: '척추관협착증 또는 요추 신경 압박 질환 의심 소견입니다. 보행 시 저림과 당김이 동반되는 경우 척추·관절 전문의 진료가 시급합니다.',
-    suggestedHospitalIds: ['hosp-1', 'hosp-3', 'hosp-2']
-  },
-  {
-    id: 'sym-2',
-    chipText: '가슴 답답 & 계단 오를 때 숨참',
-    fullQuery: '계단을 오를 때 가슴이 뻐근하게 조여오고 숨이 턱 끝까지 차올라요',
-    department: '순환기내과 (심장내과)',
-    analysisSummary: '노년기 협심증 또는 심부전증 초기 징후일 가능성이 있습니다. 계단이나 경사로 이동 시 증상이 심화되면 심전도 및 심장 초음파 정밀 검사가 필요합니다.',
-    suggestedHospitalIds: ['hosp-4', 'hosp-1']
-  },
-  {
-    id: 'sym-3',
-    chipText: '눈 침침 & 안개 낀 듯 뿌연 시야',
-    fullQuery: '글씨가 이중으로 겹쳐 보이고 눈앞에 얇은 막이 낀 것처럼 뿌옇게 보여요',
-    department: '안과 (백내장·노안클리닉)',
-    analysisSummary: '수정체 혼탁으로 인한 노년성 백내장 또는 망막 질환 의심 소견입니다. 동공 확대(산동) 정밀 검진 후 수술 필요 여부를 확인하는 것이 좋습니다.',
-    suggestedHospitalIds: ['hosp-1', 'hosp-4']
-  },
-  {
-    id: 'sym-4',
-    chipText: '무릎 관절 시큰 & 쑤심',
-    fullQuery: '무릎에서 소리가 나고 계단 내려갈 때 찌르는 듯한 통증이 심해요',
-    department: '정형외과 (관절센터)',
-    analysisSummary: '퇴행성 무릎 관절염 2~3기 의심 소견입니다. 연골 손상도 확인을 위한 X-ray 및 관절강 주사 치료 상담이 권장됩니다.',
-    suggestedHospitalIds: ['hosp-2', 'hosp-3', 'hosp-1']
-  }
-];
-
-const GUARDIAN_TESTIMONIALS = [
-  {
-    id: 't-1',
-    author: '이영훈 님 (직장인)',
-    relation: '78세 모친 동행 신청',
-    rating: 5,
-    tag: '직장인 자녀 필수 앱',
-    text: '연차를 못 내는 날마다 홀로 병원에 가시는 어머니 때문에 늘 불안했는데, 김서연 매니저님이 자택 앞에서 픽업부터 약국 수령까지 가족보다 더 세심하게 챙겨주셔서 정말 큰 힘이 되었습니다.',
-    hospital: '신촌 세브란스병원 순환기내과'
-  },
-  {
-    id: 't-2',
-    author: '박정민 님 (보호자)',
-    relation: '82세 부친 휠체어 동행',
-    rating: 5,
-    tag: '휠체어 차량 완벽 지원',
-    text: '아버지가 휠체어를 타셔서 이동이 큰 부담이었는데 최정민 매니저님이 능숙하게 부축해 주시고, 진료실에서 교수님이 하신 말씀과 다음 재진 일정을 하나도 안 빠뜨리고 리포트로 남겨주셨습니다.',
-    hospital: '서울성모병원 정형외과'
-  }
-];
-
-const B2B_MODEL_POINTS = [
-  {
-    title: '병원 타겟 광고 및 제휴 프로필 노출',
-    desc: '환자의 증상 및 지역 데이터 기반으로 전문 병원을 정밀 매칭하고, 제휴 병원 우선 추천 슬롯을 통해 안정적인 B2B 광고 수익을 창출합니다.',
-    badge: '광고 & 마케팅 수익'
-  },
-  {
-    title: '병원 공식 파트너십 (패스트트랙 접수)',
-    desc: '대형 병원과의 원내 전담 창구 협약을 통해, 동행 매니저 전용 접수/수납 패스트트랙을 구축하고 병원으로부터 제휴 수수료를 수취합니다.',
-    badge: 'B2B 제휴 수수료'
-  },
-  {
-    title: '기업 임직원 부모님 복지 B2B 정기 구독',
-    desc: '기업 임직원을 위한 "부모님 효도 동행 복지 패키지"를 법인 복지몰 구독 모델로 제공하여 안정적인 정기 매출을 확보합니다.',
-    badge: '기업 복지 구독'
-  },
-  {
-    title: '심층 건강 리포트 프리미엄 B2C 모델',
-    desc: '기본 진료 요약은 무료 제공하되, AI 혈압/혈당 추세 분석 및 재활 가이드가 포함된 "심층 건강 리포트"는 월정액 유료 구독으로 차별화합니다.',
-    badge: '프리미엄 모델'
-  }
-];
+// 브라우저 전역 노출
+window.DEFAULT_PATIENT_PROFILE = DEFAULT_PATIENT_PROFILE;
+window.DEFAULT_MANAGERS = DEFAULT_MANAGERS;
+window.DEFAULT_HOSPITALS = DEFAULT_HOSPITALS;
+window.DAEJEON_LOCATIONS = DAEJEON_LOCATIONS;
+window.URGENT_REQUESTS = URGENT_REQUESTS;
+window.MAJOR_INSIGHTS = MAJOR_INSIGHTS;
+window.TRACKING_STEPS_META = TRACKING_STEPS_META;
+window.DEFAULT_CHAT_HISTORY = DEFAULT_CHAT_HISTORY;
+window.DEFAULT_RESERVATIONS = DEFAULT_RESERVATIONS;
