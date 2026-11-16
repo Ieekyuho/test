@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="50" fill="#f0fdf4"/>
+  <!-- Hair -->
+  <path d="M30 42 C30 24 70 24 70 42 C70 34 30 34 30 42 Z" fill="#0f172a"/>
+  <!-- Head -->
+  <circle cx="50" cy="45" r="18" fill="#fde047" opacity="0.3"/>
+  <circle cx="50" cy="45" r="17" fill="#fed7aa"/>
+  <!-- Eyes -->
+  <circle cx="44" cy="44" r="2" fill="#0f172a"/>
+  <circle cx="56" cy="44" r="2" fill="#0f172a"/>
+  <!-- Smile -->
+  <path d="M46 52 Q50 55 54 52" stroke="#475569" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Body/Doctor coat -->
+  <path d="M26 84 C26 66 36 60 50 60 C64 60 74 66 74 84 Z" fill="#ffffff"/>
+  <!-- Inner shirt -->
+  <path d="M44 60 L50 72 L56 60" fill="#0284c7"/>
+  <!-- Stethoscope -->
+  <path d="M38 68 C38 80 62 80 62 68" stroke="#334155" stroke-width="2" fill="none"/>
+  <circle cx="50" cy="78" r="3" fill="#cbd5e1" stroke="#334155" stroke-width="1.5"/>
+</svg>

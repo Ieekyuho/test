@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="50" fill="#f1f5f9"/>
+  <!-- Short hair -->
+  <path d="M30 40 C30 22 70 22 70 40" fill="#1e293b"/>
+  <circle cx="50" cy="46" r="17" fill="#fed7aa"/>
+  <circle cx="44" cy="44" r="2" fill="#0f172a"/>
+  <circle cx="56" cy="44" r="2" fill="#0f172a"/>
+  <path d="M46 53 Q50 56 54 53" stroke="#334155" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Physical therapist polo shirt -->
+  <path d="M24 84 C24 64 36 58 50 58 C64 58 76 64 76 84 Z" fill="#475569"/>
+  <path d="M44 58 L50 68 L56 58" fill="#fed7aa"/>
+</svg>
