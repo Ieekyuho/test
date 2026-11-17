@@ -62,6 +62,36 @@ const Icons = {
 };
 
 // ========================================================
+// 0-1. 이미지 안전 로드 & 폴백 헬퍼
+// (assets/ 폴더에 있든 최상위 루트에 있든 자동 감지하며, 실패 시 내장 SVG로 즉시 대체)
+// ========================================================
+const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e0f2fe'/%3E%3Ccircle cx='50' cy='40' r='24' fill='%23334155'/%3E%3Ccircle cx='50' cy='44' r='18' fill='%23fed7aa'/%3E%3Cpath d='M34 38 Q50 24 66 38 Q50 30 34 38 Z' fill='%231e293b'/%3E%3Ccircle cx='44' cy='44' r='2' fill='%230f172a'/%3E%3Ccircle cx='56' cy='44' r='2' fill='%230f172a'/%3E%3Cpath d='M46 51 Q50 54 54 51' stroke='%23ea580c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='41' cy='48' r='2' fill='%23fca5a5' opacity='0.6'/%3E%3Ccircle cx='59' cy='48' r='2' fill='%23fca5a5' opacity='0.6'/%3E%3Cpath d='M26 84 C26 66 36 60 50 60 C64 60 74 66 74 84 Z' fill='%230284c7'/%3E%3Cpath d='M44 60 L50 68 L56 60' fill='%23fed7aa'/%3E%3Ccircle cx='62' cy='74' r='5' fill='%23ffffff'/%3E%3Cpath d='M62 71 V77 M59 74 H65' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E";
+
+const handleAvatarError = (e) => {
+  const step = e.target.dataset.fallbackStep || '0';
+  if (step === '0') {
+    e.target.dataset.fallbackStep = '1';
+    const src = e.target.getAttribute('src') || '';
+    const filename = src.split('/').pop() || 'avatar_kim.svg';
+    e.target.src = filename;
+  } else {
+    e.target.onerror = null;
+    e.target.src = DEFAULT_AVATAR;
+  }
+};
+
+const handleLogoError = (e) => {
+  const step = e.target.dataset.fallbackStep || '0';
+  if (step === '0') {
+    e.target.dataset.fallbackStep = '1';
+    e.target.src = 'logo.png';
+  } else {
+    e.target.onerror = null;
+    e.target.style.display = 'none';
+  }
+};
+
+// ========================================================
 // 1. 메인 App 루트 컴포넌트
 // ========================================================
 function App() {
@@ -151,7 +181,7 @@ function App() {
                 src="assets/logo.png" 
                 alt="WithCare 로고" 
                 className="w-8 h-8 object-contain transition-transform group-hover:scale-105" 
-                onError={(e) => { e.target.style.display = 'none'; }}
+                onError={handleLogoError}
               />
               <div className="flex flex-col">
                 <span className="font-extrabold text-lg text-slate-900 tracking-tight leading-none">
@@ -402,7 +432,7 @@ function App() {
       <footer className="bg-white border-t border-slate-200 py-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={handleLogoError} />
             <span className="font-extrabold text-slate-800">위드케어 (WithCare)</span>
             <span>· 대전광역시 거점 부모님 병원 동행 서비스 플랫폼</span>
           </div>
@@ -423,10 +453,10 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
     <div className="space-y-12 pb-16">
       {/* Hero 섹션 */}
       <section className="relative w-full min-h-[500px] sm:min-h-[560px] flex items-center justify-center overflow-hidden bg-slate-900">
-        {/* 상체~팔 위주 크롭본 배경 이미지 */}
+        {/* 상체~팔 위주 크롭본 배경 이미지 (assets 또는 루트 경로 자동 지원) */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 hover:scale-105"
-          style={{ backgroundImage: `url('assets/hero_companion.jpg')` }}
+          style={{ backgroundImage: `url('assets/hero_companion.jpg'), url('hero_companion.jpg')` }}
         ></div>
 
         {/* 텍스트 시인성을 위한 소프트 딤 오버레이 (그라데이션 없이 플랫) */}
@@ -1073,7 +1103,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
                     src={mgr.avatar} 
                     alt={mgr.name} 
                     className="w-full h-full rounded-full object-cover" 
-                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                    onError={handleAvatarError}
                   />
                   <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border border-white"></span>
                 </div>
@@ -1100,7 +1130,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
                     src={activeManager.avatar} 
                     alt={activeManager.name} 
                     className="w-13 h-13 rounded-2xl object-cover border border-slate-200 shadow-xs" 
-                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                    onError={handleAvatarError}
                   />
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -1205,7 +1235,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
                     src={mgr.avatar} 
                     alt={mgr.name} 
                     className="w-10 h-10 rounded-xl object-cover border border-slate-200" 
-                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                    onError={handleAvatarError}
                   />
                   <div className="overflow-hidden">
                     <div className="font-extrabold text-slate-900 truncate">{mgr.name} ({mgr.badge.split(' ')[1] || '전공'})</div>
@@ -1471,7 +1501,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
                       src={mgr.avatar} 
                       alt={mgr.name} 
                       className="w-10 h-10 rounded-xl object-cover" 
-                      onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                      onError={handleAvatarError}
                     />
                     <div>
                       <div className="flex items-center gap-1.5">
@@ -1844,7 +1874,7 @@ function UserMyPageView({ currentUser, patientProfile, reservations, managers, o
                         src={manager.avatar} 
                         alt={manager.name} 
                         className="w-12 h-12 rounded-xl object-cover border border-slate-100" 
-                        onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                        onError={handleAvatarError}
                       />
                       <div>
                         <div className="flex items-center gap-2">
@@ -2004,7 +2034,7 @@ function UserMyPageView({ currentUser, patientProfile, reservations, managers, o
                       src={mgr.avatar} 
                       alt={mgr.name} 
                       className="w-12 h-12 rounded-xl object-cover" 
-                      onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                      onError={handleAvatarError}
                     />
                     <div>
                       <div className="font-bold text-slate-900 text-sm">{mgr.name} ({mgr.badge})</div>
@@ -2632,7 +2662,7 @@ function LoginModal({ onClose, onSuccess }) {
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-7 border border-slate-200 space-y-5 text-xs">
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={handleLogoError} />
             <h3 className="font-extrabold text-base text-slate-900">위드케어 로그인</h3>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
@@ -2725,7 +2755,7 @@ function LoginModal({ onClose, onSuccess }) {
                     src={defaultManager.avatar} 
                     alt={defaultManager.name} 
                     className="w-12 h-12 rounded-xl object-cover" 
-                    onError={(e) => { e.target.src = 'assets/avatar_kim.svg'; }}
+                    onError={handleAvatarError}
                   />
                   <div>
                     <div className="font-black text-slate-900 text-sm">{defaultManager.name} 동행자</div>
