@@ -147,31 +147,9 @@ function App() {
   const [preselectedHospital, setPreselectedHospital] = useState(null);
 
   const [toast, setToast] = useState(null);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isInstallable, setIsInstallable] = useState(false);
 
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setIsInstallable(true);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      showToast('스마트폰 브라우저 메뉴(⋮ 또는 공유)에서 [홈 화면에 추가]를 선택하여 앱으로 설치하세요.', 'info');
-      return;
-    }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setIsInstallable(false);
-      showToast('위드케어 앱이 정상적으로 설치되었습니다!', 'success');
-    }
-    setDeferredPrompt(null);
+  const handleApkDownload = () => {
+    showToast('위드케어 앱(APK) 다운로드를 시작합니다. 완료 후 파일을 열어 설치해 주세요.', 'info');
   };
 
   const showToast = (message, type = 'info') => {
@@ -299,15 +277,16 @@ function App() {
 
             {/* 우측 테마 전환 & 로그인/로그아웃 버튼 */}
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleInstallClick}
+              <a
+                href="./withcare.apk"
+                download="withcare.apk"
+                onClick={handleApkDownload}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-[#fff0f3] hover:bg-[#ffe4ea] text-[#e11d62] border border-[#ff4b72]/40 transition shadow-2xs cursor-pointer"
-                title="위드케어 앱 홈 화면에 설치"
+                title="위드케어 앱(APK) 다운로드"
               >
                 <Icons.Sparkles className="w-3.5 h-3.5 text-[#ff4b72]" />
                 <span>앱 설치</span>
-              </button>
+              </a>
 
               {storeState.currentUser.isLoggedIn ? (
                 <div className="flex items-center gap-2 text-xs">
