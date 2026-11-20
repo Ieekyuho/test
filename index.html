@@ -5,19 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>위드케어 (WithCare) - 대전 의료전공 대학생 병원 동행서비스</title>
   <!-- 파비콘: 캐시 무효화(?v=3) 및 상대경로/루트 자동 감지 -->
-  <link rel="icon" type="image/png" href="./assets/logo.png?v=3" id="site-favicon">
-  <link rel="shortcut icon" type="image/png" href="./assets/logo.png?v=3">
-  <link rel="apple-touch-icon" href="./assets/logo.png?v=3">
+  <link rel="icon" type="image/png" href="./assets/logo_pink.png?v=3" id="site-favicon">
+  <link rel="shortcut icon" type="image/png" href="./assets/logo_pink.png?v=3">
+  <link rel="apple-touch-icon" href="./assets/logo_pink.png?v=3">
   <script>
     (function() {
       var testImg = new Image();
       testImg.onerror = function() {
         var icons = document.querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon']");
-        icons.forEach(function(el) { el.href = './logo.png?v=3'; });
+        icons.forEach(function(el) { el.href = './logo_pink.png?v=3'; });
       };
-      testImg.src = './assets/logo.png?v=3';
+      testImg.src = './assets/logo_pink.png?v=3';
     })();
   </script>
+    <!-- PWA Manifest & Mobile App Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#ff4b72">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="위드케어">
+  <link rel="apple-touch-icon" href="./assets/logo_pink.png?v=3">
   <meta name="description" content="부모님 병원 가는 날, 전문 자격증 검증 매니저 매칭, 1:1 안심 실시간 대화, 실시간 동행 위치 안내, AI 음성 요약 리포트">
 
   <!-- Pretendard 한글 웹폰트 -->
@@ -32,10 +40,10 @@
         extend: {
           colors: {
             brand: {
-              DEFAULT: '#6edfec',
-              hover: '#5cd4e2',
-              dark: '#0bbecb',
-              light: '#e8fbfd'
+              DEFAULT: '#ff4b72',
+              hover: '#ff5f83',
+              dark: '#e11d62',
+              light: '#fff0f3'
             },
             sky: {
               50: '#f0f9ff',
@@ -106,11 +114,11 @@
   <!-- Babel Standalone (JSX 컴파일용) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-sky-500 selection:text-white">
+<body class="text-slate-800 antialiased selection:bg-[#ff4b72] selection:text-white" style="background: linear-gradient(180deg, #ffffff 0%, #fff6f8 30%, #fae6ed 100%); background-attachment: fixed; min-height: 100vh;">
   <!-- React Mount Root -->
   <div id="root">
     <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8fafc; font-family: sans-serif; color: #334155;">
-      <div style="width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #0284c7; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+      <div style="width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #ff4b72; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
       <h2 style="margin-top: 14px; font-weight: 700; font-size: 16px; color: #0f172a;">위드케어 (WithCare) 불러오는 중...</h2>
       <p style="margin-top: 4px; font-size: 12px; color: #64748b;">부모님 병원 동행 서비스를 준비하고 있습니다.</p>
       <style>
@@ -214,7 +222,7 @@ const handleLogoError = (e) => {
   const step = e.target.dataset.fallbackStep || '0';
   if (step === '0') {
     e.target.dataset.fallbackStep = '1';
-    e.target.src = 'logo.png';
+    e.target.src = 'logo_pink.png';
   } else {
     e.target.onerror = null;
     e.target.style.display = 'none';
@@ -277,6 +285,32 @@ function App() {
   const [preselectedHospital, setPreselectedHospital] = useState(null);
 
   const [toast, setToast] = useState(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      showToast('스마트폰 브라우저 메뉴(⋮ 또는 공유)에서 [홈 화면에 추가]를 선택하여 앱으로 설치하세요.', 'info');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+      showToast('위드케어 앱이 정상적으로 설치되었습니다!', 'success');
+    }
+    setDeferredPrompt(null);
+  };
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
@@ -329,7 +363,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased selection:bg-[#6edfec]/40">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#fff6f8] to-[#fae6ed] flex flex-col font-sans text-slate-800 antialiased selection:bg-[#ff4b72]/30">
       {/* 1. 상단 글로벌 네비게이션 헤더 */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -340,7 +374,7 @@ function App() {
               className="flex items-center gap-3 cursor-pointer group"
             >
               <img 
-                src="assets/logo.png" 
+                src="assets/logo_pink.png" 
                 alt="WithCare 로고" 
                 className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-xl transition-transform group-hover:scale-105 shadow-xs border border-slate-100 bg-white p-0.5" 
                 onError={handleLogoError}
@@ -375,7 +409,7 @@ function App() {
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <Icons.MapPin className="w-3.5 h-3.5 text-[#0bbecb]" />
+                <Icons.MapPin className="w-3.5 h-3.5 text-[#e11d62]" />
                 <span>동행자 찾기</span>
               </button>
               <button
@@ -403,15 +437,15 @@ function App() {
 
             {/* 우측 테마 전환 & 로그인/로그아웃 버튼 */}
             <div className="flex items-center gap-2">
-              <a
-                href="pink.html"
-                id="theme-switch-link"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-[#F4EBEE] hover:bg-[#ebdbe0] text-[#8e6673] border border-[#B4939E]/40 transition shadow-2xs cursor-pointer"
-                title="로즈 핑크 테마 시안 보기"
+              <button
+                type="button"
+                onClick={handleInstallClick}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-[#fff0f3] hover:bg-[#ffe4ea] text-[#e11d62] border border-[#ff4b72]/40 transition shadow-2xs cursor-pointer"
+                title="위드케어 앱 홈 화면에 설치"
               >
-                <span className="w-2 h-2 rounded-full bg-[#B4939E]"></span>
-                <span>핑크 시안</span>
-              </a>
+                <Icons.Sparkles className="w-3.5 h-3.5 text-[#ff4b72]" />
+                <span>앱 설치</span>
+              </button>
 
               {storeState.currentUser.isLoggedIn ? (
                 <div className="flex items-center gap-2 text-xs">
@@ -433,7 +467,7 @@ function App() {
               ) : (
                 <button
                   onClick={() => setIsLoginModalOpen(true)}
-                  className="px-4 py-1.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                  className="px-4 py-1.5 bg-[#ff4b72] hover:bg-[#ff5f83] text-slate-900 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer"
                 >
                   로그인
                 </button>
@@ -475,13 +509,7 @@ function App() {
             >
               마이페이지
             </button>
-            <a
-              href="pink.html"
-              id="mobile-theme-link"
-              className="px-2 py-1 rounded-lg text-[11px] font-black bg-[#F4EBEE] text-[#8e6673] border border-[#B4939E]/40 cursor-pointer"
-            >
-              핑크시안
-            </a>
+
           </div>
         </div>
       </header>
@@ -609,7 +637,7 @@ function App() {
             {!isFloatingChatOpen && (
               <div 
                 onClick={() => setIsFloatingChatOpen(true)}
-                className="hidden sm:flex items-center gap-2 bg-white/95 backdrop-blur-md text-slate-800 text-xs font-black px-3.5 py-2 rounded-2xl shadow-lg border border-slate-200 cursor-pointer hover:bg-white hover:border-[#6edfec] transition-all hover:scale-105"
+                className="hidden sm:flex items-center gap-2 bg-white/95 backdrop-blur-md text-slate-800 text-xs font-black px-3.5 py-2 rounded-2xl shadow-lg border border-slate-200 cursor-pointer hover:bg-white hover:border-[#ff4b72] transition-all hover:scale-105"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>1:1 안심 대화방</span>
@@ -625,11 +653,11 @@ function App() {
               className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer relative ${
                 isFloatingChatOpen 
                   ? 'bg-slate-900 text-white border-2 border-slate-700' 
-                  : 'bg-slate-900 hover:bg-slate-800 text-white border-2 border-[#6edfec]'
+                  : 'bg-slate-900 hover:bg-slate-800 text-white border-2 border-[#ff4b72]'
               }`}
             >
               {!isFloatingChatOpen && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#6edfec] text-slate-900 rounded-full text-[10px] font-black flex items-center justify-center shadow-md animate-bounce">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#ff4b72] text-slate-900 rounded-full text-[10px] font-black flex items-center justify-center shadow-md animate-bounce">
                   1
                 </span>
               )}
@@ -637,7 +665,7 @@ function App() {
               {isFloatingChatOpen ? (
                 <span className="text-xl font-bold leading-none">✕</span>
               ) : (
-                <Icons.MessageSquare className="w-6 h-6 text-[#6edfec]" />
+                <Icons.MessageSquare className="w-6 h-6 text-[#ff4b72]" />
               )}
             </button>
           </div>
@@ -657,7 +685,7 @@ function App() {
       {/* 토스트 알림 */}
       {toast && (
         <div className="fixed bottom-6 left-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-bold border border-slate-700 animate-bounce">
-          <span className="w-2 h-2 rounded-full bg-[#6edfec]"></span>
+          <span className="w-2 h-2 rounded-full bg-[#ff4b72]"></span>
           <span>{toast.message}</span>
         </div>
       )}
@@ -666,7 +694,7 @@ function App() {
       <footer className="bg-white border-t border-slate-200 py-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={handleLogoError} />
+            <img src="assets/logo_pink.png" alt="WithCare" className="w-5 h-5 object-contain" onError={handleLogoError} />
             <span className="font-extrabold text-slate-800">위드케어 (WithCare)</span>
             <span>· 대전광역시 거점 부모님 병원 동행 서비스 플랫폼</span>
           </div>
@@ -689,7 +717,7 @@ function HeroSlideshow({ onGoNearFinder, onGoBooking }) {
       badge: '대전광역시 의료전공 대학생 & 병원 동행 플랫폼',
       titleLine1: '부모님 병원 가는 길,',
       titleLine2: (
-        <span>근처 <span className="text-[#6edfec]">동행 매니저</span>와 신속하게</span>
+        <span>근처 <span className="text-[#ff4b72]">동행 매니저</span>와 신속하게</span>
       ),
       subtitle: '내일의 의료인이 따뜻한 동행 매니저가 되어드립니다.',
       tags: ['1:1 안심 케어', '대전 전지역 24h 매칭', '의료전공 대학생'],
@@ -701,7 +729,7 @@ function HeroSlideshow({ onGoNearFinder, onGoBooking }) {
       badge: '바쁜 자녀를 위한 실시간 안심 연결',
       titleLine1: '직접 가지 못하는 미안함,',
       titleLine2: (
-        <span><span className="text-[#6edfec]">실시간 안심 리포트</span>로 덜어드립니다</span>
+        <span><span className="text-[#ff4b72]">실시간 안심 리포트</span>로 덜어드립니다</span>
       ),
       subtitle: '병원 도착부터 귀가까지 실시간 위치 안내와 AI 진료 음성 요약 리포트를 전송합니다.',
       tags: ['실시간 위치 알림', 'AI 진료 음성 요약', '1:1 안심 채팅'],
@@ -768,7 +796,7 @@ function HeroSlideshow({ onGoNearFinder, onGoBooking }) {
 
             {/* Hero 컨텐츠 슬라이드 내용 */}
             <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 text-center space-y-6 py-16">
-              <div className="inline-flex items-center gap-2 bg-[#6edfec]/20 text-[#6edfec] border border-[#6edfec]/40 text-xs sm:text-sm font-extrabold px-4 py-1.5 rounded-full">
+              <div className="inline-flex items-center gap-2 bg-[#ff4b72]/20 text-[#ff4b72] border border-[#ff4b72]/40 text-xs sm:text-sm font-extrabold px-4 py-1.5 rounded-full">
                 <span>{slide.badge}</span>
               </div>
 
@@ -842,7 +870,7 @@ function HeroSlideshow({ onGoNearFinder, onGoBooking }) {
             onClick={() => setCurrentIndex(idx)}
             aria-label={`슬라이드 ${idx + 1}`}
             className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-              idx === currentIndex ? 'w-8 bg-[#6edfec]' : 'w-2 bg-white/40 hover:bg-white/70'
+              idx === currentIndex ? 'w-8 bg-[#ff4b72]' : 'w-2 bg-white/40 hover:bg-white/70'
             }`}
           />
         ))}
@@ -864,7 +892,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#0bbecb] flex items-center justify-center font-black text-xs border border-slate-200">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#e11d62] flex items-center justify-center font-black text-xs border border-slate-200">
               01
             </div>
             <h3 className="font-extrabold text-base text-slate-900">대전권 의료전공 대학생 인증</h3>
@@ -874,7 +902,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
           </div>
 
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#0bbecb] flex items-center justify-center font-black text-xs border border-slate-200">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#e11d62] flex items-center justify-center font-black text-xs border border-slate-200">
               02
             </div>
             <h3 className="font-extrabold text-base text-slate-900">1365·VMS 공식 봉사시간 연계</h3>
@@ -884,7 +912,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
           </div>
 
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#0bbecb] flex items-center justify-center font-black text-xs border border-slate-200">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#e11d62] flex items-center justify-center font-black text-xs border border-slate-200">
               03
             </div>
             <h3 className="font-extrabold text-base text-slate-900">5단계 실시간 안심 케어 프로세스</h3>
@@ -899,7 +927,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center md:text-left">
-            <span className="bg-[#6edfec] text-slate-900 text-xs font-black px-3 py-1 rounded-full">
+            <span className="bg-[#ff4b72] text-slate-900 text-xs font-black px-3 py-1 rounded-full">
               DAEJEON MVP SERVICE
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold">
@@ -912,7 +940,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
 
           <button
             onClick={onGoNearFinder}
-            className="px-6 py-3.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-extrabold text-sm rounded-2xl shadow-md transition cursor-pointer shrink-0"
+            className="px-6 py-3.5 bg-[#ff4b72] hover:bg-[#ff5f83] text-slate-900 font-extrabold text-sm rounded-2xl shadow-md transition cursor-pointer shrink-0"
           >
             내 근처 동행자 조회하기
           </button>
@@ -931,7 +959,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
             </span>
             <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
               기존 전문 인력 중심 구조를 전환한<br />
-              <span className="text-[#0bbecb] underline decoration-[#6edfec] decoration-4 underline-offset-4">대학생 참여형 양면 플랫폼</span>
+              <span className="text-[#e11d62] underline decoration-[#ff4b72] decoration-4 underline-offset-4">대학생 참여형 양면 플랫폼</span>
             </h2>
             <p className="text-xs sm:text-base text-slate-600 font-medium leading-relaxed">
               기존 병원동행 서비스의 전문 인력 중심 구조를 대학생 참여형 모델로 전환하고, 
@@ -943,15 +971,15 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
           {/* 핵심 가치 제안 박스 (Core Value Connection) */}
           <div className="bg-slate-100/80 border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs mt-6">
             <div className="space-y-1 text-center md:text-left">
-              <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider block">
+              <span className="text-xs font-black text-[#e11d62] uppercase tracking-wider block">
                 CORE VALUE CONNECTION
               </span>
               <p className="text-sm sm:text-base text-slate-800 font-bold leading-relaxed">
                 단순히 기존 서비스보다 저렴한 병원동행 서비스를 제공하는 것이 아니라,{' '}
-                <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
+                <span className="bg-[#ff4b72]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
                   병원 이용에 도움이 필요한 시니어의 수요
                 </span>와{' '}
-                <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
+                <span className="bg-[#ff4b72]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
                   보건·의료·복지 분야의 현장 경험을 원하는 대학생의 수요
                 </span>를 연결하는 것이 핵심입니다.
               </p>
@@ -978,7 +1006,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
             {/* 상단 2대 수요-공급 주체 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 시니어 · 보호자 */}
-              <div className="bg-slate-50 border border-slate-200 hover:border-[#6edfec] rounded-2xl p-6 transition-all shadow-xs">
+              <div className="bg-slate-50 border border-slate-200 hover:border-[#ff4b72] rounded-2xl p-6 transition-all shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Demand</span>
                   <span className="text-[10px] font-bold bg-white text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
@@ -986,24 +1014,24 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
                   </span>
                 </div>
                 <h4 className="text-lg font-black text-slate-900">시니어 · 보호자</h4>
-                <p className="text-sm font-extrabold text-[#0bbecb] mt-1">
+                <p className="text-sm font-extrabold text-[#e11d62] mt-1">
                   합리적인 비용으로 병원 이용 지원
                 </p>
                 <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
                   <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 기존 간병인 대비 부담을 낮춘 실속형 병원 동행
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e11d62]"></span> 기존 간병인 대비 부담을 낮춘 실속형 병원 동행
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 진료 접수, 원내 이동, 의사 소견 경청 지원
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e11d62]"></span> 진료 접수, 원내 이동, 의사 소견 경청 지원
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 보호자를 위한 1:1 실시간 이동 알림 및 안심 리포트
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e11d62]"></span> 보호자를 위한 1:1 실시간 이동 알림 및 안심 리포트
                   </li>
                 </ul>
               </div>
 
               {/* 대학생 · 취업준비생 */}
-              <div className="bg-slate-50 border border-slate-200 hover:border-[#6edfec] rounded-2xl p-6 transition-all shadow-xs">
+              <div className="bg-slate-50 border border-slate-200 hover:border-[#ff4b72] rounded-2xl p-6 transition-all shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Supply</span>
                   <span className="text-[10px] font-bold bg-white text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
@@ -1011,18 +1039,18 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
                   </span>
                 </div>
                 <h4 className="text-lg font-black text-slate-900">대학생 · 취업준비생</h4>
-                <p className="text-sm font-extrabold text-[#0bbecb] mt-1">
+                <p className="text-sm font-extrabold text-[#e11d62] mt-1">
                   유급 일경험 · 실무 역량 축적
                 </p>
                 <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
                   <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 간호·의예·보건·사회복지 전공 맞춤형 현장 일경험
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e11d62]"></span> 간호·의예·보건·사회복지 전공 맞춤형 현장 일경험
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 1365·VMS 공식 공인 봉사시간 인정 (회당 3~4시간)
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e11d62]"></span> 1365·VMS 공식 공인 봉사시간 인정 (회당 3~4시간)
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0bbecb]"></span> 대학병원 취업 준비를 위한 공식 환자 케어 포트폴리오
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e11d62]"></span> 대학병원 취업 준비를 위한 공식 환자 케어 포트폴리오
                   </li>
                 </ul>
               </div>
@@ -1036,9 +1064,9 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
             </div>
 
             {/* 중앙 플랫폼: 대학병원 특화 동행 플랫폼 */}
-            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-md border-2 border-[#6edfec]/40">
+            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-md border-2 border-[#ff4b72]/40">
               <div className="text-center space-y-3">
-                <div className="inline-block bg-[#6edfec] text-slate-900 text-xs font-black px-3.5 py-1 rounded-full">
+                <div className="inline-block bg-[#ff4b72] text-slate-900 text-xs font-black px-3.5 py-1 rounded-full">
                   CORE PLATFORM
                 </div>
                 <h4 className="text-xl sm:text-2xl font-black tracking-tight">
@@ -1050,19 +1078,19 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
 
                 {/* 5대 플랫폼 기능 칩 */}
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                  <span className="bg-white/10 hover:bg-white/20 text-[#ff4b72] border border-[#ff4b72]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
                     매칭
                   </span>
-                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                  <span className="bg-white/10 hover:bg-white/20 text-[#ff4b72] border border-[#ff4b72]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
                     표준교육
                   </span>
-                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                  <span className="bg-white/10 hover:bg-white/20 text-[#ff4b72] border border-[#ff4b72]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
                     병원별 동선 안내
                   </span>
-                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                  <span className="bg-white/10 hover:bg-white/20 text-[#ff4b72] border border-[#ff4b72]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
                     안전관리
                   </span>
-                  <span className="bg-white/10 hover:bg-white/20 text-[#6edfec] border border-[#6edfec]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                  <span className="bg-white/10 hover:bg-white/20 text-[#ff4b72] border border-[#ff4b72]/30 text-xs font-bold px-3 py-1.5 rounded-xl">
                     활동 기록
                   </span>
                 </div>
@@ -1073,13 +1101,13 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                 <h5 className="font-extrabold text-sm text-slate-900">지역 대학병원</h5>
-                <p className="text-xs text-[#0bbecb] font-bold mt-0.5">현장 운영 · 안내 협력</p>
+                <p className="text-xs text-[#e11d62] font-bold mt-0.5">현장 운영 · 안내 협력</p>
                 <p className="text-[11px] text-slate-500 mt-1">충남대병원, 대전을지대병원, 건양대병원 외래 진료 연계</p>
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                 <h5 className="font-extrabold text-sm text-slate-900">지역 대학교</h5>
-                <p className="text-xs text-[#0bbecb] font-bold mt-0.5">학생 모집 · 교육 협력</p>
+                <p className="text-xs text-[#e11d62] font-bold mt-0.5">학생 모집 · 교육 협력</p>
                 <p className="text-[11px] text-slate-500 mt-1">간호·보건의료 전공생 선발 및 사전 직무·에티켓 교육</p>
               </div>
             </div>
@@ -1092,7 +1120,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
               <div>
-                <span className="text-xs font-black text-[#0bbecb] tracking-wider uppercase">
+                <span className="text-xs font-black text-[#e11d62] tracking-wider uppercase">
                   WITHCARE KEY STRENGTHS
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
@@ -1108,7 +1136,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
               {/* 전략 1: 병원별 특화 운영 */}
               <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-xl bg-[#ff4b72]/20 text-[#e11d62] font-black text-xs flex items-center justify-center">
                     01
                   </span>
                   <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
@@ -1129,7 +1157,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
               {/* 전략 2: 청년 일경험 프로그램화 */}
               <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-xl bg-[#ff4b72]/20 text-[#e11d62] font-black text-xs flex items-center justify-center">
                     02
                   </span>
                   <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
@@ -1150,7 +1178,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
               {/* 전략 3: 표준화된 안심 서비스 */}
               <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-xl bg-[#ff4b72]/20 text-[#e11d62] font-black text-xs flex items-center justify-center">
                     03
                   </span>
                   <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
@@ -1171,7 +1199,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
               {/* 전략 4: 병원별 전담 인력풀 */}
               <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-xl bg-[#ff4b72]/20 text-[#e11d62] font-black text-xs flex items-center justify-center">
                     04
                   </span>
                   <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
@@ -1192,7 +1220,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
               {/* 전략 5: 정기 진료 고객 확보 */}
               <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3 md:col-span-2 lg:col-span-2">
                 <div className="flex items-center justify-between">
-                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-xl bg-[#ff4b72]/20 text-[#e11d62] font-black text-xs flex items-center justify-center">
                     05
                   </span>
                   <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
@@ -1217,19 +1245,19 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
         <ScrollReveal delay={200}>
           <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 relative overflow-hidden shadow-lg">
             <div className="relative z-10 max-w-3xl space-y-3">
-              <span className="bg-[#6edfec] text-slate-900 text-[11px] font-black px-3.5 py-1 rounded-full">
+              <span className="bg-[#ff4b72] text-slate-900 text-[11px] font-black px-3.5 py-1 rounded-full">
                 핵심 포지셔닝 (Core Positioning)
               </span>
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-snug">
                 단순 저가형 병원동행 플랫폼이 아닌,<br />
-                <span className="text-[#6edfec]">지역 대학병원에 특화된 청년 일경험 기반 진료 지원 서비스</span>
+                <span className="text-[#ff4b72]">지역 대학병원에 특화된 청년 일경험 기반 진료 지원 서비스</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 위드케어는 어르신에게는 자녀처럼 따뜻하고 안전한 병원 동행을 제공하고, 
                 지역 보건의료 청년에게는 가치 있는 실무 일경험과 봉사를 제공하여 지속 가능한 지역 의료 복지 생태계를 만듭니다.
               </p>
             </div>
-            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-[#6edfec]/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-[#ff4b72]/10 rounded-full blur-3xl pointer-events-none"></div>
           </div>
         </ScrollReveal>
 
@@ -1237,7 +1265,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
         <ScrollReveal delay={250}>
           <div className="space-y-6 pt-4">
             <div className="text-center max-w-3xl mx-auto space-y-2">
-              <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider">
+              <span className="text-xs font-black text-[#e11d62] uppercase tracking-wider">
                 PARTNER HOSPITALS & UNIVERSITIES
               </span>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
@@ -1264,7 +1292,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
                   category: '대형종합병원 (선메디컬센터)',
                   role: '유성구 거점 뇌졸중·관절 특화',
                   badge: '외래 동행 협력',
-                  badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+                  badgeColor: 'bg-[#fff0f3] text-[#be185d] border-[#fbcfe8]',
                   address: '대전 유성구 북유성대로 93',
                   desc: '암·뇌신경 및 관절 치료 특화 전문 의료기관 맞춤형 원내 동선 안내'
                 },
@@ -1300,7 +1328,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
                   category: '종합병원 (선메디컬센터 본원)',
                   role: '척추관절·종합검진 특화',
                   badge: '외래 동행 협력',
-                  badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+                  badgeColor: 'bg-[#fff0f3] text-[#be185d] border-[#fbcfe8]',
                   address: '대전 중구 목중로 29',
                   desc: '정형외과 및 종합검진 수검 어르신 원스톱 케어 지원'
                 }
@@ -1313,7 +1341,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
                     </span>
                   </div>
                   <h4 className="font-black text-base text-slate-900">{hosp.name}</h4>
-                  <p className="text-xs text-[#0bbecb] font-bold">{hosp.role}</p>
+                  <p className="text-xs text-[#e11d62] font-bold">{hosp.role}</p>
                   <p className="text-[11px] text-slate-600 leading-relaxed">{hosp.desc}</p>
                   <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-400">
                     위치: {hosp.address}
@@ -1449,7 +1477,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
       <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0bbecb] animate-ping"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#e11d62] animate-ping"></span>
             <h2 className="text-xl font-extrabold text-slate-900">GPS 실시간 동행자 지도 (대전광역시)</h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
@@ -1485,7 +1513,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
       <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-md bg-[#6edfec]/30 text-slate-900 font-black text-[11px]">
+            <span className="px-2.5 py-0.5 rounded-md bg-[#ff4b72]/30 text-slate-900 font-black text-[11px]">
               GPS LIVE RADAR
             </span>
             <span className="font-extrabold text-slate-800">
@@ -1514,11 +1542,11 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
             <rect width="100%" height="100%" fill="url(#lightGrid)" />
 
             {/* 갑천 강줄기 (맑은 파스텔 블루) */}
-            <path d="M 120 0 Q 200 180 250 250 T 360 500" fill="none" stroke="#bae6fd" strokeWidth="20" opacity="0.8" strokeLinecap="round" />
-            <path d="M 120 0 Q 200 180 250 250 T 360 500" fill="none" stroke="#7dd3fc" strokeWidth="10" opacity="0.9" strokeLinecap="round" />
+            <path d="M 120 0 Q 200 180 250 250 T 360 500" fill="none" stroke="#fce4ec" strokeWidth="20" opacity="0.8" strokeLinecap="round" />
+            <path d="M 120 0 Q 200 180 250 250 T 360 500" fill="none" stroke="#f48fb1" strokeWidth="10" opacity="0.9" strokeLinecap="round" />
 
             {/* 유등천 지류 */}
-            <path d="M 320 220 Q 340 320 380 500" fill="none" stroke="#bae6fd" strokeWidth="14" opacity="0.7" strokeLinecap="round" />
+            <path d="M 320 220 Q 340 320 380 500" fill="none" stroke="#fce4ec" strokeWidth="14" opacity="0.7" strokeLinecap="round" />
 
             {/* 주요 도로망 (화이트 & 연회색 도로선) */}
             <line x1="0" y1="210" x2="500" y2="230" stroke="#ffffff" strokeWidth="10" />
@@ -1573,12 +1601,12 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
             style={{ left: `${myPos.x}%`, top: `${myPos.y}%` }}
           >
             <div className="relative flex items-center justify-center">
-              <span className="w-10 h-10 rounded-full bg-[#6edfec]/40 animate-ping absolute"></span>
-              <span className="w-5 h-5 rounded-full bg-[#0bbecb] text-white flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white">
+              <span className="w-10 h-10 rounded-full bg-[#ff4b72]/40 animate-ping absolute"></span>
+              <span className="w-5 h-5 rounded-full bg-[#e11d62] text-white flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white">
                 <span className="w-2 h-2 rounded-full bg-white"></span>
               </span>
             </div>
-            <span className="text-[10px] font-black text-slate-900 whitespace-nowrap bg-[#6edfec] px-2.5 py-0.5 rounded-full shadow-md mt-1 border border-white">
+            <span className="text-[10px] font-black text-slate-900 whitespace-nowrap bg-[#ff4b72] px-2.5 py-0.5 rounded-full shadow-md mt-1 border border-white">
               내 위치 ({myPos.name.replace('대전 ', '').split(' ')[0]})
             </span>
           </div>
@@ -1604,8 +1632,8 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
                 {/* 상단 소요 시간 말풍선 배지 */}
                 <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap mb-1 transition-all ${
                   isSelected 
-                    ? 'bg-[#6edfec] text-slate-900 ring-2 ring-slate-900 font-black scale-105' 
-                    : 'bg-white text-slate-800 border border-slate-300 group-hover:border-[#0bbecb]'
+                    ? 'bg-[#ff4b72] text-slate-900 ring-2 ring-slate-900 font-black scale-105' 
+                    : 'bg-white text-slate-800 border border-slate-300 group-hover:border-[#e11d62]'
                 }`}>
                   ⏱️ {mgr.calcEtaText.split(' ')[0]}
                 </span>
@@ -1613,8 +1641,8 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
                 {/* 원형 아바타 (로컬 SVG 적용) */}
                 <div className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full p-0.5 transition-all bg-white ${
                   isSelected 
-                    ? 'ring-4 ring-[#0bbecb] shadow-xl animate-bounce' 
-                    : 'ring-2 ring-slate-300 shadow-md group-hover:ring-[#0bbecb]'
+                    ? 'ring-4 ring-[#e11d62] shadow-xl animate-bounce' 
+                    : 'ring-2 ring-slate-300 shadow-md group-hover:ring-[#e11d62]'
                 }`}>
                   <img 
                     src={mgr.avatar} 
@@ -1639,7 +1667,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
           {activeManager && (
             <div 
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-4 right-4 left-4 sm:left-auto sm:w-96 z-50 bg-white rounded-3xl p-5 shadow-2xl border-2 border-[#6edfec] space-y-4 animate-fadeIn"
+              className="absolute bottom-4 right-4 left-4 sm:left-auto sm:w-96 z-50 bg-white rounded-3xl p-5 shadow-2xl border-2 border-[#ff4b72] space-y-4 animate-fadeIn"
             >
               <div className="flex justify-between items-start border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-3">
@@ -1695,7 +1723,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
 
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
                   <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                    <Icons.ShieldCheck className="w-4 h-4 text-[#0bbecb]" />
+                    <Icons.ShieldCheck className="w-4 h-4 text-[#e11d62]" />
                     <span>자격 및 신원 검증</span>
                   </div>
                   <p className="text-[11px] text-slate-600 pl-5">
@@ -1710,7 +1738,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
                   </p>
                 </div>
 
-                <p className="text-[11px] text-slate-600 italic bg-[#6edfec]/10 p-2.5 rounded-xl border border-[#6edfec]/30">
+                <p className="text-[11px] text-slate-600 italic bg-[#ff4b72]/10 p-2.5 rounded-xl border border-[#ff4b72]/30">
                   "{activeManager.intro}"
                 </p>
               </div>
@@ -1719,7 +1747,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
               <button
                 type="button"
                 onClick={() => onSelectManager(activeManager)}
-                className="w-full py-3 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-3 bg-[#ff4b72] hover:bg-[#ff5f83] text-slate-900 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>{activeManager.name} 동행자와 바로 예약하기</span>
               </button>
@@ -1729,19 +1757,19 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
       </div>
 
       {/* 3. 지도 바로 아래: 위치 기반 실시간 안내 배너 (대형 글씨 및 가독성 대폭 강조) */}
-      <div className="bg-gradient-to-r from-sky-50 via-cyan-50 to-blue-50 border-2 border-[#6edfec] rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-all">
+      <div className="bg-gradient-to-r from-white via-[#fff0f4] to-[#fce4ec] border-2 border-[#ff4b72] rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-all">
         <div className="flex items-start sm:items-center gap-4 sm:gap-5">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#6edfec]/30 text-[#0bbecb] border border-[#6edfec]/50 flex items-center justify-center shrink-0 shadow-xs">
-            <Icons.MapPin className="w-8 h-8 text-[#0bbecb]" />
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#ff4b72]/30 text-[#e11d62] border border-[#ff4b72]/50 flex items-center justify-center shrink-0 shadow-xs">
+            <Icons.MapPin className="w-8 h-8 text-[#e11d62]" />
           </div>
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider">실시간 매칭 레이더</span>
+              <span className="text-xs font-black text-[#e11d62] uppercase tracking-wider">실시간 매칭 레이더</span>
               <span className="text-xs text-slate-400 font-semibold">| 현재 선택 위치: <strong className="text-slate-700">{myPos.name}</strong></span>
             </div>
             <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-snug">
-              <span className="text-sky-800 underline decoration-[#6edfec] decoration-4 underline-offset-4">{patientProfile?.name || currentUser?.name || '김순자'}님</span> 근처에는 <span className="text-[#0bbecb] text-2xl sm:text-3xl font-black">{nearbyManagers.length}명</span>의 동행자가 있습니다.
+              <span className="text-[#9d174d] underline decoration-[#ff4b72] decoration-4 underline-offset-4">{patientProfile?.name || currentUser?.name || '김순자'}님</span> 근처에는 <span className="text-[#e11d62] text-2xl sm:text-3xl font-black">{nearbyManagers.length}명</span>의 동행자가 있습니다.
             </h3>
             <p className="text-base sm:text-xl font-extrabold text-slate-800 mt-1">
               가장 가까운 병원은 <span className="text-emerald-700 bg-white px-3 py-1 rounded-xl border border-emerald-300 font-black shadow-xs inline-block">{nearestHospital.name}</span>입니다.
@@ -1766,7 +1794,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
       <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs sm:text-sm">
           <span className="font-extrabold text-slate-900 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0bbecb]"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#e11d62]"></span>
             내 위치 근처 대기 중인 동행자 ({nearbyManagers.length}명 대기 중):
           </span>
           <span className="text-xs text-slate-400 font-medium">거리순 자동 정렬 (먼 동행자는 지도에서 제외됨)</span>
@@ -1783,12 +1811,12 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
                 onClick={() => setActiveManager(mgr)}
                 className={`relative p-3 rounded-2xl border transition cursor-pointer flex flex-col items-center text-center gap-2 ${
                   isSelected 
-                    ? 'border-[#0bbecb] bg-[#6edfec]/10 ring-2 ring-[#6edfec]' 
+                    ? 'border-[#e11d62] bg-[#ff4b72]/10 ring-2 ring-[#ff4b72]' 
                     : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'
                 }`}
               >
                 {isNearest && (
-                  <span className="absolute -top-2 bg-[#0bbecb] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-xs">
+                  <span className="absolute -top-2 bg-[#e11d62] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-xs">
                     최인접
                   </span>
                 )}
@@ -1801,7 +1829,7 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
                 <div className="w-full overflow-hidden">
                   <div className="font-extrabold text-slate-900 truncate">{mgr.name}</div>
                   <div className="text-[10px] text-slate-500 font-medium truncate">{mgr.university}</div>
-                  <div className="text-[11px] text-[#0bbecb] font-black mt-0.5">{mgr.calcEtaText.split(' ')[0]}</div>
+                  <div className="text-[11px] text-[#e11d62] font-black mt-0.5">{mgr.calcEtaText.split(' ')[0]}</div>
                 </div>
               </div>
             );
@@ -1863,7 +1891,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
         <div className="border-b border-slate-100 pb-4">
-          <span className="text-[#0bbecb] text-xs font-extrabold">BOOKING STEP</span>
+          <span className="text-[#e11d62] text-xs font-extrabold">BOOKING STEP</span>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">병원 동행 간편 예약 신청</h2>
           <p className="text-xs text-slate-500 mt-1">
             대전 지역 대학생 동행 매니저가 부모님의 안전한 병원 방문을 1:1로 케어합니다.
@@ -2061,7 +2089,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
                 <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px]">4</span>
                 <span>배정 희망 동행 매니저 선택</span>
               </h4>
-              <span className="text-[11px] font-bold text-sky-800 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-200 w-fit">
+              <span className="text-[11px] font-bold text-[#9d174d] bg-[#fff0f3] px-2.5 py-0.5 rounded border border-[#fbcfe8] w-fit">
                 전문 매니저 21,000원/h · 학생 매니저 18,000원/h (교통비 별도)
               </span>
             </div>
@@ -2073,7 +2101,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
                   onClick={() => setFormData({ ...formData, managerId: mgr.id })}
                   className={`p-3.5 rounded-2xl border flex items-center justify-between cursor-pointer transition ${
                     formData.managerId === mgr.id 
-                      ? 'border-[#0bbecb] bg-[#6edfec]/10 ring-2 ring-[#6edfec]' 
+                      ? 'border-[#e11d62] bg-[#ff4b72]/10 ring-2 ring-[#ff4b72]' 
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
@@ -2090,7 +2118,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
                         <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
                           mgr.hourlyRate === 21000 
                             ? 'bg-slate-900 text-white' 
-                            : 'bg-[#6edfec]/30 text-slate-900'
+                            : 'bg-[#ff4b72]/30 text-slate-900'
                         }`}>
                           {mgr.hourlyRate === 21000 ? '전문 매니저' : '학생 매니저'}
                         </span>
@@ -2147,7 +2175,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-[#6edfec] text-lg font-black">{estimatedCost.toLocaleString()}원</span>
+                <span className="text-[#ff4b72] text-lg font-black">{estimatedCost.toLocaleString()}원</span>
                 <span className="text-[10px] text-slate-400 block font-normal">교통비 별도</span>
               </div>
             </div>
@@ -2160,7 +2188,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
                 type="checkbox"
                 checked={formData.agreeTerms}
                 onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
-                className="w-4 h-4 rounded text-[#6edfec]"
+                className="w-4 h-4 rounded text-[#ff4b72]"
               />
               <span className="text-slate-200 font-bold">[필수] 병원 동행 서비스 이용약관 및 개인정보 활용에 동의합니다.</span>
             </label>
@@ -2168,7 +2196,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
 
           <button
             type="submit"
-            className="w-full py-4 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-black text-sm rounded-2xl shadow-md transition cursor-pointer"
+            className="w-full py-4 bg-[#ff4b72] hover:bg-[#ff5f83] text-slate-900 font-black text-sm rounded-2xl shadow-md transition cursor-pointer"
           >
             동행 예약 신청 완료하기
           </button>
@@ -2197,8 +2225,8 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
         <div className="flex items-center gap-2">
           <div className="relative flex items-center justify-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0bbecb] animate-ping absolute"></span>
-            <span className="w-2 h-2 rounded-full bg-[#0bbecb]"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#e11d62] animate-ping absolute"></span>
+            <span className="w-2 h-2 rounded-full bg-[#e11d62]"></span>
           </div>
           <span className="font-extrabold text-slate-900 text-sm">⏱️ 실시간 5단계 동행 프로세스 트래커</span>
         </div>
@@ -2236,7 +2264,7 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
                   isDone
                     ? 'bg-emerald-600 text-white shadow-xs group-hover:scale-105'
                     : isCurrent
-                      ? 'bg-slate-900 text-white ring-4 ring-[#6edfec] shadow-md scale-110 font-extrabold animate-pulse'
+                      ? 'bg-slate-900 text-white ring-4 ring-[#ff4b72] shadow-md scale-110 font-extrabold animate-pulse'
                       : 'bg-white text-slate-400 border-2 border-slate-300 group-hover:border-slate-400'
                 } ${isSelected && !isCurrent ? 'ring-2 ring-slate-400' : ''}`}>
                   {isDone ? '완료' : stepMeta.step}
@@ -2249,7 +2277,7 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
                 </span>
 
                 {isCurrent && (
-                  <span className="text-[10px] text-slate-900 font-extrabold bg-[#6edfec] px-1.5 py-0.5 rounded mt-0.5">
+                  <span className="text-[10px] text-slate-900 font-extrabold bg-[#ff4b72] px-1.5 py-0.5 rounded mt-0.5">
                     진행 중
                   </span>
                 )}
@@ -2263,7 +2291,7 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div className="flex items-center gap-2">
             <span className={`px-2.5 py-0.5 rounded-md font-extrabold text-xs ${
-              selectedStep === currentStep ? 'bg-[#6edfec]/30 text-slate-900' : 'bg-slate-100 text-slate-700'
+              selectedStep === currentStep ? 'bg-[#ff4b72]/30 text-slate-900' : 'bg-slate-100 text-slate-700'
             }`}>
               {selectedStep}단계 {selectedStep === currentStep ? '실시간 브리핑' : '단계 안내'}
             </span>
@@ -2292,8 +2320,8 @@ function RealtimeProcessTracker({ reservation, onAdvanceStep, showAdvanceButton 
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-sky-50/70 p-3 rounded-xl border border-sky-100">
-          <Icons.MapPin className="w-4 h-4 text-[#0bbecb] shrink-0" />
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-[#fff0f3]/70 p-3 rounded-xl border border-sky-100">
+          <Icons.MapPin className="w-4 h-4 text-[#e11d62] shrink-0" />
           <span className="text-slate-500 shrink-0">실시간 위치 안내:</span>
           <span className="text-slate-900 font-bold">{activeMeta.locationText}</span>
         </div>
@@ -2343,7 +2371,7 @@ function UserMyPageView({ currentUser, patientProfile, reservations, managers, o
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-[#6edfec]/20 text-slate-900 flex items-center justify-center font-bold text-xs border border-[#6edfec]/40">
+          <div className="w-12 h-12 rounded-2xl bg-[#ff4b72]/20 text-slate-900 flex items-center justify-center font-bold text-xs border border-[#ff4b72]/40">
             환자
           </div>
           <div>
@@ -2473,7 +2501,7 @@ function UserMyPageView({ currentUser, patientProfile, reservations, managers, o
                       <button
                         type="button"
                         onClick={() => onOpenChat(item.id)}
-                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#ff4b72] hover:bg-[#ff5f83] text-slate-900 font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Icons.MessageSquare className="w-4 h-4" />
                         <span>1:1 안심 대화방</span>
@@ -2600,7 +2628,7 @@ function UserMyPageView({ currentUser, patientProfile, reservations, managers, o
         <div className="space-y-4">
           <div className="bg-slate-900 text-white p-5 rounded-2xl flex items-center justify-between text-xs">
             <div>
-              <span className="bg-[#6edfec] text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded">AI MATCHING</span>
+              <span className="bg-[#ff4b72] text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded">AI MATCHING</span>
               <h4 className="text-base font-bold text-white mt-1">{patientProfile.name} 어르신의 증상에 최적화된 추천 대학생</h4>
             </div>
             <span className="text-slate-400 text-[11px] hidden sm:inline">재학 및 CPR 인증 완료</span>
@@ -2619,7 +2647,7 @@ function UserMyPageView({ currentUser, patientProfile, reservations, managers, o
                     />
                     <div>
                       <div className="font-bold text-slate-900 text-sm">{mgr.name} ({mgr.badge})</div>
-                      <p className="text-[11px] text-[#0bbecb] font-semibold">{mgr.aiPickReason}</p>
+                      <p className="text-[11px] text-[#e11d62] font-semibold">{mgr.aiPickReason}</p>
                       <span className="text-amber-500 text-[11px]">★ {mgr.rating} (후기 {mgr.reviewCount}회)</span>
                     </div>
                   </div>
@@ -2658,13 +2686,13 @@ function CompanionMyPageView({ currentUser, reservations, urgentRequests, majorI
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#6edfec] text-slate-900 flex items-center justify-center font-black text-sm">
+          <div className="w-14 h-14 rounded-2xl bg-[#ff4b72] text-slate-900 flex items-center justify-center font-black text-sm">
             동행자
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl sm:text-2xl font-black">{currentUser.name} 동행자님의 마이페이지</h2>
-              <span className="bg-[#6edfec]/20 text-[#6edfec] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#6edfec]/30">
+              <span className="bg-[#ff4b72]/20 text-[#ff4b72] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#ff4b72]/30">
                 {currentUser.badge || '충남대 간호학과'}
               </span>
             </div>
@@ -2677,7 +2705,7 @@ function CompanionMyPageView({ currentUser, reservations, urgentRequests, majorI
         <div className="flex items-center gap-4 bg-slate-800/80 p-3 sm:p-4 rounded-2xl border border-slate-700">
           <div>
             <span className="text-[11px] text-slate-400 block font-semibold">누적 인정 봉사시간</span>
-            <span className="text-xl font-black text-[#6edfec]">{currentVolunteerHours}시간</span>
+            <span className="text-xl font-black text-[#ff4b72]">{currentVolunteerHours}시간</span>
             <span className="text-[10px] text-slate-500 block">1365·VMS 공식 연계</span>
           </div>
           <button
@@ -2808,7 +2836,7 @@ function CompanionMyPageView({ currentUser, reservations, urgentRequests, majorI
                     <button
                       type="button"
                       onClick={() => onOpenChat(item.id)}
-                      className="px-4 py-2 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      className="px-4 py-2 bg-[#ff4b72] hover:bg-[#ff5f83] text-slate-900 font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Icons.MessageSquare className="w-4 h-4" />
                       <span>이용자 1:1 대화</span>
@@ -2856,12 +2884,12 @@ function CompanionMyPageView({ currentUser, reservations, urgentRequests, majorI
                       <span className="font-bold text-slate-900 mr-1.5">{i + 1}. {h.name}</span>
                       <span className="text-[10px] text-slate-400">({h.badge})</span>
                     </div>
-                    <span className="font-extrabold text-[#0bbecb]">{h.share}</span>
+                    <span className="font-extrabold text-[#e11d62]">{h.share}</span>
                   </div>
                 ))}
               </div>
 
-              <p className="text-[11px] text-slate-600 bg-[#6edfec]/10 p-3 rounded-xl border border-[#6edfec]/30 italic leading-relaxed">
+              <p className="text-[11px] text-slate-600 bg-[#ff4b72]/10 p-3 rounded-xl border border-[#ff4b72]/30 italic leading-relaxed">
                 {m.reviewQuote}
               </p>
             </div>
@@ -2918,10 +2946,10 @@ function ChatModal({ reservationId, currentUser, onClose, isFloating = false }) 
   // 메인 페이지 우측 하단 고정 소형 채팅창 (isFloating === true)
   if (isFloating) {
     return (
-      <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] max-w-[370px] h-[520px] max-h-[80vh] bg-white rounded-3xl shadow-2xl border-2 border-[#6edfec]/70 flex flex-col overflow-hidden animate-fadeIn">
+      <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] max-w-[370px] h-[520px] max-h-[80vh] bg-white rounded-3xl shadow-2xl border-2 border-[#ff4b72]/70 flex flex-col overflow-hidden animate-fadeIn">
         <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#6edfec] animate-pulse"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ff4b72] animate-pulse"></span>
             <div>
               <h4 className="font-extrabold text-sm text-white">{otherPartyTitle} 1:1 대화</h4>
               <p className="text-[10px] text-slate-400">예약번호 {reservationId} · 대전 실시간 안심 소통</p>
@@ -2981,7 +3009,7 @@ function ChatModal({ reservationId, currentUser, onClose, isFloating = false }) 
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col h-[580px] overflow-hidden border border-slate-200">
         <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#6edfec] animate-pulse"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ff4b72] animate-pulse"></span>
             <div>
               <h4 className="font-bold text-sm text-white">{otherPartyTitle} 1:1 대화</h4>
               <p className="text-[10px] text-slate-400">예약번호 {reservationId} · 대전 실시간 안심 소통</p>
@@ -3057,7 +3085,7 @@ function ReportModal({ reservationId, onClose, showToast }) {
       <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto space-y-5 border border-slate-200 text-xs">
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
           <div>
-            <span className="text-[#0bbecb] text-[10px] font-extrabold">SAFE CARE REPORT</span>
+            <span className="text-[#e11d62] text-[10px] font-extrabold">SAFE CARE REPORT</span>
             <h3 className="font-extrabold text-base text-slate-900">외래 진료 결과 안심 리포트</h3>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
@@ -3068,7 +3096,7 @@ function ReportModal({ reservationId, onClose, showToast }) {
           <p className="text-slate-700 leading-relaxed font-medium">{report.summary || '진료 소견 메모 완료.'}</p>
         </div>
 
-        <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100 space-y-1">
+        <div className="bg-[#fff0f3] p-4 rounded-2xl border border-sky-100 space-y-1">
           <span className="font-bold text-slate-900 block text-xs">처방약 복용 지도 안내</span>
           <p className="text-slate-700 leading-relaxed">{report.pharmacyGuide || '처방전 수령 및 복약 지도 완료.'}</p>
         </div>
@@ -3151,7 +3179,7 @@ function ManagerReportEditorModal({ reservationId, onClose, showToast }) {
       <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 border border-slate-200 space-y-4 text-xs">
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
           <div>
-            <span className="text-[#0bbecb] text-[10px] font-extrabold">REPORT EDITOR</span>
+            <span className="text-[#e11d62] text-[10px] font-extrabold">REPORT EDITOR</span>
             <h3 className="font-extrabold text-base text-slate-900">외래 결과 안심 리포트 작성</h3>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
@@ -3233,7 +3261,7 @@ function VolunteerCertModal({ currentUser, onClose }) {
             </div>
             <div>활동기간: <strong>2026. 09. 01 ~ 2026. 11. 20</strong></div>
             <div>활동처: <strong>위드케어 대전광역시 시니어 병원동행 지원단 (충남대병원·을지대병원)</strong></div>
-            <div>인정시간: <strong className="text-[#0bbecb] text-sm">총 {hours} 시간</strong> (1회당 3~4시간 인정)</div>
+            <div>인정시간: <strong className="text-[#e11d62] text-sm">총 {hours} 시간</strong> (1회당 3~4시간 인정)</div>
           </div>
 
           <div className="text-center text-xs text-slate-700 leading-relaxed py-2">
@@ -3304,7 +3332,7 @@ function LoginModal({ onClose, onSuccess }) {
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-7 border border-slate-200 space-y-5 text-xs">
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <img src="assets/logo.png" alt="WithCare" className="w-5 h-5 object-contain" onError={handleLogoError} />
+            <img src="assets/logo_pink.png" alt="WithCare" className="w-5 h-5 object-contain" onError={handleLogoError} />
             <h3 className="font-extrabold text-base text-slate-900">위드케어 로그인</h3>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">✕</button>
@@ -3384,14 +3412,14 @@ function LoginModal({ onClose, onSuccess }) {
                 <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-slate-700 space-y-1">
                   <span className="font-extrabold text-slate-900 block">기본 보호자 계정 (데모 시연용)</span>
                   <div className="text-[11px]">이름: 김민수 / 환자: 김순자 어르신</div>
-                  <div className="text-[11px] text-[#0bbecb] font-bold">클릭 시 이용자 마이페이지로 즉시 진입합니다.</div>
+                  <div className="text-[11px] text-[#e11d62] font-bold">클릭 시 이용자 마이페이지로 즉시 진입합니다.</div>
                 </div>
               )}
             </div>
           ) : (
             <div className="space-y-3">
               <label className="block font-bold text-slate-700">시연용 대표 대학생 동행자 계정</label>
-              <div className="p-4 rounded-2xl border-2 border-slate-900 bg-[#6edfec]/10 flex items-center justify-between">
+              <div className="p-4 rounded-2xl border-2 border-slate-900 bg-[#ff4b72]/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img 
                     src={defaultManager.avatar} 
@@ -3402,7 +3430,7 @@ function LoginModal({ onClose, onSuccess }) {
                   <div>
                     <div className="font-black text-slate-900 text-sm">{defaultManager.name} 동행자</div>
                     <div className="text-slate-600 text-[11px] mt-0.5">{defaultManager.university} {defaultManager.major}</div>
-                    <span className="text-[#0bbecb] font-extrabold text-[10px]">인정 봉사 {defaultManager.volunteerHours}시간 누적</span>
+                    <span className="text-[#e11d62] font-extrabold text-[10px]">인정 봉사 {defaultManager.volunteerHours}시간 누적</span>
                   </div>
                 </div>
                 <span className="bg-slate-900 text-white text-[10px] font-black px-2.5 py-1 rounded-lg">
@@ -3417,7 +3445,7 @@ function LoginModal({ onClose, onSuccess }) {
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-[#6edfec] hover:bg-[#5cd4e2] text-slate-900 font-black rounded-xl shadow-xs transition cursor-pointer"
+            className="w-full py-3.5 bg-[#ff4b72] hover:bg-[#ff5f83] text-slate-900 font-black rounded-xl shadow-xs transition cursor-pointer"
           >
             {role === 'MANAGER' ? '동행자 마이페이지로 접속하기' : '이용자 마이페이지로 접속하기'}
           </button>
@@ -3433,5 +3461,18 @@ function LoginModal({ onClose, onSuccess }) {
 ReactDOM.render(<App />, document.getElementById('root'));
 
 </script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').then(function(reg) {
+          console.log('WithCare PWA Service Worker registered:', reg.scope);
+        }).catch(function(err) {
+          console.log('WithCare PWA Service Worker registration error:', err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
