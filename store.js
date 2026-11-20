@@ -1,12 +1,12 @@
 // store.js - 위드케어(WithCare) 인메모리 & 로컬스토리지 연동 상태 관리자 v3.2
 // 대전광역시 MVP & 대학생 동행 매니저 전용
 
-const STORAGE_KEY = 'withcare_reservations_v8';
-const USER_KEY = 'withcare_current_user_v8';
-const PROFILE_KEY = 'withcare_patient_profile_v8';
-const CHATS_KEY = 'withcare_chats_v8';
-const MANAGERS_KEY = 'withcare_managers_v8';
-const URGENT_KEY = 'withcare_urgent_v8';
+const STORAGE_KEY = 'withcare_reservations_v9';
+const USER_KEY = 'withcare_current_user_v9';
+const PROFILE_KEY = 'withcare_patient_profile_v9';
+const CHATS_KEY = 'withcare_chats_v9';
+const MANAGERS_KEY = 'withcare_managers_v9';
+const URGENT_KEY = 'withcare_urgent_v9';
 
 class WithCareStoreManager {
   constructor() {

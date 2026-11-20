@@ -21,7 +21,7 @@ const DEFAULT_PATIENT_PROFILE = {
 
 // ========================================================
 // 2. 의료 관련 전공 대학생 및 전문 동행 매니저 프로필 데이터 (로컬 SVG 아바타 적용)
-// 전문 매니저 21,000원/h / 학생 매니저 18,000원/h (교통비 별도)
+// 전문 매니저 21,000원/h / 학생 매니저 18,000원/h (기본 1시간 기준, 교통비 별도)
 // ========================================================
 const DEFAULT_MANAGERS = [
   {
@@ -39,14 +39,14 @@ const DEFAULT_MANAGERS = [
     reviewCount: 42,
     volunteerHours: 38,
     hourlyRate: 18000,
-    region: '대전 서구 / 유성구',
+    region: '대전 유성구 궁동 / 서구',
     baseLocation: '대전 유성구 대학로 (충남대 대덕캠퍼스 인근)',
-    primaryHospitals: '충남대학교병원, 대전을지대학교병원',
+    primaryHospitals: '충남대학교병원, 대전을지대학교병원, 유성선병원',
     etaMinutes: 7,
     etaText: '도보 7분 (약 480m)',
     avatar: 'assets/avatar_kim.svg',
-    offsetX: -8, // 내 위치 기준 상대 오프셋%
-    offsetY: -10,
+    mapX: 30, // 대전 지도 내 고정 좌표
+    mapY: 34,
     tags: ['학생 매니저', '간호학과', 'CPR 자격', '친절한 말벗', '휠체어 숙련'],
     title: '어르신의 눈높이에 맞춘 따뜻한 예비 간호사',
     intro: '충남대학교 간호학과 3학년에 재학 중입니다. 외래 실습 경험과 CPR 수료를 바탕으로 어르신을 제 가족처럼 안전하고 정성껏 모시겠습니다.',
@@ -68,14 +68,14 @@ const DEFAULT_MANAGERS = [
     reviewCount: 35,
     volunteerHours: 45,
     hourlyRate: 21000,
-    region: '대전 중구 / 서구',
+    region: '대전 서구 둔산동 / 중구',
     baseLocation: '대전 서구 둔산동 (을지대병원 인근)',
-    primaryHospitals: '대전을지대학교병원, 대전성모병원',
+    primaryHospitals: '대전을지대학교병원, 대전성모병원, 대전선병원',
     etaMinutes: 4,
     etaText: '도보 4분 (약 310m)',
     avatar: 'assets/avatar_park.svg',
-    offsetX: 10,
-    offsetY: -6,
+    mapX: 52,
+    mapY: 40,
     tags: ['전문 매니저', '의예과', '진료 소견 메모', '복약 지도', '든든한 부축'],
     title: '진료실 핵심 소견을 꼼꼼히 정리해 드리는 예비 의사',
     intro: '을지대학교 의과대학 본과 1학년 재학 중입니다. 진료실에서 교수님의 처방과 설명을 정확히 경청하고 보호자님께 명쾌하게 전달해 드립니다.',
@@ -97,14 +97,14 @@ const DEFAULT_MANAGERS = [
     reviewCount: 28,
     volunteerHours: 26,
     hourlyRate: 18000,
-    region: '대전 서구 / 유성구',
+    region: '대전 서구 관저동 / 도안동',
     baseLocation: '대전 서구 관저동 (건양대 메디컬캠퍼스)',
     primaryHospitals: '건양대학교병원, 충남대학교병원',
     etaMinutes: 9,
     etaText: '도보 9분 (약 620m)',
     avatar: 'assets/avatar_lee.svg',
-    offsetX: -12,
-    offsetY: 12,
+    mapX: 24,
+    mapY: 76,
     tags: ['학생 매니저', '간호학과', '밝은 에너지', '약국 처방전 수령', '키오스크 접수 대행'],
     title: '손녀처럼 다정하고 씩씩한 간호대 동행 매니저',
     intro: '건양대학교 간호학과 2학년입니다. 어르신들의 병원 원내 무인 접수부터 수납, 약국 조제 수령까지 편안하게 챙겨드립니다.',
@@ -126,24 +126,82 @@ const DEFAULT_MANAGERS = [
     reviewCount: 31,
     volunteerHours: 32,
     hourlyRate: 21000,
-    region: '대전 동구 / 중구',
+    region: '대전 중구 대흥동 / 동구',
     baseLocation: '대전 중구 대흥동 (대전성모병원 인근)',
-    primaryHospitals: '가톨릭대 대전성모병원, 충남대학교병원',
+    primaryHospitals: '가톨릭대 대전성모병원, 충남대학교병원, 대전선병원',
     etaMinutes: 11,
     etaText: '도보 11분 (약 780m)',
     avatar: 'assets/avatar_choi.svg',
-    offsetX: 14,
-    offsetY: 10,
+    mapX: 72,
+    mapY: 60,
     tags: ['전문 매니저', '물리치료학과', '낙상 예방', '보행 부축 전문가', '재활외래 특화'],
     title: '안전한 보행을 책임지는 물리치료 전공 매니저',
     intro: '대전대학교 물리치료학과 3학년입니다. 보행이 불편하시거나 관절 질환이 있으신 어르신들의 낙상 방지와 편안한 이동을 책임집니다.',
     isAiPick: false,
     aiPickReason: '거동 불편 및 휠체어 이용 환자 선호도 1위'
+  },
+  {
+    id: 'mgr-5',
+    name: '정다은',
+    gender: '여성',
+    age: 23,
+    university: '충남대학교',
+    major: '의예과 본과 2학년',
+    managerType: 'EXPERT',
+    managerTypeLabel: '전문 매니저',
+    badge: '충남대 의예 본과 (전문)',
+    certification: '대한적십자사 전문응급처치 강사과정 수료',
+    rating: 4.99,
+    reviewCount: 39,
+    volunteerHours: 52,
+    hourlyRate: 21000,
+    region: '대전 유성구 지족동 / 노은동',
+    baseLocation: '대전 유성구 지족동 (유성선병원 인근)',
+    primaryHospitals: '유성선병원, 충남대학교병원',
+    etaMinutes: 5,
+    etaText: '도보 5분 (약 350m)',
+    avatar: 'assets/avatar_kim.svg',
+    mapX: 28,
+    mapY: 24,
+    tags: ['전문 매니저', '의예과', '유성선병원 특화', '응급처치 강사', '세심한 설명'],
+    title: '유성선병원 외래 및 심뇌혈관 전문 안심 동행',
+    intro: '충남대학교 의과대학 본과 2학년에 재학 중입니다. 유성선병원 인근에 거주하여 신속한 매칭과 진료 브리핑이 가능합니다.',
+    isAiPick: true,
+    aiPickReason: '유성선병원 최인접 & 뇌혈관 외래 동행 평점 5.0 만점'
+  },
+  {
+    id: 'mgr-6',
+    name: '한지원',
+    gender: '여성',
+    age: 22,
+    university: '을지대학교',
+    major: '간호학과 3학년',
+    managerType: 'STUDENT',
+    managerTypeLabel: '학생 매니저',
+    badge: '을지대 간호 3학년 (학생)',
+    certification: '기본소생술(BLS) Provider / 노인간호 실습 우수',
+    rating: 4.94,
+    reviewCount: 29,
+    volunteerHours: 34,
+    hourlyRate: 18000,
+    region: '대전 중구 목동 / 서구 탄방동',
+    baseLocation: '대전 중구 목동 (대전선병원 본원 인근)',
+    primaryHospitals: '대전선병원, 대전을지대학교병원',
+    etaMinutes: 6,
+    etaText: '도보 6분 (약 420m)',
+    avatar: 'assets/avatar_lee.svg',
+    mapX: 62,
+    mapY: 48,
+    tags: ['학생 매니저', '간호학과', '대전선병원 특화', '낙상 예방', '친절한 동행'],
+    title: '원도심 선병원 외래를 꼼꼼히 챙기는 예비 간호사',
+    intro: '을지대학교 간호학과 3학년입니다. 선병원과 성모병원 외래 동행 경험이 풍부하며, 부모님을 따뜻하게 부축해 드리겠습니다.',
+    isAiPick: false,
+    aiPickReason: '대전선병원 본원 최단거리 매칭 가능'
   }
 ];
 
 // ========================================================
-// 3. 대전광역시 주요 대학/종합병원 데이터셋
+// 3. 대전광역시 주요 대학/대형종합병원 데이터셋
 // ========================================================
 const DEFAULT_HOSPITALS = [
   {
@@ -193,6 +251,30 @@ const DEFAULT_HOSPITALS = [
     departments: ['소화기내과', '신경과', '정형외과', '비뇨의학과'],
     partnered: true,
     description: '원도심 중심 가톨릭 의료기관, 따뜻한 호스피스 및 만성질환 케어 특화'
+  },
+  {
+    id: 'hosp-5',
+    name: '유성선병원',
+    category: '대형종합병원 (선메디컬센터)',
+    region: '대전 유성구 지족동',
+    address: '대전광역시 유성구 북유성대로 93',
+    mapX: 28,
+    mapY: 24,
+    departments: ['뇌졸중센터', '심장센터', '정형외과', '소화기내과', '응급의학과'],
+    partnered: true,
+    description: '유성구 거점 종합병원, 선메디컬센터 암·뇌졸중 및 관절치료 특화 전문 병원'
+  },
+  {
+    id: 'hosp-6',
+    name: '대전선병원 (목동 본원)',
+    category: '종합병원 (선메디컬센터 본원)',
+    region: '대전 중구 목동',
+    address: '대전광역시 중구 목중로 29',
+    mapX: 62,
+    mapY: 48,
+    departments: ['척추관절센터', '소화기센터', '인공신장실', '가정의학과'],
+    partnered: true,
+    description: '원도심 중심 대형 종합병원, 정형외과 수술 및 전문 종합검진 특화'
   }
 ];
 
@@ -207,7 +289,7 @@ const DAEJEON_LOCATIONS = [
     nearHospital: '대전을지대학교병원', 
     mapX: 50, 
     mapY: 42,
-    activeManagers: 4 
+    activeManagers: 6 
   },
   { 
     id: 'loc-2', 
@@ -216,7 +298,7 @@ const DAEJEON_LOCATIONS = [
     nearHospital: '충남대학교병원', 
     mapX: 32, 
     mapY: 34,
-    activeManagers: 4 
+    activeManagers: 6 
   },
   { 
     id: 'loc-3', 
@@ -225,7 +307,7 @@ const DAEJEON_LOCATIONS = [
     nearHospital: '충남대학교병원, 대전성모병원', 
     mapX: 70, 
     mapY: 62,
-    activeManagers: 4 
+    activeManagers: 6 
   },
   { 
     id: 'loc-4', 
@@ -234,7 +316,25 @@ const DAEJEON_LOCATIONS = [
     nearHospital: '건양대학교병원', 
     mapX: 28, 
     mapY: 74,
-    activeManagers: 4 
+    activeManagers: 6 
+  },
+  { 
+    id: 'loc-5', 
+    name: '대전 유성구 지족동/노은동', 
+    label: '대전 유성구 지족동 (유성선병원 인근)', 
+    nearHospital: '유성선병원', 
+    mapX: 28, 
+    mapY: 24,
+    activeManagers: 6 
+  },
+  { 
+    id: 'loc-6', 
+    name: '대전 중구 목동/용두동', 
+    label: '대전 중구 목동 (대전선병원 본원 인근)', 
+    nearHospital: '대전선병원', 
+    mapX: 62, 
+    mapY: 48,
+    activeManagers: 6 
   }
 ];
 
@@ -426,7 +526,8 @@ const DEFAULT_RESERVATIONS = [
     includePharmacy: true,
     messageToDoctor: '최근 아침 기상 시 가슴 답답함 증상이 주 2회 정도 있으셨습니다.',
     messageToManager: '귀가 어두우시니 원내 이동 시 큰 소리로 친절하게 안내 부탁드립니다.',
-    cost: 36000,
+    durationHours: 1,
+    cost: 18000,
     step: 4,
     status: 'IN_PROGRESS',
     managerId: 'mgr-1',
@@ -454,7 +555,8 @@ const DEFAULT_RESERVATIONS = [
     includePharmacy: true,
     messageToDoctor: '무릎 관절 주사 경과 확인차 내원합니다.',
     messageToManager: '병원 외래 센터 앞 키오스크 수납 대행 부탁드립니다.',
-    cost: 42000,
+    durationHours: 1,
+    cost: 21000,
     step: 5,
     status: 'COMPLETED',
     managerId: 'mgr-2',

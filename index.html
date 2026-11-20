@@ -4,18 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>위드케어 (WithCare) - 대전 의료전공 대학생 병원 동행서비스</title>
-  <!-- 파비콘: 캐시 무효화(?v=2) 및 상대경로/루트 자동 감지 -->
-  <link rel="icon" type="image/png" href="./assets/logo.png?v=2" id="site-favicon">
-  <link rel="shortcut icon" type="image/png" href="./assets/logo.png?v=2">
-  <link rel="apple-touch-icon" href="./assets/logo.png?v=2">
+  <!-- 파비콘: 캐시 무효화(?v=3) 및 상대경로/루트 자동 감지 -->
+  <link rel="icon" type="image/png" href="./assets/logo.png?v=3" id="site-favicon">
+  <link rel="shortcut icon" type="image/png" href="./assets/logo.png?v=3">
+  <link rel="apple-touch-icon" href="./assets/logo.png?v=3">
   <script>
     (function() {
       var testImg = new Image();
       testImg.onerror = function() {
         var icons = document.querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon']");
-        icons.forEach(function(el) { el.href = './logo.png?v=2'; });
+        icons.forEach(function(el) { el.href = './logo.png?v=3'; });
       };
-      testImg.src = './assets/logo.png?v=2';
+      testImg.src = './assets/logo.png?v=3';
     })();
   </script>
   <meta name="description" content="부모님 병원 가는 날, 전문 자격증 검증 매니저 매칭, 1:1 안심 실시간 대화, 실시간 동행 위치 안내, AI 음성 요약 리포트">
@@ -222,6 +222,37 @@ const handleLogoError = (e) => {
 };
 
 // ========================================================
+// 0-2. 스크롤 반응형 부드러운 등장 애니메이션 (ScrollReveal)
+// ========================================================
+function ScrollReveal({ children, className = '', delay = 0 }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+      }
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    if (domRef.current) observer.observe(domRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={domRef}
+      className={`transition-all duration-700 ease-out transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ========================================================
 // 1. 메인 App 루트 컴포넌트
 // ========================================================
 function App() {
@@ -237,6 +268,7 @@ function App() {
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeChatResId, setActiveChatResId] = useState(null);
+  const [isFloatingChatOpen, setIsFloatingChatOpen] = useState(false);
   const [activeReportResId, setActiveReportResId] = useState(null);
   const [activeManagerReportResId, setActiveManagerReportResId] = useState(null);
   const [isVolunteerCertModalOpen, setIsVolunteerCertModalOpen] = useState(false);
@@ -310,7 +342,7 @@ function App() {
               <img 
                 src="assets/logo.png" 
                 alt="WithCare 로고" 
-                className="w-8 h-8 object-contain transition-transform group-hover:scale-105" 
+                className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-xl transition-transform group-hover:scale-105 shadow-xs border border-slate-100 bg-white p-0.5" 
                 onError={handleLogoError}
               />
               <div className="flex flex-col">
@@ -369,8 +401,18 @@ function App() {
               </button>
             </nav>
 
-            {/* 우측 로그인 / 로그아웃 버튼 */}
+            {/* 우측 테마 전환 & 로그인/로그아웃 버튼 */}
             <div className="flex items-center gap-2">
+              <a
+                href="pink.html"
+                id="theme-switch-link"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-[#F4EBEE] hover:bg-[#ebdbe0] text-[#8e6673] border border-[#B4939E]/40 transition shadow-2xs cursor-pointer"
+                title="로즈 핑크 테마 시안 보기"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#B4939E]"></span>
+                <span>핑크 시안</span>
+              </a>
+
               {storeState.currentUser.isLoggedIn ? (
                 <div className="flex items-center gap-2 text-xs">
                   <span className="hidden sm:inline font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
@@ -433,6 +475,13 @@ function App() {
             >
               마이페이지
             </button>
+            <a
+              href="pink.html"
+              id="mobile-theme-link"
+              className="px-2 py-1 rounded-lg text-[11px] font-black bg-[#F4EBEE] text-[#8e6673] border border-[#B4939E]/40 cursor-pointer"
+            >
+              핑크시안
+            </a>
           </div>
         </div>
       </header>
@@ -448,6 +497,8 @@ function App() {
 
         {currentTab === 'nearFinder' && (
           <NearFinderView
+            currentUser={storeState.currentUser}
+            patientProfile={storeState.patientProfile}
             managers={storeState.managers}
             locations={window.DAEJEON_LOCATIONS || []}
             hospitals={window.DEFAULT_HOSPITALS || []}
@@ -550,9 +601,62 @@ function App() {
         />
       )}
 
+      {/* 메인 페이지 위치 고정 소형 채팅 아이콘 (FAB) & 1:1 실시간 안심 대화창 */}
+      {currentTab === 'home' && (
+        <>
+          <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2 select-none">
+            {/* 소형 안내 말풍선 */}
+            {!isFloatingChatOpen && (
+              <div 
+                onClick={() => setIsFloatingChatOpen(true)}
+                className="hidden sm:flex items-center gap-2 bg-white/95 backdrop-blur-md text-slate-800 text-xs font-black px-3.5 py-2 rounded-2xl shadow-lg border border-slate-200 cursor-pointer hover:bg-white hover:border-[#6edfec] transition-all hover:scale-105"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>1:1 안심 대화방</span>
+              </div>
+            )}
+
+            {/* 소형 원형 채팅 아이콘 버튼 */}
+            <button
+              type="button"
+              onClick={() => setIsFloatingChatOpen(prev => !prev)}
+              aria-label="1:1 실시간 안심 대화방 열기"
+              title="1:1 실시간 안심 대화방"
+              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer relative ${
+                isFloatingChatOpen 
+                  ? 'bg-slate-900 text-white border-2 border-slate-700' 
+                  : 'bg-slate-900 hover:bg-slate-800 text-white border-2 border-[#6edfec]'
+              }`}
+            >
+              {!isFloatingChatOpen && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#6edfec] text-slate-900 rounded-full text-[10px] font-black flex items-center justify-center shadow-md animate-bounce">
+                  1
+                </span>
+              )}
+              
+              {isFloatingChatOpen ? (
+                <span className="text-xl font-bold leading-none">✕</span>
+              ) : (
+                <Icons.MessageSquare className="w-6 h-6 text-[#6edfec]" />
+              )}
+            </button>
+          </div>
+
+          {/* 소형 플로팅 1:1 안심 대화창 (마이페이지 1:1 안심 대화방과 동일한 실시간 데이터 연동) */}
+          {isFloatingChatOpen && (
+            <ChatModal
+              reservationId={storeState.reservations[0]?.id || 'RES-20261120-001'}
+              currentUser={storeState.currentUser}
+              onClose={() => setIsFloatingChatOpen(false)}
+              isFloating={true}
+            />
+          )}
+        </>
+      )}
+
       {/* 토스트 알림 */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-bold border border-slate-700 animate-bounce">
+        <div className="fixed bottom-6 left-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-bold border border-slate-700 animate-bounce">
           <span className="w-2 h-2 rounded-full bg-[#6edfec]"></span>
           <span>{toast.message}</span>
         </div>
@@ -576,56 +680,185 @@ function App() {
 }
 
 // ========================================================
-// 2. 메인 랜딩페이지 (사용자 첨부 이미지: 얼굴 제외 상체~팔 크롭본 적용)
+// 2-0. 메인 Hero 슬라이드 쇼 (배너 캐러셀) 컴포넌트
+// ========================================================
+function HeroSlideshow({ onGoNearFinder, onGoBooking }) {
+  const slides = [
+    {
+      id: 1,
+      badge: '대전광역시 의료전공 대학생 & 병원 동행 플랫폼',
+      titleLine1: '부모님 병원 가는 길,',
+      titleLine2: (
+        <span>근처 <span className="text-[#6edfec]">동행 매니저</span>와 신속하게</span>
+      ),
+      subtitle: '내일의 의료인이 따뜻한 동행 매니저가 되어드립니다.',
+      tags: ['1:1 안심 케어', '대전 전지역 24h 매칭', '의료전공 대학생'],
+      bgImage: 'assets/hero_companion.jpg',
+      fallbackImage: 'hero_companion.jpg'
+    },
+    {
+      id: 2,
+      badge: '바쁜 자녀를 위한 실시간 안심 연결',
+      titleLine1: '직접 가지 못하는 미안함,',
+      titleLine2: (
+        <span><span className="text-[#6edfec]">실시간 안심 리포트</span>로 덜어드립니다</span>
+      ),
+      subtitle: '병원 도착부터 귀가까지 실시간 위치 안내와 AI 진료 음성 요약 리포트를 전송합니다.',
+      tags: ['실시간 위치 알림', 'AI 진료 음성 요약', '1:1 안심 채팅'],
+      bgImage: 'assets/hero_report.jpg',
+      fallbackImage: 'hero_report.jpg'
+    },
+    {
+      id: 3,
+      badge: '충남대·건양대·을지대·유성선병원 원내 케어',
+      titleLine1: '복잡한 대형병원 원내 동선,',
+      titleLine2: '처음부터 끝까지 편안하게',
+      subtitle: '원내 무인 접수 키오스크, 검사실 이동, 수납 및 약국 처방전 수령까지 꼼꼼히 동행합니다.',
+      tags: ['무인 키오스크 접수 대행', '원내 검사실 안내', '약국 수령 케어'],
+      bgImage: 'assets/hero_hospital.jpg',
+      fallbackImage: 'hero_hospital.jpg'
+    }
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isPaused, slides.length]);
+
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  return (
+    <section 
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      className="relative w-full min-h-[520px] sm:min-h-[580px] overflow-hidden bg-slate-900 select-none flex items-center"
+    >
+      {/* 슬라이드 수평 이동 트랙 (옆으로 넘어가는 슬라이드 애니메이션 효과) */}
+      <div 
+        className="flex w-full h-full transition-transform duration-700 ease-in-out"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {slides.map((slide) => (
+          <div 
+            key={slide.id}
+            className="w-full shrink-0 min-w-full relative min-h-[520px] sm:min-h-[580px] flex items-center justify-center overflow-hidden"
+          >
+            {/* 개별 슬라이드 배경 이미지 */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 ease-out transform scale-100 hover:scale-105"
+              style={{ backgroundImage: `url('${slide.bgImage}'), url('${slide.fallbackImage}')` }}
+            />
+
+            {/* 텍스트 시인성을 위한 소프트 딤 오버레이 */}
+            <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[0.5px]"></div>
+
+            {/* Hero 컨텐츠 슬라이드 내용 */}
+            <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 text-center space-y-6 py-16">
+              <div className="inline-flex items-center gap-2 bg-[#6edfec]/20 text-[#6edfec] border border-[#6edfec]/40 text-xs sm:text-sm font-extrabold px-4 py-1.5 rounded-full">
+                <span>{slide.badge}</span>
+              </div>
+
+              {/* 2줄 고정 및 포인트 컬러 강조 제목 (글자 겹침/깨짐 방지 flex-col) */}
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-md text-center min-h-[90px] sm:min-h-[140px] flex flex-col items-center justify-center gap-1.5 sm:gap-2.5">
+                <span className="block">{slide.titleLine1}</span>
+                <span className="block">{slide.titleLine2}</span>
+              </h1>
+
+              <div className="inline-block bg-white/10 backdrop-blur-md px-6 py-2.5 rounded-2xl border border-white/15 shadow-xs">
+                <p className="text-sm sm:text-lg text-white font-medium drop-shadow-xs">
+                  {slide.subtitle}
+                </p>
+              </div>
+
+              {/* 배너 태그 칩 */}
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                {slide.tags.map((tag, idx) => (
+                  <span key={idx} className="text-[11px] sm:text-xs font-bold text-slate-200 bg-slate-800/80 border border-slate-700 px-3 py-1 rounded-full">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* 간결한 2개 액션 버튼 */}
+              <div className="flex items-center justify-center gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={onGoNearFinder}
+                  className="px-6 sm:px-8 py-3.5 bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-sm sm:text-base rounded-xl shadow-md transition-all hover:scale-105 cursor-pointer"
+                >
+                  동행자 찾기
+                </button>
+                <button
+                  type="button"
+                  onClick={onGoBooking}
+                  className="px-6 sm:px-8 py-3.5 bg-slate-900/90 hover:bg-black text-white font-extrabold text-sm sm:text-base rounded-xl shadow-md border border-slate-700 transition-all hover:scale-105 cursor-pointer"
+                >
+                  예약하기
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 좌우 슬라이드 이동 화살표 버튼 */}
+      <button
+        type="button"
+        onClick={handlePrev}
+        aria-label="이전 배너"
+        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs border border-white/20 transition-all hover:scale-110 cursor-pointer"
+      >
+        &#10094;
+      </button>
+      <button
+        type="button"
+        onClick={handleNext}
+        aria-label="다음 배너"
+        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs border border-white/20 transition-all hover:scale-110 cursor-pointer"
+      >
+        &#10095;
+      </button>
+
+      {/* 하단 인디케이터 (도트 네비게이션) */}
+      <div className="absolute bottom-6 left-0 right-0 z-20 flex items-center justify-center gap-2">
+        {slides.map((slide, idx) => (
+          <button
+            type="button"
+            key={slide.id}
+            onClick={() => setCurrentIndex(idx)}
+            aria-label={`슬라이드 ${idx + 1}`}
+            className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+              idx === currentIndex ? 'w-8 bg-[#6edfec]' : 'w-2 bg-white/40 hover:bg-white/70'
+            }`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ========================================================
+// 2. 메인 랜딩페이지
 // ========================================================
 function HomeView({ onGoNearFinder, onGoBooking }) {
   return (
     <div className="space-y-12 pb-16">
-      {/* Hero 섹션 */}
-      <section className="relative w-full min-h-[500px] sm:min-h-[560px] flex items-center justify-center overflow-hidden bg-slate-900">
-        {/* 상체~팔 위주 크롭본 배경 이미지 (assets 또는 루트 경로 자동 지원) */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 hover:scale-105"
-          style={{ backgroundImage: `url('assets/hero_companion.jpg'), url('hero_companion.jpg')` }}
-        ></div>
-
-        {/* 텍스트 시인성을 위한 소프트 딤 오버레이 (그라데이션 없이 플랫) */}
-        <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[0.5px]"></div>
-
-        {/* Hero 컨텐츠 */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6 py-16">
-          <span className="inline-block bg-[#6edfec]/20 text-[#6edfec] border border-[#6edfec]/40 text-xs sm:text-sm font-extrabold px-4 py-1.5 rounded-full">
-            대전광역시 의료전공 대학생 & 병원 동행 플랫폼
-          </span>
-
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-md">
-            부모님 병원 가는 길,<br />
-            근처 동행 매니저와 신속하게
-          </h1>
-
-          <div className="inline-block bg-white/10 backdrop-blur-md px-6 py-2.5 rounded-2xl border border-white/15 shadow-xs">
-            <p className="text-sm sm:text-lg text-white font-medium drop-shadow-xs">
-              내일의 의료인이 따뜻한 동행 매니저가 되어드립니다.
-            </p>
-          </div>
-
-          {/* 간결한 2개 버튼 */}
-          <div className="flex items-center justify-center gap-3 pt-4">
-            <button
-              onClick={onGoNearFinder}
-              className="px-6 sm:px-8 py-3.5 bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-sm sm:text-base rounded-xl shadow-md transition-all hover:scale-105 cursor-pointer"
-            >
-              동행자 찾기
-            </button>
-            <button
-              onClick={onGoBooking}
-              className="px-6 sm:px-8 py-3.5 bg-slate-900/90 hover:bg-black text-white font-extrabold text-sm sm:text-base rounded-xl shadow-md border border-slate-700 transition-all hover:scale-105 cursor-pointer"
-            >
-              예약하기
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* 1. Hero 슬라이드 쇼 섹션 */}
+      <HeroSlideshow onGoNearFinder={onGoNearFinder} onGoBooking={onGoBooking} />
 
       {/* 서비스 핵심 3대 신뢰 포인트 (플랫 화이트 카드) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -690,46 +923,49 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
       {/* 4. 서비스 소개 & 교육 방법 및 비즈니스 모델 (양면 플랫폼 & 차별화 전략) */}
       {/* ======================================================== */}
       <section id="service-intro" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-12">
-        {/* 상단 섹션 헤더 */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="inline-flex items-center bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black px-4 py-1.5 rounded-full">
-            WITHCARE BUSINESS MODEL & STRATEGY
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
-            기존 전문 인력 중심 구조를 전환한<br />
-            <span className="text-[#0bbecb] underline decoration-[#6edfec] decoration-4 underline-offset-4">대학생 참여형 양면 플랫폼</span>
-          </h2>
-          <p className="text-xs sm:text-base text-slate-600 font-medium leading-relaxed">
-            기존 병원동행 서비스의 전문 인력 중심 구조를 대학생 참여형 모델로 전환하고, 
-            서비스 제공 범위를 <strong className="text-slate-900 font-extrabold">지역 대학병원으로 집중</strong>하여 
-            가격 경쟁력과 운영 효율성을 확보하는 양면 플랫폼 사업입니다.
-          </p>
-        </div>
-
-        {/* 핵심 가치 제안 박스 (Core Value Connection) */}
-        <div className="bg-slate-100/80 border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
-          <div className="space-y-1 text-center md:text-left">
-            <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider block">
-              CORE VALUE CONNECTION
+        {/* 상단 섹션 헤더 & 핵심 가치 제안 (ScrollReveal 적용) */}
+        <ScrollReveal delay={50}>
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="inline-flex items-center bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black px-4 py-1.5 rounded-full">
+              WITHCARE BUSINESS MODEL & STRATEGY
             </span>
-            <p className="text-sm sm:text-base text-slate-800 font-bold leading-relaxed">
-              단순히 기존 서비스보다 저렴한 병원동행 서비스를 제공하는 것이 아니라,{' '}
-              <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
-                병원 이용에 도움이 필요한 시니어의 수요
-              </span>와{' '}
-              <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
-                보건·의료·복지 분야의 현장 경험을 원하는 대학생의 수요
-              </span>를 연결하는 것이 핵심입니다.
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+              기존 전문 인력 중심 구조를 전환한<br />
+              <span className="text-[#0bbecb] underline decoration-[#6edfec] decoration-4 underline-offset-4">대학생 참여형 양면 플랫폼</span>
+            </h2>
+            <p className="text-xs sm:text-base text-slate-600 font-medium leading-relaxed">
+              기존 병원동행 서비스의 전문 인력 중심 구조를 대학생 참여형 모델로 전환하고, 
+              서비스 제공 범위를 <strong className="text-slate-900 font-extrabold">지역 대학병원으로 집중</strong>하여 
+              가격 경쟁력과 운영 효율성을 확보하는 양면 플랫폼 사업입니다.
             </p>
           </div>
-        </div>
 
-        {/* 양면 플랫폼 비즈니스 모델 구조도 (다이어그램) */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
-            <div>
-              <span className="text-[11px] font-bold text-slate-400">PLATFORM ARCHITECTURE</span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+          {/* 핵심 가치 제안 박스 (Core Value Connection) */}
+          <div className="bg-slate-100/80 border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs mt-6">
+            <div className="space-y-1 text-center md:text-left">
+              <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider block">
+                CORE VALUE CONNECTION
+              </span>
+              <p className="text-sm sm:text-base text-slate-800 font-bold leading-relaxed">
+                단순히 기존 서비스보다 저렴한 병원동행 서비스를 제공하는 것이 아니라,{' '}
+                <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
+                  병원 이용에 도움이 필요한 시니어의 수요
+                </span>와{' '}
+                <span className="bg-[#6edfec]/30 px-1.5 py-0.5 rounded text-slate-900 font-black">
+                  보건·의료·복지 분야의 현장 경험을 원하는 대학생의 수요
+                </span>를 연결하는 것이 핵심입니다.
+              </p>
+            </div>
+          </div>
+        </ScrollReveal>
+
+        {/* 양면 플랫폼 비즈니스 모델 구조도 (다이어그램, ScrollReveal 적용) */}
+        <ScrollReveal delay={100}>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+              <div>
+                <span className="text-[11px] font-bold text-slate-400">PLATFORM ARCHITECTURE</span>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900">
                 대학병원 특화 동행 양면 플랫폼 구조
               </h3>
             </div>
@@ -849,148 +1085,273 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
             </div>
           </div>
         </div>
+        </ScrollReveal>
 
-        {/* 위드케어만의 차별화된 5대 핵심 강점 */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-            <div>
-              <span className="text-xs font-black text-[#0bbecb] tracking-wider uppercase">
-                WITHCARE KEY STRENGTHS
+        {/* 위드케어만의 차별화된 5대 핵심 강점 (ScrollReveal 적용) */}
+        <ScrollReveal delay={150}>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+              <div>
+                <span className="text-xs font-black text-[#0bbecb] tracking-wider uppercase">
+                  WITHCARE KEY STRENGTHS
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
+                  위드케어만의 차별화된 5대 핵심 강점
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium">
+                기존 민간 간병 및 단순 매칭 알바와 비교할 수 없는 위드케어만의 신뢰와 전문성
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* 전략 1: 병원별 특화 운영 */}
+              <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                    01
+                  </span>
+                  <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                    병원별 특화 운영
+                  </span>
+                </div>
+                <h4 className="text-base font-extrabold text-slate-900">
+                  병원별 동선 및 절차 집중 교육
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  병원 내부 동선과 이용 절차를 사전 교육하고, 한정된 병원에서 운영 역량을 집중적으로 축적합니다.
+                </p>
+                <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                  정확하고 신속한 매뉴얼과 빠른 인수인계로 서비스 질 향상
+                </div>
+              </div>
+
+              {/* 전략 2: 청년 일경험 프로그램화 */}
+              <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                    02
+                  </span>
+                  <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                    청년 일경험 프로그램화
+                  </span>
+                </div>
+                <h4 className="text-base font-extrabold text-slate-900">
+                  단순 알바를 넘어 역량 인증까지
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  단순 아르바이트 매칭을 넘어 교육 · 활동 · 피드백 · 역량 인증까지 유기적으로 연결합니다.
+                </p>
+                <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                  대학병원 취업 준비 및 의료 현장 직무 포트폴리오 연계
+                </div>
+              </div>
+
+              {/* 전략 3: 표준화된 안심 서비스 */}
+              <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                    03
+                  </span>
+                  <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                    표준화된 안심 서비스
+                  </span>
+                </div>
+                <h4 className="text-base font-extrabold text-slate-900">
+                  체계적인 신원 확인 및 관리 시스템
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  자격증 대신 체계적인 교육, 철저한 신원 확인, 명확한 활동 범위 제한, 관리자 개입으로 신뢰를 확보합니다.
+                </p>
+                <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                  1:1 대화 모듈 및 보호자 실시간 안심 트래킹 상시 가동
+                </div>
+              </div>
+
+              {/* 전략 4: 병원별 전담 인력풀 */}
+              <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                    04
+                  </span>
+                  <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                    병원별 전담 인력풀
+                  </span>
+                </div>
+                <h4 className="text-base font-extrabold text-slate-900">
+                  익숙한 병원 반복 활동으로 효율 개선
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  매번 낯선 병원으로 파견하기보다 익숙한 병원에서 반복 활동하여 운영 효율을 개선합니다.
+                </p>
+                <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                  복잡한 대학병원 채혈실·검사실 동선 지체 없는 이동 보장
+                </div>
+              </div>
+
+              {/* 전략 5: 정기 진료 고객 확보 */}
+              <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3 md:col-span-2 lg:col-span-2">
+                <div className="flex items-center justify-between">
+                  <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
+                    05
+                  </span>
+                  <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                    정기 진료 고객 확보
+                  </span>
+                </div>
+                <h4 className="text-base font-extrabold text-slate-900">
+                  단발성 예약을 넘어 재이용 및 정기 관리 유도
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  단발성 예약뿐 아니라 만성질환 반복 진료, 동일 동행자 우선 매칭 등 재이용을 유도합니다.
+                </p>
+                <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
+                  환자의 진료 특성을 잘 아는 동행자와의 친밀한 라포(Rapport) 형성
+                </div>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+
+        {/* 핵심 포지셔닝 강조 카드 (ScrollReveal 적용) */}
+        <ScrollReveal delay={200}>
+          <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 relative overflow-hidden shadow-lg">
+            <div className="relative z-10 max-w-3xl space-y-3">
+              <span className="bg-[#6edfec] text-slate-900 text-[11px] font-black px-3.5 py-1 rounded-full">
+                핵심 포지셔닝 (Core Positioning)
               </span>
-              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-                위드케어만의 차별화된 5대 핵심 강점
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-snug">
+                단순 저가형 병원동행 플랫폼이 아닌,<br />
+                <span className="text-[#6edfec]">지역 대학병원에 특화된 청년 일경험 기반 진료 지원 서비스</span>
               </h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                위드케어는 어르신에게는 자녀처럼 따뜻하고 안전한 병원 동행을 제공하고, 
+                지역 보건의료 청년에게는 가치 있는 실무 일경험과 봉사를 제공하여 지속 가능한 지역 의료 복지 생태계를 만듭니다.
+              </p>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium">
-              기존 민간 간병 및 단순 매칭 알바와 비교할 수 없는 위드케어만의 신뢰와 전문성
-            </p>
+            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-[#6edfec]/10 rounded-full blur-3xl pointer-events-none"></div>
           </div>
+        </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* 전략 1: 병원별 특화 운영 */}
-            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
-                  01
-                </span>
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
-                  병원별 특화 운영
-                </span>
-              </div>
-              <h4 className="text-base font-extrabold text-slate-900">
-                병원별 동선 및 절차 집중 교육
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                병원 내부 동선과 이용 절차를 사전 교육하고, 한정된 병원에서 운영 역량을 집중적으로 축적합니다.
+        {/* 5. 공식 협력 거점 병원 & 대학교 파트너스 (요청사항 반영, ScrollReveal 적용) */}
+        <ScrollReveal delay={250}>
+          <div className="space-y-6 pt-4">
+            <div className="text-center max-w-3xl mx-auto space-y-2">
+              <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider">
+                PARTNER HOSPITALS & UNIVERSITIES
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                공식 협력 거점 병원 & 대학교 네트워크
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 font-medium">
+                위드케어는 대전광역시 거점 대학병원 및 주요 대형 종합병원, 보건의료 특성화 대학교와 공식 연계 네트워크를 구축하고 있습니다.
               </p>
-              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
-                정확하고 신속한 매뉴얼과 빠른 인수인계로 서비스 질 향상
-              </div>
             </div>
 
-            {/* 전략 2: 청년 일경험 프로그램화 */}
-            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
-                  02
-                </span>
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
-                  청년 일경험 프로그램화
-                </span>
-              </div>
-              <h4 className="text-base font-extrabold text-slate-900">
-                단순 알바를 넘어 역량 인증까지
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                단순 아르바이트 매칭을 넘어 교육 · 활동 · 피드백 · 역량 인증까지 유기적으로 연결합니다.
-              </p>
-              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
-                대학병원 취업 준비 및 의료 현장 직무 포트폴리오 연계
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                {
+                  name: '충남대학교병원',
+                  category: '상급종합병원 (국립)',
+                  role: '대전·충남 공공보건의료 거점',
+                  badge: '공식 동행 연계',
+                  badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                  address: '대전 중구 문화로 282',
+                  desc: '간호대학·의과대학 대학생 동행봉사단 공식 연계 병원'
+                },
+                {
+                  name: '유성선병원',
+                  category: '대형종합병원 (선메디컬센터)',
+                  role: '유성구 거점 뇌졸중·관절 특화',
+                  badge: '외래 동행 협력',
+                  badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+                  address: '대전 유성구 북유성대로 93',
+                  desc: '암·뇌신경 및 관절 치료 특화 전문 의료기관 맞춤형 원내 동선 안내'
+                },
+                {
+                  name: '건양대학교병원',
+                  category: '상급종합병원 (사립)',
+                  role: '서구 관저동 로봇수술·심혈관센터',
+                  badge: '공식 동행 연계',
+                  badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                  address: '대전 서구 관저동로 158',
+                  desc: '안심 동행 전용 창구 및 간호학과 실습 연계 핫라인 운영'
+                },
+                {
+                  name: '대전을지대학교병원',
+                  category: '종합병원',
+                  role: '정부청사·둔산 도심 메디컬 거점',
+                  badge: '공식 동행 연계',
+                  badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                  address: '대전 서구 둔산서로 95',
+                  desc: '둔산 중심가 어르신 외래 최다 매칭, 의예과 동행 매니저 활동 거점'
+                },
+                {
+                  name: '가톨릭대 대전성모병원',
+                  category: '종합병원',
+                  role: '원도심 호스피스·만성질환 케어',
+                  badge: '공식 동행 연계',
+                  badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                  address: '대전 중구 대흥로 64',
+                  desc: '중구 원도심 가톨릭 의료기관, 노인 만성질환 및 재활 특화 동행'
+                },
+                {
+                  name: '대전선병원 (목동 본원)',
+                  category: '종합병원 (선메디컬센터 본원)',
+                  role: '척추관절·종합검진 특화',
+                  badge: '외래 동행 협력',
+                  badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+                  address: '대전 중구 목중로 29',
+                  desc: '정형외과 및 종합검진 수검 어르신 원스톱 케어 지원'
+                }
+              ].map((hosp, idx) => (
+                <div key={idx} className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-2.5 hover:border-slate-400 transition">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-500">{hosp.category}</span>
+                    <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${hosp.badgeColor}`}>
+                      {hosp.badge}
+                    </span>
+                  </div>
+                  <h4 className="font-black text-base text-slate-900">{hosp.name}</h4>
+                  <p className="text-xs text-[#0bbecb] font-bold">{hosp.role}</p>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">{hosp.desc}</p>
+                  <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                    위치: {hosp.address}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* 전략 3: 표준화된 안심 서비스 */}
-            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
-                  03
-                </span>
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
-                  표준화된 안심 서비스
-                </span>
-              </div>
-              <h4 className="text-base font-extrabold text-slate-900">
-                체계적인 신원 확인 및 관리 시스템
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                자격증 대신 체계적인 교육, 철저한 신원 확인, 명확한 활동 범위 제한, 관리자 개입으로 신뢰를 확보합니다.
-              </p>
-              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
-                1:1 대화 모듈 및 보호자 실시간 안심 트래킹 상시 가동
-              </div>
-            </div>
-
-            {/* 전략 4: 병원별 전담 인력풀 */}
-            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
-                  04
-                </span>
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
-                  병원별 전담 인력풀
+            {/* 연계 대학교 협력단 */}
+            <div className="bg-slate-100 rounded-3xl p-6 border border-slate-200 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">ACADEMIC ALLIANCE</span>
+                  <h4 className="font-extrabold text-sm sm:text-base text-slate-900">
+                    대전 보건의료 특성화 대학교 참여단
+                  </h4>
+                </div>
+                <span className="text-xs font-bold text-slate-500">
+                  1365 · VMS 공인 봉사시간 및 대학병원 취업 포트폴리오 연계
                 </span>
               </div>
-              <h4 className="text-base font-extrabold text-slate-900">
-                익숙한 병원 반복 활동으로 효율 개선
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                매번 낯선 병원으로 파견하기보다 익숙한 병원에서 반복 활동하여 운영 효율을 개선합니다.
-              </p>
-              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
-                복잡한 대학병원 채혈실·검사실 동선 지체 없는 이동 보장
-              </div>
-            </div>
-
-            {/* 전략 5: 정기 진료 고객 확보 */}
-            <div className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 shadow-xs space-y-3 md:col-span-2 lg:col-span-2">
-              <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-xl bg-[#6edfec]/20 text-[#0bbecb] font-black text-xs flex items-center justify-center">
-                  05
-                </span>
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
-                  정기 진료 고객 확보
-                </span>
-              </div>
-              <h4 className="text-base font-extrabold text-slate-900">
-                단발성 예약을 넘어 재이용 및 정기 관리 유도
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                단발성 예약뿐 아니라 만성질환 반복 진료, 동일 동행자 우선 매칭 등 재이용을 유도합니다.
-              </p>
-              <div className="pt-2 border-t border-slate-100 text-[11px] font-extrabold text-slate-800">
-                환자의 진료 특성을 잘 아는 동행자와의 친밀한 라포(Rapport) 형성
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-1">
+                {[
+                  { uni: '충남대학교', dept: '간호대학 / 의과대학' },
+                  { uni: '을지대학교', dept: '의과대학 / 간호대학' },
+                  { uni: '건양대학교', dept: '간호대학 / 의과대학' },
+                  { uni: '대전대학교', dept: '물리치료학과' },
+                  { uni: '우송대학교', dept: '응급구조학과 / 간호학과' }
+                ].map((item, idx) => (
+                  <div key={idx} className="bg-white p-3.5 rounded-2xl border border-slate-200 text-center space-y-1 shadow-2xs">
+                    <div className="font-black text-xs text-slate-900">{item.uni}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{item.dept}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* 핵심 포지셔닝 강조 카드 (이미지 2 하단) */}
-        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-10 border border-slate-800 relative overflow-hidden shadow-lg">
-          <div className="relative z-10 max-w-3xl space-y-3">
-            <span className="bg-[#6edfec] text-slate-900 text-[11px] font-black px-3.5 py-1 rounded-full">
-              핵심 포지셔닝 (Core Positioning)
-            </span>
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-snug">
-              단순 저가형 병원동행 플랫폼이 아닌,<br />
-              <span className="text-[#6edfec]">지역 대학병원에 특화된 청년 일경험 기반 진료 지원 서비스</span>
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              위드케어는 어르신에게는 자녀처럼 따뜻하고 안전한 병원 동행을 제공하고, 
-              지역 보건의료 청년에게는 가치 있는 실무 일경험과 봉사를 제공하여 지속 가능한 지역 의료 복지 생태계를 만듭니다.
-            </p>
-          </div>
-          <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-[#6edfec]/10 rounded-full blur-3xl pointer-events-none"></div>
-        </div>
+        </ScrollReveal>
       </section>
     </div>
   );
@@ -999,7 +1360,7 @@ function HomeView({ onGoNearFinder, onGoBooking }) {
 // ========================================================
 // 3. 신규 화면: 내 근처 동행자 찾기 (화이트 모드 GPS 지도 & 클릭 시에만 세부사항 표시 & 지도 클릭 이동)
 // ========================================================
-function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
+function NearFinderView({ currentUser, patientProfile, managers, locations, hospitals, onSelectManager }) {
   // 내 위치 상태 (기본: 대전 서구 둔산동 x: 50, y: 42)
   const [myPos, setMyPos] = useState({
     x: 50,
@@ -1013,21 +1374,23 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
   // 지도 영역 레퍼런스
   const mapContainerRef = useRef(null);
 
-  // 지도 위를 직접 클릭하여 내 위치 변경
+  // 지도 위를 직접 클릭하여 내 위치 변경 (동행자 위치는 고정, 내 위치만 이동)
   const handleMapClick = (e) => {
     if (!mapContainerRef.current) return;
     const rect = mapContainerRef.current.getBoundingClientRect();
     const clickX = Math.round(((e.clientX - rect.left) / rect.width) * 100);
     const clickY = Math.round(((e.clientY - rect.top) / rect.height) * 100);
 
-    // 5% ~ 95% 범위 내로 제한
-    const clampedX = Math.max(8, Math.min(92, clickX));
-    const clampedY = Math.max(8, Math.min(92, clickY));
+    // 6% ~ 94% 범위 내로 제한
+    const clampedX = Math.max(6, Math.min(94, clickX));
+    const clampedY = Math.max(6, Math.min(94, clickY));
 
     let areaName = '대전 서구 둔산 인근';
-    if (clampedX < 40 && clampedY < 50) areaName = '대전 유성구 궁동 인근';
-    else if (clampedX < 45 && clampedY >= 50) areaName = '대전 서구 관저/도안 인근';
-    else if (clampedX >= 60) areaName = '대전 중구 대사/대흥 인근';
+    if (clampedX < 36 && clampedY < 32) areaName = '대전 유성구 지족/노은 (선병원 인근)';
+    else if (clampedX < 42 && clampedY < 50) areaName = '대전 유성구 궁동 (충남대 인근)';
+    else if (clampedX < 45 && clampedY >= 50) areaName = '대전 서구 관저/도안 (건양대 인근)';
+    else if (clampedX >= 55 && clampedY < 55) areaName = '대전 중구 목동 (선병원 본원 인근)';
+    else if (clampedX >= 55 && clampedY >= 55) areaName = '대전 중구 대사/대흥 (충남대/성모병원 인근)';
 
     setMyPos({ x: clampedX, y: clampedY, name: areaName });
   };
@@ -1041,26 +1404,44 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
     });
   };
 
-  // 내 위치(myPos)를 기준으로 4명의 매니저가 항상 주변(반경)에 다채롭게 포진하도록 계산
-  const visibleManagers = useMemo(() => {
+  // 동행자는 각자의 대전 시내 고정 좌표(posX, posY)에 위치!
+  // 내 위치(myPos)가 변경되면 이용자 핀만 이동하고, 각 동행자와의 실시간 거리 및 도보 시간이 계산됩니다.
+  const computedManagers = useMemo(() => {
     return managers.map((mgr) => {
-      // 내 위치에 상대 오프셋을 더해 위치 계산 (경계 내 클램핑)
-      const posX = Math.max(10, Math.min(90, myPos.x + (mgr.offsetX || 0)));
-      const posY = Math.max(12, Math.min(88, myPos.y + (mgr.offsetY || 0)));
+      const posX = mgr.mapX || 50;
+      const posY = mgr.mapY || 50;
 
-      // 유클리드 거리 기반 실시간 도보 시간 계산
+      // 유클리드 거리 기반 실시간 도보 시간 및 거리 계산
       const dist = Math.sqrt(Math.pow(posX - myPos.x, 2) + Math.pow(posY - myPos.y, 2));
-      const dynamicMinutes = Math.max(3, Math.round(dist * 0.5) + (mgr.etaMinutes ? (mgr.etaMinutes % 4) : 3));
-      const dynamicDistMeters = Math.round(dynamicMinutes * 70);
+      const dynamicMinutes = Math.max(3, Math.round(dist * 0.45));
+      const dynamicDistMeters = Math.round(dynamicMinutes * 75);
 
       return {
         ...mgr,
         posX,
         posY,
+        dist,
         calcEtaText: `도보 ${dynamicMinutes}분 (약 ${dynamicDistMeters}m)`
       };
-    });
+    }).sort((a, b) => a.dist - b.dist); // 가까운 순으로 정렬!
   }, [managers, myPos]);
+
+  // 가장 가까운 병원 계산 (유클리드 거리)
+  const nearestHospital = useMemo(() => {
+    if (!hospitals || hospitals.length === 0) return { name: '충남대학교병원' };
+    return hospitals.reduce((prev, curr) => {
+      const prevD = Math.hypot((prev.mapX || 50) - myPos.x, (prev.mapY || 50) - myPos.y);
+      const currD = Math.hypot((curr.mapX || 50) - myPos.x, (curr.mapY || 50) - myPos.y);
+      return currD < prevD ? curr : prev;
+    }, hospitals[0]);
+  }, [hospitals, myPos]);
+
+  // 이용자와 가까운 동행자 필터링 (반경 26% 이내, 외곽일 경우 최소 가까운 2명 매칭 보장)
+  const nearbyManagers = useMemo(() => {
+    const RADIUS_THRESHOLD = 26;
+    const filtered = computedManagers.filter(m => m.dist <= RADIUS_THRESHOLD);
+    return filtered.length >= 2 ? filtered : computedManagers.slice(0, 2);
+  }, [computedManagers]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -1072,7 +1453,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
             <h2 className="text-xl font-extrabold text-slate-900">GPS 실시간 동행자 지도 (대전광역시)</h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            지도를 직접 클릭하거나 아래 거점 버튼을 누르면 내 위치가 이동하며, <strong>동행자 프로필 핀을 누르면 세부사항</strong>이 나타납니다.
+            지도를 직접 클릭하거나 아래 거점 버튼을 누르면 내 위치가 이동하며, <strong>내 위치와 가까운 동행자 핀만 지도에 표시</strong>됩니다.
           </p>
         </div>
 
@@ -1100,7 +1481,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
         </div>
       </div>
 
-      {/* 2. 메인: 화이트 모드 GPS 지도 캔버스 */}
+      {/* 2. 메인: 화이트 모드 GPS 지도 캔버스 (상단 배치) */}
       <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
@@ -1113,7 +1494,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
           </div>
 
           <span className="text-slate-500 text-[11px]">
-            지도를 클릭하여 위치를 변경할 수 있습니다 (현재 반경 내 4명 대기 중)
+            지도를 클릭하여 내 위치를 변경할 수 있습니다 (이용자와 가까운 {nearbyManagers.length}명의 동행자 핀만 지도에 표시 중)
           </span>
         </div>
 
@@ -1151,20 +1532,26 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
           </svg>
 
           {/* 지도 지역 라벨 */}
-          <span className="absolute top-[28%] left-[16%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+          <span className="absolute top-[20%] left-[22%] text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            유성 지족/노은 (선병원)
+          </span>
+          <span className="absolute top-[29%] left-[16%] text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
             유성구 (궁동/충남대)
           </span>
-          <span className="absolute top-[36%] left-[46%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+          <span className="absolute top-[36%] left-[46%] text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
             서구 둔산동 (시청/청사)
           </span>
-          <span className="absolute top-[68%] left-[60%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
-            중구 (대흥동/대사동)
+          <span className="absolute top-[46%] left-[58%] text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            중구 목동 (선병원 본원)
           </span>
-          <span className="absolute top-[76%] left-[14%] text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
-            서구 관저동 (건양대)
+          <span className="absolute top-[68%] left-[62%] text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            중구 대사동 (충남대병원)
+          </span>
+          <span className="absolute top-[76%] left-[14%] text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">
+            서구 관저동 (건양대병원)
           </span>
 
-          {/* 1. 병원 마커들 (보조 핀) */}
+          {/* 1. 병원 마커들 (보조 핀 - 대학병원 및 유성선병원 등 대형병원) */}
           {hospitals.map(hosp => (
             <div
               key={hosp.id}
@@ -1180,7 +1567,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
             </div>
           ))}
 
-          {/* 2. 내 현재 위치 핀 (펄싱 레이더 링) */}
+          {/* 2. 내 현재 위치 핀 (펄싱 레이더 링 - 사용자가 클릭한 위치로 단독 이동) */}
           <div
             className="absolute z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none transition-all duration-500 ease-out"
             style={{ left: `${myPos.x}%`, top: `${myPos.y}%` }}
@@ -1196,8 +1583,8 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
             </span>
           </div>
 
-          {/* 3. 대학생 동행자 마커들 (클릭 가능 인터랙티브 핀) */}
-          {visibleManagers.map((mgr) => {
+          {/* 3. 이용자와 가까운 대학생 동행자 마커들만 지도에 표시 (멀리 있는 동행자 핀은 자동 제외) */}
+          {nearbyManagers.map((mgr) => {
             const isSelected = activeManager?.id === mgr.id;
 
             return (
@@ -1248,7 +1635,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
             );
           })}
 
-          {/* 4. 프로필을 눌렀을 때만 나타나는 세부사항 오버레이 카드 (드롭다운/슬라이드업) */}
+          {/* 4. 프로필을 눌렀을 때만 나타나는 세부사항 오버레이 카드 */}
           {activeManager && (
             <div 
               onClick={(e) => e.stopPropagation()}
@@ -1301,7 +1688,7 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
                       {activeManager.hourlyRate ? activeManager.hourlyRate.toLocaleString() : '18,000'}원/h
                     </strong>
                     <span className="text-[10px] text-slate-500 block">
-                      ({activeManager.hourlyRate === 21000 ? '전문 매니저' : '학생 매니저'} · 교통비 별도)
+                      ({activeManager.hourlyRate === 21000 ? '전문 매니저' : '학생 매니저'} · 기본 1시간 기준, 교통비 별도)
                     </span>
                   </div>
                 </div>
@@ -1339,42 +1726,86 @@ function NearFinderView({ managers, locations, hospitals, onSelectManager }) {
             </div>
           )}
         </div>
+      </div>
 
-        {/* 3. 지도 하단: 대기 중인 동행자 프로필 미니 바 (클릭 시 세부사항 열림) */}
-        <div className="space-y-2 pt-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-slate-700">대기 중인 대학생 동행자 목록 (프로필을 누르면 세부사항이 팝업됩니다):</span>
-            <span className="text-[11px] text-slate-400">총 {visibleManagers.length}명 활동 중</span>
+      {/* 3. 지도 바로 아래: 위치 기반 실시간 안내 배너 (대형 글씨 및 가독성 대폭 강조) */}
+      <div className="bg-gradient-to-r from-sky-50 via-cyan-50 to-blue-50 border-2 border-[#6edfec] rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-all">
+        <div className="flex items-start sm:items-center gap-4 sm:gap-5">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#6edfec]/30 text-[#0bbecb] border border-[#6edfec]/50 flex items-center justify-center shrink-0 shadow-xs">
+            <Icons.MapPin className="w-8 h-8 text-[#0bbecb]" />
           </div>
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="text-xs font-black text-[#0bbecb] uppercase tracking-wider">실시간 매칭 레이더</span>
+              <span className="text-xs text-slate-400 font-semibold">| 현재 선택 위치: <strong className="text-slate-700">{myPos.name}</strong></span>
+            </div>
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-snug">
+              <span className="text-sky-800 underline decoration-[#6edfec] decoration-4 underline-offset-4">{patientProfile?.name || currentUser?.name || '김순자'}님</span> 근처에는 <span className="text-[#0bbecb] text-2xl sm:text-3xl font-black">{nearbyManagers.length}명</span>의 동행자가 있습니다.
+            </h3>
+            <p className="text-base sm:text-xl font-extrabold text-slate-800 mt-1">
+              가장 가까운 병원은 <span className="text-emerald-700 bg-white px-3 py-1 rounded-xl border border-emerald-300 font-black shadow-xs inline-block">{nearestHospital.name}</span>입니다.
+            </p>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            {visibleManagers.map((mgr) => {
-              const isSelected = activeManager?.id === mgr.id;
+        <button
+          type="button"
+          onClick={() => {
+            if (nearbyManagers[0]) {
+              setActiveManager(nearbyManagers[0]);
+            }
+          }}
+          className="px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-sm rounded-2xl transition shadow-md whitespace-nowrap cursor-pointer shrink-0 hover:scale-105"
+        >
+          가장 가까운 동행자 확인
+        </button>
+      </div>
 
-              return (
-                <div
-                  key={mgr.id}
-                  onClick={() => setActiveManager(mgr)}
-                  className={`p-3 rounded-2xl border transition cursor-pointer flex items-center gap-3 ${
-                    isSelected 
-                      ? 'border-[#0bbecb] bg-[#6edfec]/10 ring-2 ring-[#6edfec]' 
-                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
-                  }`}
-                >
-                  <img 
-                    src={mgr.avatar} 
-                    alt={mgr.name} 
-                    className="w-10 h-10 rounded-xl object-cover border border-slate-200" 
-                    onError={handleAvatarError}
-                  />
-                  <div className="overflow-hidden">
-                    <div className="font-extrabold text-slate-900 truncate">{mgr.name} ({mgr.badge.split(' ')[1] || '전공'})</div>
-                    <div className="text-[11px] text-[#0bbecb] font-bold">{mgr.calcEtaText.split(' ')[0]}</div>
-                  </div>
+      {/* 4. 최하단: 가까운 동행자 프로필 미니 카드 목록 (근처 동행자만 표시) */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+        <div className="flex items-center justify-between text-xs sm:text-sm">
+          <span className="font-extrabold text-slate-900 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0bbecb]"></span>
+            내 위치 근처 대기 중인 동행자 ({nearbyManagers.length}명 대기 중):
+          </span>
+          <span className="text-xs text-slate-400 font-medium">거리순 자동 정렬 (먼 동행자는 지도에서 제외됨)</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+          {nearbyManagers.map((mgr, idx) => {
+            const isSelected = activeManager?.id === mgr.id;
+            const isNearest = idx === 0;
+
+            return (
+              <div
+                key={mgr.id}
+                onClick={() => setActiveManager(mgr)}
+                className={`relative p-3 rounded-2xl border transition cursor-pointer flex flex-col items-center text-center gap-2 ${
+                  isSelected 
+                    ? 'border-[#0bbecb] bg-[#6edfec]/10 ring-2 ring-[#6edfec]' 
+                    : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+              >
+                {isNearest && (
+                  <span className="absolute -top-2 bg-[#0bbecb] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-xs">
+                    최인접
+                  </span>
+                )}
+                <img 
+                  src={mgr.avatar} 
+                  alt={mgr.name} 
+                  className="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-2xs" 
+                  onError={handleAvatarError}
+                />
+                <div className="w-full overflow-hidden">
+                  <div className="font-extrabold text-slate-900 truncate">{mgr.name}</div>
+                  <div className="text-[10px] text-slate-500 font-medium truncate">{mgr.university}</div>
+                  <div className="text-[11px] text-[#0bbecb] font-black mt-0.5">{mgr.calcEtaText.split(' ')[0]}</div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -1392,6 +1823,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
     department: '순환기내과',
     date: '2026-11-25',
     time: '10:00',
+    durationHours: 1, // 기본 1시간!
     mobility: '거동 불편·부축 필요',
     pickupAddress: patientProfile.address || '대전광역시 서구 둔산로 123 (크로바Apt)',
     transportType: 'TAXI',
@@ -1409,8 +1841,8 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
 
   const estimatedCost = useMemo(() => {
     const rate = selectedManager?.hourlyRate || 18000;
-    return rate * 2;
-  }, [selectedManager]);
+    return rate * (formData.durationHours || 1);
+  }, [selectedManager, formData.durationHours]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -1544,6 +1976,25 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium"
                   required
                 />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block font-bold text-slate-700 mb-1">
+                  동행 이용 시간 (기본 1시간) *
+                </label>
+                <select
+                  value={formData.durationHours}
+                  onChange={(e) => setFormData({ ...formData, durationHours: Number(e.target.value) })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-bold cursor-pointer"
+                >
+                  <option value={1}>기본 1시간 (외래 진료 및 처방전 수납)</option>
+                  <option value={2}>2시간 (정밀 검사 및 대기 동행)</option>
+                  <option value={3}>3시간 (오전/오후 연속 진료)</option>
+                  <option value={4}>4시간 (시술/처치 및 장시간 동행)</option>
+                </select>
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  * 위드케어의 기본 이용 시간은 1시간이며, 추가 진료 및 검사 필요 시 시간에 맞춰 선택할 수 있습니다.
+                </span>
               </div>
             </div>
           </div>
@@ -1690,9 +2141,9 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
           <div className="bg-slate-900 text-white p-5 rounded-2xl space-y-3">
             <div className="flex justify-between items-center text-sm font-bold border-b border-slate-800 pb-3">
               <div>
-                <div>기본 2시간 동행 예상 견적</div>
+                <div>기본 1시간 동행 예상 견적 {formData.durationHours > 1 ? `(${formData.durationHours}시간 선택)` : ''}</div>
                 <div className="text-[11px] text-slate-400 font-normal mt-0.5">
-                  {selectedManager?.name} ({selectedManager?.hourlyRate === 21000 ? '전문 매니저 21,000원' : '학생 매니저 18,000원'}/h 기준)
+                  {selectedManager?.name} ({selectedManager?.hourlyRate === 21000 ? '전문 매니저 21,000원' : '학생 매니저 18,000원'}/h × {formData.durationHours}시간)
                 </div>
               </div>
               <div className="text-right">
@@ -1701,7 +2152,7 @@ function BookingView({ patientProfile, managers, hospitals, preselectedManager, 
               </div>
             </div>
             <div className="text-[11px] text-slate-400 leading-relaxed">
-              * 기본 2시간 기준 금액이며, 이동 교통비(택시·대중교통)는 환자 부담 실비로 별도 처리됩니다. (구급차 미지원)
+              * 기본 1시간 기준 금액(학생 매니저 18,000원 / 전문 매니저 21,000원)이며, 이동 교통비(택시·대중교통)는 환자 부담 실비로 별도 처리됩니다. (구급차 미지원)
             </div>
 
             <label className="flex items-center gap-2 pt-1 text-xs cursor-pointer">
@@ -2424,7 +2875,7 @@ function CompanionMyPageView({ currentUser, reservations, urgentRequests, majorI
 // ========================================================
 // 6. 1:1 실시간 대화방 모달 (ChatModal)
 // ========================================================
-function ChatModal({ reservationId, currentUser, onClose }) {
+function ChatModal({ reservationId, currentUser, onClose, isFloating = false }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const chatScrollRef = useRef(null);
@@ -2463,6 +2914,67 @@ function ChatModal({ reservationId, currentUser, onClose }) {
   const otherPartyTitle = isManager 
     ? `${reservation.patientName} 어르신 보호자` 
     : `${window.withCareStore.getManagerById(reservation.managerId)?.name || '담당'} 동행자`;
+
+  // 메인 페이지 우측 하단 고정 소형 채팅창 (isFloating === true)
+  if (isFloating) {
+    return (
+      <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] max-w-[370px] h-[520px] max-h-[80vh] bg-white rounded-3xl shadow-2xl border-2 border-[#6edfec]/70 flex flex-col overflow-hidden animate-fadeIn">
+        <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#6edfec] animate-pulse"></span>
+            <div>
+              <h4 className="font-extrabold text-sm text-white">{otherPartyTitle} 1:1 대화</h4>
+              <p className="text-[10px] text-slate-400">예약번호 {reservationId} · 대전 실시간 안심 소통</p>
+            </div>
+          </div>
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="p-1.5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition cursor-pointer"
+            title="대화방 닫기"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div ref={chatScrollRef} className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+          {messages.map((m) => {
+            const isMe = m.sender === currentUser.role;
+
+            return (
+              <div key={m.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                <span className="text-[10px] text-slate-400 mb-0.5 px-1">{m.senderName}</span>
+                <div className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl shadow-xs font-medium leading-relaxed ${
+                  isMe 
+                    ? 'bg-slate-900 text-white rounded-br-none' 
+                    : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
+                }`}>
+                  {m.text}
+                </div>
+                <span className="text-[9px] text-slate-400 mt-0.5 px-1">{m.time}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-200 flex gap-2">
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="메시지를 입력하세요 (예: 자택 1층 도착했습니다!)"
+            className="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium focus:outline-hidden"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl transition cursor-pointer"
+          >
+            전송
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
