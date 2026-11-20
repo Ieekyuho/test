@@ -1508,25 +1508,25 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
           {activeManager && (
             <div 
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-4 right-4 left-4 sm:left-auto sm:w-96 z-50 bg-white rounded-3xl p-5 shadow-2xl border-2 border-[#ff4b72] space-y-4 animate-fadeIn"
+              className="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 sm:w-88 max-w-[calc(100vw-2rem)] z-[200] bg-white rounded-3xl p-5 shadow-2xl border-2 border-[#ff4b72] space-y-4 animate-fadeIn"
             >
               <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <img 
                     src={activeManager.avatar} 
                     alt={activeManager.name} 
-                    className="w-13 h-13 rounded-2xl object-cover border border-slate-200 shadow-xs" 
+                    className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-xs shrink-0" 
                     onError={handleAvatarError}
                   />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h4 className="font-extrabold text-base text-slate-900">{activeManager.name}</h4>
-                      <span className="text-[10px] bg-slate-100 text-slate-800 font-extrabold px-2 py-0.5 rounded border border-slate-200">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h4 className="font-extrabold text-base text-slate-900 truncate">{activeManager.name}</h4>
+                      <span className="text-[10px] bg-slate-100 text-slate-800 font-extrabold px-2 py-0.5 rounded border border-slate-200 shrink-0 whitespace-nowrap">
                         {activeManager.badge}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5">{activeManager.university} {activeManager.major}</p>
-                    <div className="text-[11px] text-amber-500 font-bold">
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">{activeManager.university} {activeManager.major}</p>
+                    <div className="text-[11px] text-amber-500 font-bold whitespace-nowrap">
                       ★ {activeManager.rating} <span className="text-slate-400 font-normal">({activeManager.reviewCount}회 후기)</span>
                     </div>
                   </div>
@@ -1544,42 +1544,42 @@ function NearFinderView({ currentUser, patientProfile, managers, locations, hosp
               </div>
 
               {/* 세부사항 내용 */}
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                  <span className="text-slate-500">내 위치 기준 도착:</span>
-                  <strong className="text-slate-900 font-black">{activeManager.calcEtaText}</strong>
+              <div className="space-y-2 text-xs overflow-y-auto max-h-[45vh]">
+                <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200 gap-2">
+                  <span className="text-slate-500 shrink-0">내 위치 기준 도착:</span>
+                  <strong className="text-slate-900 font-black text-right whitespace-nowrap">{activeManager.calcEtaText}</strong>
                 </div>
 
-                <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                  <span className="text-slate-500">동행 이용 요금:</span>
+                <div className="flex items-start justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200 gap-2">
+                  <span className="text-slate-500 shrink-0">동행 이용 요금:</span>
                   <div className="text-right">
-                    <strong className="text-slate-900 font-black">
+                    <strong className="text-slate-900 font-black whitespace-nowrap">
                       {activeManager.hourlyRate ? activeManager.hourlyRate.toLocaleString() : '18,000'}원/h
                     </strong>
-                    <span className="text-[10px] text-slate-500 block">
-                      ({activeManager.hourlyRate === 21000 ? '전문 매니저' : '학생 매니저'} · 기본 1시간 기준, 교통비 별도)
+                    <span className="text-[10px] text-slate-500 block break-keep leading-tight mt-0.5">
+                      ({activeManager.hourlyRate === 21000 ? '전문 매니저' : '학생 매니저'} · 기본 1시간, 교통비 별도)
                     </span>
                   </div>
                 </div>
 
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
                   <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                    <Icons.ShieldCheck className="w-4 h-4 text-[#e11d62]" />
+                    <Icons.ShieldCheck className="w-4 h-4 text-[#e11d62] shrink-0" />
                     <span>자격 및 신원 검증</span>
                   </div>
-                  <p className="text-[11px] text-slate-600 pl-5">
+                  <p className="text-[11px] text-slate-600 pl-5 break-keep leading-relaxed">
                     {activeManager.certification} · 인정 봉사 {activeManager.volunteerHours}시간
                   </p>
                 </div>
 
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
                   <span className="font-bold text-slate-800 block">주요 동행 병원:</span>
-                  <p className="text-[11px] text-slate-600 pl-2">
+                  <p className="text-[11px] text-slate-600 pl-2 break-keep leading-relaxed">
                     {activeManager.primaryHospitals}
                   </p>
                 </div>
 
-                <p className="text-[11px] text-slate-600 italic bg-[#ff4b72]/10 p-2.5 rounded-xl border border-[#ff4b72]/30">
+                <p className="text-[11px] text-slate-600 italic bg-[#ff4b72]/10 p-2.5 rounded-xl border border-[#ff4b72]/30 break-keep leading-relaxed">
                   "{activeManager.intro}"
                 </p>
               </div>
